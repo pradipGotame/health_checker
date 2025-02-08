@@ -4,6 +4,7 @@ import Divider from "@mui/material/Divider";
 import Hero from "./components/Hero";
 import Features from "./components/Features";
 import Footer from "./components/Footer";
+import LandingPage from "./views/LandingPage";
 // import LogoCollection from "./components/LogoCollection";
 // import Highlights from "./components/Highlights";
 // import Pricing from "./components/Pricing";
@@ -14,12 +15,7 @@ export default function MarketingPage() {
   return (
     <>
       <CssBaseline enableColorScheme />
-      <NavBar />
-      <Hero />
-      <Divider />
-      <Features />
-      <Divider />
-      <Footer />
+      <LandingPage />
       {/* 
       <div>
         <LogoCollection />
