@@ -40,16 +40,16 @@ export default function Hero() {
             }}
           >
             Unlock Your Strength.
-            <Typography
-              variant="h1"
-              sx={() => ({
-                fontSize: "clamp(3rem, 10vw, 3.5rem)",
-                fontWeight: "bold",
-              })}
-              color="primary"
-            >
-              Track. Train. Transform.
-            </Typography>
+          </Typography>
+          <Typography
+            variant="h2" // Changed from h1 to h2
+            sx={{
+              fontSize: "clamp(3rem, 10vw, 3.5rem)",
+              fontWeight: "bold",
+            }}
+            color="primary"
+          >
+            Track. Train. Transform.
           </Typography>
           <Typography
             sx={{

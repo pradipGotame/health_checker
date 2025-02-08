@@ -136,6 +136,7 @@ export default function Features() {
 
   return (
     <Container id="features" sx={{ py: { xs: 8, sm: 16 } }}>
+      {/* Features Header Section */}
       <Box sx={{ width: { sm: "100%", md: "60%" } }}>
         <Typography
           component="h2"
@@ -154,6 +155,8 @@ export default function Features() {
           progress, train effectively, and transform your body.
         </Typography>
       </Box>
+
+      {/* Features Content Section */}
       <Box
         sx={{
           display: "flex",
@@ -161,67 +164,63 @@ export default function Features() {
           gap: 2,
         }}
       >
-        <div>
+        {/* Feature Buttons Section */}
+        <Box>
           <Box
             sx={{
               display: { xs: "none", sm: "flex" },
               flexDirection: "column",
-              columns: 3,
               gap: 2,
               height: "100%",
             }}
           >
             {items.map(({ icon, title, description }, index) => (
-              <Box
+              <Button
                 key={index}
-                component={Button}
                 onClick={() => handleItemClick(index)}
                 sx={[
                   (theme) => ({
                     p: 2,
                     width: "100%",
                     borderRadius: "12px",
+                    textTransform: "none",
+                    textAlign: "left",
+                    justifyContent: "flex-start",
                     "&:hover": {
                       backgroundColor: (theme.vars || theme).palette.action
-                        .main,
+                        .hover,
                     },
                   }),
                   selectedItemIndex === index && {
                     backgroundColor: "primary.main",
+                    color: "primary.contrastText",
                   },
                 ]}
               >
                 <Box
-                  sx={[
-                    {
-                      width: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "left",
-                      gap: 1,
-                      textAlign: "left",
-                      textTransform: "none",
-                      color: "text.secondary",
-                    },
-                    selectedItemIndex === index && {
-                      color: "primary.contrastText",
-                    },
-                  ]}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: 1,
+                  }}
                 >
                   {icon}
-
                   <Typography variant="h6">{title}</Typography>
                   <Typography variant="body2">{description}</Typography>
                 </Box>
-              </Box>
+              </Button>
             ))}
           </Box>
+          {/* Mobile Layout */}
           <MobileLayout
             selectedItemIndex={selectedItemIndex}
             handleItemClick={handleItemClick}
             selectedFeature={selectedFeature}
           />
-        </div>
+        </Box>
+
+        {/* Feature Image Section */}
         <Box
           sx={{
             display: { xs: "none", sm: "flex" },
