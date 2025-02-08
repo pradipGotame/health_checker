@@ -1,9 +1,9 @@
 import CssBaseline from "@mui/material/CssBaseline";
-import NavBar from "./components/NavBar";
+import NavBar from "./components/Landing/NavBar";
 import Divider from "@mui/material/Divider";
-import Hero from "./components/Hero";
-import Features from "./components/Features";
-import Footer from "./components/Footer";
+import Hero from "./components/Landing/Hero";
+import Features from "./components/Landing/Features";
+import Footer from "./components/Landing/Footer";
 import LandingPage from "./views/LandingPage";
 // import LogoCollection from "./components/LogoCollection";
 // import Highlights from "./components/Highlights";

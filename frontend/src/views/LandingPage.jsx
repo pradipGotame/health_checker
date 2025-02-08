@@ -1,9 +1,9 @@
 import * as React from "react";
-import NavigationBar from "../components/NavBar";
+import NavigationBar from "../components/Landing/NavBar";
 import Divider from "@mui/material/Divider";
-import Hero from "../components/Hero";
-import Features from "../components/Features";
-import Footer from "../components/Footer";
+import Hero from "../components/Landing/Hero";
+import Features from "../components/Landing/Features";
+import Footer from "../components/Landing/Footer";
 
 export default function NavBar() {
   return (
