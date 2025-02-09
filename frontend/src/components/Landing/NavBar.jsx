@@ -12,7 +12,7 @@ import Drawer from "@mui/material/Drawer";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Logo from "./Logo";
-import Link from "@mui/material/Link";
+import { Link } from "react-router-dom";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -96,6 +96,8 @@ export default function NavBar() {
               variant="text"
               color="secondary"
               sx={{ textTransform: "none" }}
+              component={Link}
+              to="/login"
             >
               Sign in
             </Button>
