@@ -1,20 +1,18 @@
+import { Route, Routes, useNavigate } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
-import LandingPage from "./views/LandingPage";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useNavigate,
-} from "react-router-dom";
-import Login from "./views/auth/Login";
-import Register from "./views/auth/Register";
 import { useEffect } from "react";
+
 import Dashboard from "./views/Dashboard/Dashboard";
+import LandingPage from "./views/LandingPage";
+import Register from "./views/auth/Register";
+import Login from "./views/auth/Login";
 // import ProtectedRoute from "./views/protectedRoutes/protectedRoutes";
 
 export default function MarketingPage() {
   const navigate = useNavigate();
   useEffect(() => {
+    // Maybe we can use a custom hook here to check if the user is logged in
+    // Should avoid using localStorage directly
     const userId = localStorage.getItem("userId");
     if (userId) {
       navigate("/dashboard");

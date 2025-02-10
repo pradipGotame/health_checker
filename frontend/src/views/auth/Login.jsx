@@ -1,71 +1,95 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
   TextField,
   Typography,
-  Grid,
   Link,
   Container,
   CssBaseline,
   Paper,
 } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import useLogin from "../../hooks/useLogin";
 import { useNavigate } from "react-router-dom";
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#000000",
-    },
-    background: "black",
-  },
-});
+import Logo from "../../components/Landing/Logo";
+import useLogin from "../../hooks/useLogin";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { loginUser, loading, error, setError } = useLogin();
+  const { loginUser, loading } = useLogin();
   const [formError, setFormError] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    const username = data.get("email");
+    const email = data.get("email");
     const password = data.get("password");
 
-    console.log("clicked -> ", username);
-
-    if (!username || !password) {
+    if (!email || !password) {
       setFormError("All fields are required.");
       return;
     }
 
-    await loginUser(username, password);
-    console.log("logged in ");
+    const user = await loginUser(email, password);
+    if (!user) {
+      setFormError("Invalid credentials.");
+      return;
+    }
     navigate("/dashboard");
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+    <>
+      <Box
+        id="hero"
+        sx={() => ({
+          width: "100%",
+          backgroundRepeat: "no-repeat",
+          backgroundImage:
+            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+          position: "absolute",
+          height: "100%",
+          left: 0,
+          top: 0,
+          zIndex: -1,
+        })}
+      />
+      <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
+        <Button
+          variant="outlined"
+          onClick={() => navigate("/")}
+          sx={{ textTransform: "none" }}
+        >
+          <Logo />
+        </Button>
+      </Container>
+
+      <Container component="main" maxWidth="xs" sx={{ paddingTop: 4 }}>
         <CssBaseline enableColorScheme />
-        <Typography style={{ color: "red" }}>{formError}</Typography>
         <Paper
           elevation={3}
           sx={{
-            marginTop: 8,
+            borderRadius: "16px",
             padding: 4,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            background: "white",
+            alignItems: "start",
           }}
         >
-          <Typography component="h1" variant="h5">
-            Sign in
-          </Typography>
+          <Typography sx={{ color: "red" }}>{formError}</Typography>
+          <Box
+            sx={{
+              marginTop: 4,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Typography component="h1" variant="h5">
+              Login to your account
+            </Typography>
+          </Box>
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -97,24 +121,25 @@ export default function Login() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
               Sign In
             </Button>
-            <Grid container>
-              <Grid item xs>
+            <Box>
+              <Box>
                 <Link href="#" variant="body2">
                   Forgot password?
                 </Link>
-              </Grid>
-              <Grid item>
+              </Box>
+              <Box>
                 <Link href="/register" variant="body2">
-                  Don't have an account? Sign Up
+                  Don&apos;t have an account? Sign Up
                 </Link>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           </Box>
         </Paper>
       </Container>
-    </ThemeProvider>
+    </>
   );
 }
