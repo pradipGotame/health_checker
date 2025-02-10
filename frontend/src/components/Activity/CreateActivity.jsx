@@ -10,7 +10,11 @@ import Select from "@mui/material/Select";
 
 export default function CreateActivity() {
   return (
-    <>
+    <Box
+      sx={{
+        backgroundImage: "radial-gradient(ellipse 80% 50% at 50% 50%, hsl(84, 81%, 14%), transparent)",
+      }}
+    >
       <NavBar />
       <Container
         sx={{
@@ -32,7 +36,9 @@ export default function CreateActivity() {
         >
           <Box
             sx={{
-              backgroundColor: "red",
+                backdropFilter: "blur(24px)",
+                background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
+                boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
               borderRadius: "8px",
               flex: 7,
               m: 1,
@@ -43,8 +49,9 @@ export default function CreateActivity() {
               <Box>Activity Title</Box>
               <TextField
                 id="outlined-basic"
-                label="Outlined"
                 variant="outlined"
+                size="small"
+                margin="none"
               />
             </Stack>
             <Stack
@@ -59,6 +66,7 @@ export default function CreateActivity() {
                   id="demo-simple-select"
                   value="Workout"
                   label="Age"
+                  size="small"
                 >
                   <MenuItem value={10}>Ten</MenuItem>
                   <MenuItem value={20}>Twenty</MenuItem>
@@ -127,7 +135,9 @@ export default function CreateActivity() {
           </Box>
           <Box
             sx={{
-              backgroundColor: "red",
+                backdropFilter: "blur(24px)",
+                background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
+                boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
               borderRadius: "8px",
               flex: 3,
               m: 1,
@@ -142,6 +152,6 @@ export default function CreateActivity() {
           </Box>
         </Stack>
       </Container>
-    </>
+    </Box>
   );
 }
