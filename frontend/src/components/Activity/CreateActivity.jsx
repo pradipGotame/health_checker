@@ -46,7 +46,7 @@ export default function CreateActivity() {
             }}
           >
             <Stack sx={{ mb: 4 }}>
-              <Typography sx={{ fontWeight: "bold" }}>
+              <Typography>
                 Activity Title
               </Typography>
               <TextField
@@ -99,7 +99,7 @@ export default function CreateActivity() {
               spacing={2}
             >
               <Stack sx={{ width: "50%" }}>
-                <Typography fontWeight="bold">Reps</Typography>
+                <Typography >Reps</Typography>
                 <TextField
                   id="outlined-basic"
                   variant="outlined"
@@ -110,7 +110,7 @@ export default function CreateActivity() {
                 />
               </Stack>
               <Stack sx={{ width: "50%" }}>
-                <Typography fontWeight="bold">Sets</Typography>
+                <Typography >Sets</Typography>
                 <TextField
                   id="outlined-basic"
                   variant="outlined"
@@ -123,7 +123,7 @@ export default function CreateActivity() {
             </Stack>
 
             <Stack sx={{ mb: 4 }}>
-              <Typography sx={{ fontWeight: "bold", mb: 1 }}>
+              <Typography sx={{ mb: 1 }}>
                 Location
               </Typography>
               <Select
@@ -175,7 +175,7 @@ export default function CreateActivity() {
                 }}
               >
                 <Typography variant="h2">🔥</Typography>
-                <Typography fontWeight="bold">0 Days</Typography>
+                <Typography>0 Days</Typography>
               </Stack>
               <Stack
                 display="flex"
