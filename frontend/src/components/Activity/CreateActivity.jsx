@@ -12,7 +12,8 @@ export default function CreateActivity() {
   return (
     <Box
       sx={{
-        backgroundImage: "radial-gradient(ellipse 80% 50% at 50% 50%, hsl(84, 81%, 14%), transparent)",
+        backgroundImage:
+          "radial-gradient(ellipse 80% 50% at 50% 50%, hsl(84, 81%, 14%), transparent)",
       }}
     >
       <NavBar />
@@ -28,116 +29,130 @@ export default function CreateActivity() {
           New Activity
         </Typography>
         <Stack
-          direction="row"
           display="flex"
           justifyContent="space-between"
-          alignItems="flex-start"
-          sx={{ width: "100%" }}
+          alignItems={{ sm: "flex-start" }}
+          direction={{ sm: "row" }}
         >
           <Box
             sx={{
-                backdropFilter: "blur(24px)",
-                background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
-                boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+              backdropFilter: "blur(24px)",
+              background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
               borderRadius: "8px",
               flex: 7,
               m: 1,
               p: 2,
             }}
           >
-            <Stack>
-              <Box>Activity Title</Box>
+            <Stack sx={{ mb: 4 }}>
+              <Typography sx={{ fontWeight: "bold" }}>
+                Activity Title
+              </Typography>
               <TextField
                 id="outlined-basic"
                 variant="outlined"
                 size="small"
                 margin="none"
+                sx={{ width: "100%" }}
               />
             </Stack>
             <Stack
               direction="row"
               display="flex"
               justifyContent="space-between"
+              sx={{ mb: 4, width: "100%" }}
+              spacing={2}
             >
-              <Stack>
+              <Stack sx={{ width: "50%" }}>
                 <Box>Workout Type</Box>
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
                   value="Workout"
-                  label="Age"
                   size="small"
+                  sx={{ width: "100%" }}
                 >
                   <MenuItem value={10}>Ten</MenuItem>
                   <MenuItem value={20}>Twenty</MenuItem>
                   <MenuItem value={30}>Thirty</MenuItem>
                 </Select>
-                <Box>Workout</Box>
               </Stack>
-              <Stack>
-                <Box>Duration</Box>
+
+              <Stack sx={{ width: "50%" }}>
+                <Typography>Duration</Typography>
                 <TextField
                   id="outlined-basic"
-                  label="Outlined"
                   variant="outlined"
+                  size="small"
+                  type="time"
+                  sx={{ width: "100%" }}
                 />
               </Stack>
-              <Stack direction="row">
-                <Stack>
-                  <Box>Reps</Box>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value="Workout"
-                    label="Age"
-                  >
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
-                  </Select>
-                </Stack>
-                <Stack>
-                  <Box>Reps</Box>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value="Workout"
-                    label="Age"
-                  >
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
-                  </Select>
-                </Stack>
+            </Stack>
+
+            <Stack
+              direction="row"
+              display="flex"
+              justifyContent="space-between"
+              sx={{ mb: 4, width: "100%" }}
+              spacing={2}
+            >
+              <Stack sx={{ width: "50%" }}>
+                <Typography fontWeight="bold">Reps</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  margin="none"
+                  type="number"
+                  sx={{ width: "100%" }}
+                />
+              </Stack>
+              <Stack sx={{ width: "50%" }}>
+                <Typography fontWeight="bold">Sets</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  margin="none"
+                  type="number"
+                  sx={{ width: "100%" }}
+                />
               </Stack>
             </Stack>
-            <Stack>
-              <Box>Activity Place</Box>
+
+            <Stack sx={{ mb: 4 }}>
+              <Typography sx={{ fontWeight: "bold", mb: 1 }}>
+                Location
+              </Typography>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value="Workout"
-                label="Age"
+                size="small"
+                sx={{ width: "100%" }}
               >
                 <MenuItem value={10}>Ten</MenuItem>
                 <MenuItem value={20}>Twenty</MenuItem>
                 <MenuItem value={30}>Thirty</MenuItem>
               </Select>
             </Stack>
+
             <Stack
               direction="row"
               display="flex"
-              justifyContent="flex-end"
+              justifyContent={{ sm: "flex-end", xs: "flex-start" }}
               sx={{ width: "100%" }}
             >
-              <Button variant="outlined">Save</Button>
+              <Button sx={{width: {xs: '100%'}}} variant="contained">Save</Button>
             </Stack>
           </Box>
           <Box
             sx={{
-                backdropFilter: "blur(24px)",
-                background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
-                boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+              backdropFilter: "blur(24px)",
+              background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
               borderRadius: "8px",
               flex: 3,
               m: 1,
