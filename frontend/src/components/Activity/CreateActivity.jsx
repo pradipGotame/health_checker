@@ -145,7 +145,9 @@ export default function CreateActivity() {
               justifyContent={{ sm: "flex-end", xs: "flex-start" }}
               sx={{ width: "100%" }}
             >
-              <Button sx={{width: {xs: '100%'}}} variant="contained">Save</Button>
+              <Button sx={{ width: { xs: "100%" } }} variant="contained">
+                Save
+              </Button>
             </Stack>
           </Box>
           <Box
@@ -159,11 +161,38 @@ export default function CreateActivity() {
               p: 2,
             }}
           >
-            <Typography>Streak</Typography>
-            <Box>🔥</Box>
-            <Box>0 Days</Box>
-
-            <Typography>Recommnedations</Typography>
+            <Stack display="flex" alignItems="center">
+              <Stack
+                display="flex"
+                direction="column"
+                alignItems="center"
+                sx={{
+                  p: 1,
+                  m: 1,
+                  width: "100%",
+                  borderRadius: "8px",
+                  backgroundColor: "rgba(132, 204, 22, 0.025)",
+                }}
+              >
+                <Typography variant="h2">🔥</Typography>
+                <Typography fontWeight="bold">0 Days</Typography>
+              </Stack>
+              <Stack
+                display="flex"
+                direction="column"
+                alignItems="center"
+                sx={{
+                  p: 1,
+                  m: 1,
+                  width: "100%",
+                  borderRadius: "8px",
+                  backgroundColor: "rgba(132, 204, 22, 0.025)",
+                }}
+                spacing={1}
+              >
+                <Typography>Notifications</Typography>
+              </Stack>
+            </Stack>
           </Box>
         </Stack>
       </Container>
