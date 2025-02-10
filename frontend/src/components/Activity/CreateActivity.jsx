@@ -32,7 +32,7 @@ export default function CreateActivity() {
           display="flex"
           justifyContent="space-between"
           alignItems={{ sm: "flex-start" }}
-          direction={{ sm: "row" }}
+          direction={{ xs: 'column-reverse', sm: "row" }}
         >
           <Box
             sx={{
@@ -145,7 +145,7 @@ export default function CreateActivity() {
               justifyContent={{ sm: "flex-end", xs: "flex-start" }}
               sx={{ width: "100%" }}
             >
-              <Button sx={{ width: { xs: "100%" } }} variant="contained">
+              <Button sx={{ width: '100%' }} variant="contained">
                 Save
               </Button>
             </Stack>
