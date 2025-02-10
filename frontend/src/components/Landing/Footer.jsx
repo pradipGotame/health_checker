@@ -9,17 +9,24 @@ import Logo from "./Logo";
 
 function Copyright() {
   return (
-    <Typography
-      variant="body2"
-      sx={{ display: "flex", color: "text.secondary", mt: 1 }}
-    >
-      {"Copyright © "}
-      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Typography
+        variant="body2"
+        sx={{ display: "flex", color: "text.secondary", mt: 1 }}
+      >
+        {"Copyright © "}
+      </Typography>
+      <Typography variant="body2" sx={{ color: "text.secondary", mt: 1 }}>
         ActiveX
       </Typography>
-      &nbsp;
-      {new Date().getFullYear()}
-    </Typography>
+      <Typography
+        variant="body2"
+        sx={{ display: "flex", color: "text.secondary", mt: 1 }}
+      >
+        &nbsp;
+        {new Date().getFullYear()}
+      </Typography>
+    </Box>
   );
 }
 
@@ -52,49 +59,11 @@ export default function Footer() {
           }}
         >
           <Box sx={{ width: { xs: "100%", sm: "60%" } }}>
-            {/* <SitemarkIcon /> */}
             <Logo gutterBottom />
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
               ActiveX is a fitness app that helps you track your progress, train
               effectively, and transform your body.
             </Typography>
-            {/* <Typography
-              variant="body2"
-              gutterBottom
-              sx={{ fontWeight: 600, mt: 2 }}
-            >
-              Join the newsletter
-            </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary", mb: 2 }}>
-              Subscribe for weekly updates. No spams ever!
-            </Typography> */}
-            {/* <InputLabel htmlFor="email-newsletter">Email</InputLabel> */}
-            {/* <Stack direction="row" spacing={1} useFlexGap>
-              <TextField
-                id="email-newsletter"
-                hiddenLabel
-                size="small"
-                variant="outlined"
-                fullWidth
-                aria-label="Enter your email address"
-                placeholder="Your email address"
-                slotProps={{
-                  htmlInput: {
-                    autoComplete: "off",
-                    "aria-label": "Enter your email address",
-                  },
-                }}
-                sx={{ width: "250px" }}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                sx={{ flexShrink: 0 }}
-              >
-                Subscribe
-              </Button>
-            </Stack> */}
           </Box>
         </Box>
         <Box
@@ -110,58 +79,6 @@ export default function Footer() {
           <Link color="text.secondary" variant="body2" href="#features">
             Features
           </Link>
-          {/* <Link color="text.secondary" variant="body2" href="#">
-            Testimonials
-          </Link>
-          <Link color="text.secondary" variant="body2" href="#">
-            Highlights
-          </Link>
-          <Link color="text.secondary" variant="body2" href="#">
-            Pricing
-          </Link>
-          <Link color="text.secondary" variant="body2" href="#">
-            FAQs
-          </Link> */}
-        </Box>
-        <Box
-          sx={{
-            display: { xs: "none", sm: "flex" },
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          {/* <Typography variant="body2" sx={{ fontWeight: "medium" }}>
-            Company
-          </Typography>
-          <Link color="text.secondary" variant="body2" href="#">
-            About us
-          </Link>
-          <Link color="text.secondary" variant="body2" href="#">
-            Careers
-          </Link>
-          <Link color="text.secondary" variant="body2" href="#">
-            Press
-          </Link> */}
-        </Box>
-        <Box
-          sx={{
-            display: { xs: "none", sm: "flex" },
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          {/* <Typography variant="body2" sx={{ fontWeight: "medium" }}>
-            Legal
-          </Typography>
-          <Link color="text.secondary" variant="body2" href="#">
-            Terms
-          </Link>
-          <Link color="text.secondary" variant="body2" href="#">
-            Privacy
-          </Link>
-          <Link color="text.secondary" variant="body2" href="#">
-            Contact
-          </Link> */}
         </Box>
       </Box>
       <Box

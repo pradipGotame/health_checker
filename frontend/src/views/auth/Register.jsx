@@ -1,48 +1,40 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
   TextField,
   Typography,
-  Grid,
   Link,
   Container,
   CssBaseline,
   Paper,
 } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import useRegister from "../../hooks/userRegister";
+import { useNavigate } from "react-router-dom";
 
-// Custom theme (optional)
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#1976d2", // Change primary color
-    },
-    background: "black",
-  },
-});
+import useRegister from "../../hooks/userRegister";
+import Logo from "../../components/Landing/Logo";
 
 export default function Register() {
-  const { registerUser, loading, error } = useRegister();
+  const navigate = useNavigate();
+  const { registerUser, loading } = useRegister();
   const [formError, setFormError] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    const username = data.get("username");
+    const email = data.get("email");
     const password = data.get("password");
-    const name = data.get("name");
+    const full_name = data.get("full_name");
     const age = data.get("age");
     const weight = data.get("weight");
     const height = data.get("height");
     const location = data.get("location");
 
     if (
-      !username ||
+      !email ||
       !password ||
-      !name ||
+      !full_name ||
       !age ||
       !weight ||
       !height ||
@@ -53,7 +45,7 @@ export default function Register() {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(username)) {
+    if (!emailRegex.test(email)) {
       setFormError("Username should be a valid email.");
       return;
     }
@@ -67,8 +59,8 @@ export default function Register() {
     setFormError(null);
 
     const value = {
-      name,
-      username,
+      email,
+      full_name,
       password,
       age,
       weight,
@@ -76,32 +68,67 @@ export default function Register() {
       location,
     };
 
-    await registerUser(value);
+    const user = await registerUser(value);
+    if (!user) {
+      // to be fixed, error can not be set here from the hook
+      // should find another way to set the error
+      // this current message will causse a bad user experience
+      setFormError("Invalid credentials.");
+      return;
+    }
+    navigate("/dashboard");
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
+    <>
+      <Box
+        id="hero"
+        sx={() => ({
+          width: "100%",
+          backgroundRepeat: "no-repeat",
+          backgroundImage:
+            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+          position: "absolute",
+          height: "100%",
+          left: 0,
+          top: 0,
+          zIndex: -1,
+        })}
+      />
+      <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
+        <Button
+          variant="outlined"
+          onClick={() => navigate("/")}
+          sx={{ textTransform: "none" }}
+        >
+          <Logo />
+        </Button>
+      </Container>
+      <Container component="main" maxWidth="xs" sx={{ paddingTop: 4 }}>
         <CssBaseline />
         <Paper
           elevation={3}
           sx={{
-            marginTop: 8,
+            borderRadius: "16px",
             padding: 4,
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            background: "white",
+            alignItems: "start",
           }}
         >
-          {formError && (
-            <Typography color="error" variant="body2">
-              {formError}
+          <Typography sx={{ color: "red" }}>{formError}</Typography>
+          <Box
+            sx={{
+              marginTop: 4,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Typography component="h1" variant="h5">
+              Register for an account
             </Typography>
-          )}
-          <Typography component="h1" variant="h5">
-            Sign Up
-          </Typography>
+          </Box>
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -112,10 +139,10 @@ export default function Register() {
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username (Email)"
-              name="username"
-              autoComplete="username"
+              id="email"
+              label="Email"
+              name="email"
+              autoComplete="email"
             />
             <TextField
               margin="normal"
@@ -130,9 +157,9 @@ export default function Register() {
               margin="normal"
               required
               fullWidth
-              id="name"
+              id="full_name"
               label="Full Name"
-              name="name"
+              name="full_name"
               autoComplete="name"
               autoFocus
             />
@@ -177,19 +204,16 @@ export default function Register() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
               Sign Up
             </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/login" variant="body2">
-                  Already have an account? Sign in
-                </Link>
-              </Grid>
-            </Grid>
+            <Link href="/login" variant="body2">
+              Already have an account? Sign in
+            </Link>
           </Box>
         </Paper>
       </Container>
-    </ThemeProvider>
+    </>
   );
 }
