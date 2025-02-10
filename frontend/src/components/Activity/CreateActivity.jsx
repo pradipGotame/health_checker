@@ -91,8 +91,37 @@ export default function CreateActivity() {
               sx={{ mb: 4, width: "100%" }}
               spacing={2}
             >
-              <Stack sx={{ width: "100%" }}>
+              <Stack sx={{ width: "90%" }}>
                 <Typography>Duration</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  type="number"
+                  sx={{ width: "100%" }}
+                />
+              </Stack>
+              <Stack sx={{ width: "10%" }}>
+                <Typography>Unit</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  type="number"
+                  sx={{ width: "100%" }}
+                />
+              </Stack>
+            </Stack>
+
+            <Stack
+              direction="row"
+              display="flex"
+              justifyContent="space-between"
+              sx={{ mb: 4, width: "100%" }}
+              spacing={2}
+            >
+              <Stack sx={{ width: "100%" }}>
+                <Typography>Distance</Typography>
                 <TextField
                   id="outlined-basic"
                   variant="outlined"
@@ -110,7 +139,7 @@ export default function CreateActivity() {
               sx={{ mb: 4, width: "100%" }}
               spacing={2}
             >
-              <Stack sx={{ width: "33%" }}>
+              <Stack sx={{ width: "30%" }}>
                 <Typography>Reps</Typography>
                 <TextField
                   id="outlined-basic"
@@ -121,7 +150,7 @@ export default function CreateActivity() {
                   sx={{ width: "100%" }}
                 />
               </Stack>
-              <Stack sx={{ width: "33%" }}>
+              <Stack sx={{ width: "30%" }}>
                 <Typography>Sets</Typography>
                 <TextField
                   id="outlined-basic"
@@ -132,7 +161,7 @@ export default function CreateActivity() {
                   sx={{ width: "100%" }}
                 />
               </Stack>
-              <Stack sx={{ width: "33%" }}>
+              <Stack sx={{ width: "30%" }}>
                 <Typography>Weight</Typography>
                 <TextField
                   id="outlined-basic"
@@ -140,7 +169,17 @@ export default function CreateActivity() {
                   size="small"
                   margin="none"
                   type="number"
-                  sx={{ width: "100%" }}
+                />
+              </Stack>
+
+              <Stack sx={{ width: "10%" }}>
+                <Typography>Unit</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  margin="none"
+                  type="number"
                 />
               </Stack>
             </Stack>
