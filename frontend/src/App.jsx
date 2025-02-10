@@ -6,6 +6,7 @@ import Dashboard from "./views/Dashboard/Dashboard";
 import LandingPage from "./views/LandingPage";
 import Register from "./views/auth/Register";
 import Login from "./views/auth/Login";
+import CreateActivity from "./components/Activity/createActivity";
 // import ProtectedRoute from "./views/protectedRoutes/protectedRoutes";
 
 export default function MarketingPage() {
@@ -27,6 +28,7 @@ export default function MarketingPage() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/activity" element={<CreateActivity/>} />
         {/* <Route
           path="/dashboard"
           element={
