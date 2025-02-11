@@ -6,7 +6,9 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import { useNavigate } from "react-router-dom";
 export default function ActivityPage() {
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
@@ -23,8 +25,11 @@ export default function ActivityPage() {
           pb: { xs: 8, sm: 12 },
         }}
       >
-        <Stack display="flex" direction="row" sx={{ flex: 1 }}>
-          <Stack
+<Stack
+  display="flex"
+  direction={{ xs: "column-reverse", sm: "row" }}
+  sx={{ flex: 1 }}
+>          <Stack
             sx={{
               flex: 5,
               p: 2,
@@ -35,6 +40,7 @@ export default function ActivityPage() {
               sx={{ p: 2, display: "flex", width: "100%" }}
               color="primary"
               variant="contained"
+              onClick={( ) => navigate("/activity")}
             >
               <Typography fontSize="large">New Activity</Typography>
             </Button>
@@ -83,7 +89,7 @@ export default function ActivityPage() {
           >
             <Stack
               display="flex"
-              direction="row"
+              direction={{ sm: "column", md: "row"}}
               justifyContent="space-between"
               sx={{
                 p: 2,
@@ -135,12 +141,12 @@ export default function ActivityPage() {
                 </Stack>
 
                 <Stack
-                  sx={{ p: 2 }}
+                  sx={{ p: 2, height: 'auto' }}
                   direction="row"
                   display="flex"
                   justifyContent="space-between"
                 >
-                  {Array.from({ length: 5 }).map((_, index) => (
+                  {Array.from({ length: 4 }).map((_, index) => (
                     <Box
                       key={index}
                       sx={{
