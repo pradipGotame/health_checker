@@ -16,13 +16,14 @@ export default function RowRadioButtonsGroup() {
 
   return (
     <FormControl>
-      <FormLabel id="genderSelect" sx={{ display: "flex"}}>Gender</FormLabel>
+      <FormLabel id="genderSelect" sx={{ display: "flex", color: "text.primary"}}>Gender</FormLabel>
       <RadioGroup
         row
         aria-labelledby="genderSelect"
         name="gender"
         value={selectedValue}  // 绑定 value
         onChange={handleChange} // 绑定 onChange 事件
+        sx={{padding: 1}}
       >
         <FormControlLabel value="female" control={<Radio />} label="Female" />
         <FormControlLabel value="male" control={<Radio />} label="Male" />

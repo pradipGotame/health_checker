@@ -12,6 +12,7 @@ import HeightInput from "../components/Height";
 import WeightInput from "../components/Weight";
 import ActivityType from "../components/ActivityType";
 import ExerciseLevel from "../components/ExerciseLevel";
+import Location from "../components/Location";
 
 const Profile = () => {
   return (
@@ -165,8 +166,8 @@ const Profile = () => {
             sx={{
               display: "flex",
               alignItems: "flex-start",
-              gap: 1,
-              padding: 4,
+              gap: 2,
+              padding: 1,
               flexDirection: "column",
               flexGrow: 1,
               minWidth: "35vh",
@@ -174,6 +175,7 @@ const Profile = () => {
               minHeight: 0,
             }}
           >
+            <Typography>Name</Typography>
             <TextField
               sx={{
                 flexGrow: 1,
@@ -228,6 +230,9 @@ const Profile = () => {
 
           <Typography>Activity Level</Typography>
           <ExerciseLevel />
+
+          <Typography>Location</Typography>
+          <Location />
           </Box>
         </Card>
       </Box>
