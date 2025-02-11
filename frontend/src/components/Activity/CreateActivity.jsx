@@ -7,6 +7,8 @@ import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import { Typography } from "@mui/material";
 import Select from "@mui/material/Select";
+import InfoIcon from '@mui/icons-material/Info';
+import TryIcon from '@mui/icons-material/Try';
 
 export default function CreateActivity() {
   return (
@@ -25,38 +27,30 @@ export default function CreateActivity() {
           pb: { xs: 8, sm: 12 },
         }}
       >
-        <Typography sx={{ p: 2, fontSize: 36, fontWeight: "bold" }}>
+        <Stack direction="row" spacing={2} sx={{ pl: 2 }}>
+          <Typography>Back</Typography>
+          <Typography>Programs / Activity</Typography>
+        </Stack>
+        <Typography sx={{ fontSize: 36, fontWeight: "bold", p: 2 }}>
           New Activity
         </Typography>
         <Stack
           display="flex"
           justifyContent="space-between"
           alignItems={{ sm: "flex-start" }}
-          direction={{ xs: 'column-reverse', sm: "row" }}
+          direction={{ xs: "column-reverse", sm: "row" }}
+          spacing={2}
         >
           <Box
             sx={{
               backdropFilter: "blur(24px)",
-              background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
-              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+              background: "rgba(132, 204, 22, 0.05)",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
               borderRadius: "8px",
               flex: 7,
-              m: 1,
               p: 2,
             }}
           >
-            <Stack sx={{ mb: 4 }}>
-              <Typography>
-                Activity Title
-              </Typography>
-              <TextField
-                id="outlined-basic"
-                variant="outlined"
-                size="small"
-                margin="none"
-                sx={{ width: "100%" }}
-              />
-            </Stack>
             <Stack
               direction="row"
               display="flex"
@@ -64,7 +58,7 @@ export default function CreateActivity() {
               sx={{ mb: 4, width: "100%" }}
               spacing={2}
             >
-              <Stack sx={{ width: "50%" }}>
+              <Stack sx={{ width: "100%" }}>
                 <Box>Workout Type</Box>
                 <Select
                   labelId="demo-simple-select-label"
@@ -78,9 +72,57 @@ export default function CreateActivity() {
                   <MenuItem value={30}>Thirty</MenuItem>
                 </Select>
               </Stack>
+            </Stack>
 
-              <Stack sx={{ width: "50%" }}>
+            <Stack sx={{ mb: 4 }}>
+              <Typography>Activity</Typography>
+              <TextField
+                id="outlined-basic"
+                variant="outlined"
+                size="small"
+                margin="none"
+                sx={{ width: "100%" }}
+              />
+            </Stack>
+
+            <Stack
+              direction="row"
+              display="flex"
+              justifyContent="space-between"
+              sx={{ mb: 4, width: "100%" }}
+              spacing={2}
+            >
+              <Stack sx={{ width: "90%" }}>
                 <Typography>Duration</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  type="number"
+                  sx={{ width: "100%" }}
+                />
+              </Stack>
+              <Stack sx={{ width: "10%" }}>
+                <Typography>Unit</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  type="number"
+                  sx={{ width: "100%" }}
+                />
+              </Stack>
+            </Stack>
+
+            <Stack
+              direction="row"
+              display="flex"
+              justifyContent="space-between"
+              sx={{ mb: 4, width: "100%" }}
+              spacing={2}
+            >
+              <Stack sx={{ width: "100%" }}>
+                <Typography>Distance</Typography>
                 <TextField
                   id="outlined-basic"
                   variant="outlined"
@@ -98,8 +140,8 @@ export default function CreateActivity() {
               sx={{ mb: 4, width: "100%" }}
               spacing={2}
             >
-              <Stack sx={{ width: "50%" }}>
-                <Typography >Reps</Typography>
+              <Stack sx={{ width: "30%" }}>
+                <Typography>Reps</Typography>
                 <TextField
                   id="outlined-basic"
                   variant="outlined"
@@ -109,8 +151,8 @@ export default function CreateActivity() {
                   sx={{ width: "100%" }}
                 />
               </Stack>
-              <Stack sx={{ width: "50%" }}>
-                <Typography >Sets</Typography>
+              <Stack sx={{ width: "30%" }}>
+                <Typography>Sets</Typography>
                 <TextField
                   id="outlined-basic"
                   variant="outlined"
@@ -118,14 +160,33 @@ export default function CreateActivity() {
                   margin="none"
                   type="number"
                   sx={{ width: "100%" }}
+                />
+              </Stack>
+              <Stack sx={{ width: "30%" }}>
+                <Typography>Weight</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  margin="none"
+                  type="number"
+                />
+              </Stack>
+
+              <Stack sx={{ width: "10%" }}>
+                <Typography>Unit</Typography>
+                <TextField
+                  id="outlined-basic"
+                  variant="outlined"
+                  size="small"
+                  margin="none"
+                  type="number"
                 />
               </Stack>
             </Stack>
 
             <Stack sx={{ mb: 4 }}>
-              <Typography sx={{ mb: 1 }}>
-                Location
-              </Typography>
+              <Typography sx={{ mb: 1 }}>Location</Typography>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
@@ -145,7 +206,7 @@ export default function CreateActivity() {
               justifyContent={{ sm: "flex-end", xs: "flex-start" }}
               sx={{ width: "100%" }}
             >
-              <Button sx={{ width: '100%' }} variant="contained">
+              <Button sx={{ width: "100%" }} variant="contained">
                 Save
               </Button>
             </Stack>
@@ -153,11 +214,10 @@ export default function CreateActivity() {
           <Box
             sx={{
               backdropFilter: "blur(24px)",
-              background: "rgba(132, 204, 22, 0.05)", // Increased opacity for whiter tint
-              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Subtle shadow for depth
+              background: "rgba(132, 204, 22, 0.05)",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
               borderRadius: "8px",
               flex: 3,
-              m: 1,
               p: 2,
             }}
           >
@@ -174,8 +234,8 @@ export default function CreateActivity() {
                   backgroundColor: "rgba(132, 204, 22, 0.025)",
                 }}
               >
-                <Typography variant="h2">🔥</Typography>
-                <Typography>0 Days</Typography>
+                <InfoIcon/>
+                <Typography>Select a workout to learn more about it</Typography>
               </Stack>
               <Stack
                 display="flex"
@@ -190,7 +250,8 @@ export default function CreateActivity() {
                 }}
                 spacing={1}
               >
-                <Typography>Notifications</Typography>
+                <Typography>AI Recommendation</Typography>
+                <TryIcon/>
               </Stack>
             </Stack>
           </Box>
