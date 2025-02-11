@@ -1,6 +1,7 @@
 import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
@@ -13,6 +14,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -31,6 +33,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }));
 
 export default function NavBar() {
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -63,7 +66,13 @@ export default function NavBar() {
             }}
           >
             <Logo variant="h6" />
-            <Box sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}>
+            <Stack
+              direction="row"
+              sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}
+              spacing={2}
+            >
+              <Link to="/">Home</Link>
+
               <Link
                 color="text.secondary"
                 variant="body2"
@@ -72,6 +81,7 @@ export default function NavBar() {
               >
                 Features
               </Link>
+
               {/* <Link
                 component={"button"}
                 variant="body2"
@@ -83,7 +93,9 @@ export default function NavBar() {
               {/* <Button variant="text" color="info" size="small">
                 Pricing
               </Button> */}
-            </Box>
+
+              <Link to="/activity-page">Workout</Link>
+            </Stack>
           </Box>
           <Box
             sx={{

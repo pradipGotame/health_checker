@@ -25,11 +25,12 @@ export default function ActivityPage() {
           pb: { xs: 8, sm: 12 },
         }}
       >
-<Stack
-  display="flex"
-  direction={{ xs: "column-reverse", sm: "row" }}
-  sx={{ flex: 1 }}
->          <Stack
+        <Stack
+          display="flex"
+          direction={{ xs: "column-reverse", sm: "row" }}
+          sx={{ flex: 1 }}
+        >
+          <Stack
             sx={{
               flex: 5,
               p: 2,
@@ -40,7 +41,7 @@ export default function ActivityPage() {
               sx={{ p: 2, display: "flex", width: "100%" }}
               color="primary"
               variant="contained"
-              onClick={( ) => navigate("/activity")}
+              onClick={() => navigate("/activity")}
             >
               <Typography fontSize="large">New Activity</Typography>
             </Button>
@@ -79,7 +80,6 @@ export default function ActivityPage() {
               <Typography fontSize="large">Previous Activities</Typography>
             </Stack>
           </Stack>
-
           <Stack
             direction="row"
             display="flex"
@@ -89,7 +89,7 @@ export default function ActivityPage() {
           >
             <Stack
               display="flex"
-              direction={{ sm: "column", md: "row"}}
+              direction={{ sm: "column", md: "row" }}
               justifyContent="space-between"
               sx={{
                 p: 2,
@@ -141,7 +141,7 @@ export default function ActivityPage() {
                 </Stack>
 
                 <Stack
-                  sx={{ p: 2, height: 'auto' }}
+                  sx={{ p: 2, height: "auto" }}
                   direction="row"
                   display="flex"
                   justifyContent="space-between"
