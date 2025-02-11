@@ -8,6 +8,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { Typography } from "@mui/material";
 import Select from "@mui/material/Select";
 import InfoIcon from '@mui/icons-material/Info';
+import TryIcon from '@mui/icons-material/Try';
 
 export default function CreateActivity() {
   return (
@@ -27,7 +28,7 @@ export default function CreateActivity() {
         }}
       >
         <Stack direction="row" spacing={2} sx={{ pl: 2 }}>
-          <Typography>Back</Typography>{" "}
+          <Typography>Back</Typography>
           <Typography>Programs / Activity</Typography>
         </Stack>
         <Typography sx={{ fontSize: 36, fontWeight: "bold", p: 2 }}>
@@ -250,6 +251,7 @@ export default function CreateActivity() {
                 spacing={1}
               >
                 <Typography>AI Recommendation</Typography>
+                <TryIcon/>
               </Stack>
             </Stack>
           </Box>
