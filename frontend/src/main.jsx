@@ -1,6 +1,6 @@
-import React from "react";
-import ReactDOM from "react-dom/client";  // ← 这里是你缺少的导入
-import { BrowserRouter } from "react-router-dom";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter as Router } from "react-router-dom";
 import "./index.css";
 import App from "./App.jsx";
 
@@ -18,12 +18,12 @@ const darkTheme = createTheme({
   },
 });
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <BrowserRouter>
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
     <ThemeProvider theme={darkTheme}>
-      <App />
+      <Router>
+        <App />
+      </Router>
     </ThemeProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+  </StrictMode>
 );

@@ -1,22 +1,46 @@
-import { useState } from "react";
-import Button from "@mui/material/Button";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import React from "react";
-import { CssBaseline } from "@mui/material";
-import NavBar from "./components/NavBar";
-import Footer from "./components/Footer";
-import RouteTree from "./routes/routeTree"; 
-import "./App.css";
+import { Route, Routes, useNavigate } from "react-router-dom";
+import CssBaseline from "@mui/material/CssBaseline";
+import { useEffect } from "react";
 
-function App() {
+import Dashboard from "./views/Dashboard/Dashboard";
+import LandingPage from "./views/LandingPage";
+import Register from "./views/auth/Register";
+import Login from "./views/auth/Login";
+import CreateActivity from "./components/Activity/createActivity";
+import ActivityPage from "./components/Activity/ActivityPage"
+// import ProtectedRoute from "./views/protectedRoutes/protectedRoutes";
+
+export default function MarketingPage() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    // Maybe we can use a custom hook here to check if the user is logged in
+    // Should avoid using localStorage directly
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   return (
     <>
-      <CssBaseline />
-      <NavBar />
-      <RouteTree /> {/* 这里加载所有路由 */}
-      <Footer />
+      <CssBaseline enableColorScheme />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/activity" element={<CreateActivity/>} />
+        <Route path="/activity-page" element={<ActivityPage/>} />
+
+        {/* <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        /> */}
+      </Routes>
     </>
   );
 }
-export default App;

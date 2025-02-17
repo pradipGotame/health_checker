@@ -25,3 +25,4 @@ dist-ssr
 
 # IDE
 package-lock.json
+.env
