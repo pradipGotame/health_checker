@@ -95,6 +95,7 @@ export default function NavBar() {
               </Button> */}
 
               <Link to="/activity-page">Workout</Link>
+              <Link to="/profile">Profile</Link>
             </Stack>
           </Box>
           <Box

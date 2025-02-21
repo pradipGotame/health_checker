@@ -8,6 +8,7 @@ import Register from "./views/auth/Register";
 import Login from "./views/auth/Login";
 import CreateActivity from "./components/Activity/createActivity";
 import ActivityPage from "./components/Activity/ActivityPage"
+import Profile from "./components/Profile/Profile"
 // import ProtectedRoute from "./views/protectedRoutes/protectedRoutes";
 
 export default function MarketingPage() {
@@ -29,9 +30,9 @@ export default function MarketingPage() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/activity" element={<CreateActivity/>} />
-        <Route path="/activity-page" element={<ActivityPage/>} />
-
+        <Route path="/activity" element={<CreateActivity />} />
+        <Route path="/activity-page" element={<ActivityPage />} />
+        <Route path="/profile" element={<Profile />} />
         {/* <Route
           path="/dashboard"
           element={

@@ -2,19 +2,18 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 import Card from "@mui/material/Card";
 import Avatar from "@mui/material/Avatar";
-import GenderSelection from "../components/GenderSelection";
+import GenderSelection from "../GenderSelection";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import FitnessGoal from "../components/FitnessGoal";
-import AgeSelect from "../components/Age";
-import HeightInput from "../components/Height";
-import WeightInput from "../components/Weight";
-import ActivityType from "../components/ActivityType";
-import ExerciseLevel from "../components/ExerciseLevel";
-import Location from "../components/Location";
-
-const Profile = () => {
+import FitnessGoal from "../FitnessGoal";
+import AgeSelect from "../Age";
+import HeightInput from "../Height";
+import WeightInput from "../Weight";
+import ActivityType from "../ActivityType";
+import ExerciseLevel from "../ExerciseLevel";
+import Location from "../Location";
+export default function Profile() {
   return (
     <Box
       sx={{
@@ -214,30 +213,29 @@ const Profile = () => {
             padding: 2,
           }}
         >
-          <Box  sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 2,
-                padding: 1,
-                flexDirection: "column",
-                flexGrow: 1,
-                minWidth: "35vh",
-                height: "auto",
-                minHeight: 0,
-              }}>
-          <Typography>Preffered Activity Type</Typography>
-          <ActivityType />
+          <Box sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 2,
+            padding: 1,
+            flexDirection: "column",
+            flexGrow: 1,
+            minWidth: "35vh",
+            height: "auto",
+            minHeight: 0,
+          }}>
+            <Typography>Preffered Activity Type</Typography>
+            <ActivityType />
 
-          <Typography>Activity Level</Typography>
-          <ExerciseLevel />
+            <Typography>Activity Level</Typography>
+            <ExerciseLevel />
 
-          <Typography>Location</Typography>
-          <Location />
+            <Typography>Location</Typography>
+            <Location />
           </Box>
         </Card>
       </Box>
     </Box>
   );
-};
+}
 
-export default Profile;

@@ -234,7 +234,7 @@ export default function CreateActivity() {
                   backgroundColor: "rgba(132, 204, 22, 0.025)",
                 }}
               >
-                <InfoIcon/>
+                <InfoIcon />
                 <Typography>Select a workout to learn more about it</Typography>
               </Stack>
               <Stack
@@ -251,7 +251,7 @@ export default function CreateActivity() {
                 spacing={1}
               >
                 <Typography>AI Recommendation</Typography>
-                <TryIcon/>
+                <TryIcon />
               </Stack>
             </Stack>
           </Box>

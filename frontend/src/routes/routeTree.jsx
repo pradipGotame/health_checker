@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import Profile from "../pages/Profile";  // Profile Page
+import Profile from "../Profile/Profile";  // Profile Page
 // import LandingPage from "../pages/LandingPage"; 
 
 const RouteTree = () => {
