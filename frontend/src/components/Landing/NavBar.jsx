@@ -1,7 +1,6 @@
 import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
@@ -14,7 +13,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import ThemeToggle from "../ThemeToggle";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -23,17 +22,15 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   flexShrink: 0,
   borderRadius: `calc(${theme.shape.borderRadius}px + 8px)`,
   backdropFilter: "blur(24px)",
-  border: "1px solid",
-  borderColor: (theme.vars || theme).palette.divider,
+  border: "2px solid",
+  borderColor: (theme.vars || theme).palette.primary.main,
   backgroundColor: theme.vars
     ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
     : alpha(theme.palette.background.default, 0.4),
-  boxShadow: (theme.vars || theme).shadows[1],
   padding: "8px 12px",
 }));
 
 export default function NavBar() {
-  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -65,38 +62,16 @@ export default function NavBar() {
               alignItems: "center",
             }}
           >
-            <Logo variant="h6" />
-            <Stack
-              direction="row"
-              sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}
-              spacing={2}
+            <Button
+              component={Link}
+              to="/"
+              sx={{
+                textTransform: "none",
+                ":hover": { backgroundColor: "transparent" },
+              }}
             >
-              <Link to="/">Home</Link>
-
-              <Link
-                color="text.secondary"
-                variant="body2"
-                href="#features"
-                underline="hover"
-              >
-                Features
-              </Link>
-
-              {/* <Link
-                component={"button"}
-                variant="body2"
-                color="secondary"
-                underline="hover"
-              >
-                Features
-              </Link> */}
-              {/* <Button variant="text" color="info" size="small">
-                Pricing
-              </Button> */}
-
-              <Link to="/activity-page">Workout</Link>
-              <Link to="/profile">Profile</Link>
-            </Stack>
+              <Logo variant="h6" />
+            </Button>
           </Box>
           <Box
             sx={{
@@ -107,13 +82,14 @@ export default function NavBar() {
           >
             <Button
               variant="text"
-              color="secondary"
               sx={{ textTransform: "none" }}
               component={Link}
               to="/login"
+              color="secondary"
             >
               Sign in
             </Button>
+            <ThemeToggle />
           </Box>
           <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
             <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
@@ -141,15 +117,27 @@ export default function NavBar() {
                   </IconButton>
                 </Box>
 
-                <MenuItem>Features</MenuItem>
+                <Link to={"/#features"}>Features</Link>
                 <Divider sx={{ my: 3 }} />
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    fullWidth
+                    component={Link}
+                    to="/register"
+                  >
                     Sign up
                   </Button>
                 </MenuItem>
                 <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth>
+                  <Button
+                    color="primary"
+                    variant="outlined"
+                    fullWidth
+                    component={Link}
+                    to="/login"
+                  >
                     Sign in
                   </Button>
                 </MenuItem>

@@ -116,8 +116,8 @@ MobileLayout.propTypes = {
   selectedFeature: PropTypes.shape({
     description: PropTypes.string.isRequired,
     icon: PropTypes.element,
-    imageDark: PropTypes.string.isRequired,
-    imageLight: PropTypes.string.isRequired,
+    imageDark: PropTypes.string,
+    imageLight: PropTypes.string,
     title: PropTypes.string.isRequired,
   }).isRequired,
   selectedItemIndex: PropTypes.number.isRequired,
@@ -138,16 +138,11 @@ export default function Features() {
     <Container id="features" sx={{ py: { xs: 8, sm: 16 } }}>
       {/* Features Header Section */}
       <Box sx={{ width: { sm: "100%", md: "60%" } }}>
-        <Typography
-          component="h2"
-          variant="h4"
-          gutterBottom
-          sx={{ color: "text.primary" }}
-        >
+        <Typography variant="h3" gutterBottom sx={{ color: "text.primary" }}>
           Features
         </Typography>
         <Typography
-          variant="body1"
+          variant="body2"
           sx={{ color: "text.secondary", mb: { xs: 2, sm: 4 } }}
         >
           Choose from a variety of features to help you achieve your fitness
@@ -184,6 +179,7 @@ export default function Features() {
                     width: "100%",
                     borderRadius: "12px",
                     textTransform: "none",
+                    border: "2px solid",
                     textAlign: "left",
                     justifyContent: "flex-start",
                     "&:hover": {
@@ -194,6 +190,10 @@ export default function Features() {
                   selectedItemIndex === index && {
                     backgroundColor: "primary.main",
                     color: "primary.contrastText",
+                    "&:hover": {
+                      backgroundColor: "primary.main",
+                    },
+                    borderColor: "primary.dark",
                   },
                 ]}
               >
@@ -236,6 +236,8 @@ export default function Features() {
               display: { xs: "none", sm: "flex" },
               pointerEvents: "none",
               borderRadius: "16px",
+              border: "2px solid",
+              borderColor: "primary.main",
             }}
           >
             <Box

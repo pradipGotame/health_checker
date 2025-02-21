@@ -1,6 +1,4 @@
-import React from "react";
 import { Box, Typography } from "@mui/material";
-import Card from "@mui/material/Card";
 import Avatar from "@mui/material/Avatar";
 import GenderSelection from "../GenderSelection";
 import TextField from "@mui/material/TextField";
@@ -13,18 +11,17 @@ import WeightInput from "../Weight";
 import ActivityType from "../ActivityType";
 import ExerciseLevel from "../ExerciseLevel";
 import Location from "../Location";
+
 export default function Profile() {
   return (
     <Box
       sx={{
-        paddingTop: "8vh",
         display: "flex",
         flexDirection: "column",
         gap: 3,
       }}
     >
-      <Card
-        variant="outlined"
+      <Box
         sx={{
           height: "auto",
           width: "100%",
@@ -106,6 +103,45 @@ export default function Profile() {
 
               <WeightInput />
             </Box>
+            <Typography>Name</Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 2,
+                padding: 4,
+                flexDirection: "column",
+                flexGrow: 1,
+                minWidth: "35vh",
+                height: "auto",
+                minHeight: 0,
+              }}
+            >
+              <TextField
+                sx={{
+                  flexGrow: 1,
+                  flexShrink: 1,
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "normal",
+                  width: "100%",
+                }}
+                multiline // 让输入框支持多行
+                maxRows={3}
+                id="outlined-read-only-input"
+                label="Name"
+                defaultValue="User's Name ( from database )"
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                  },
+                }}
+              />
+              <Typography>Age</Typography>
+              <AgeSelect />
+
+              <GenderSelection />
+            </Box>
           </Box>
 
           {/* <Box
@@ -137,10 +173,12 @@ export default function Profile() {
           }}
         >
           <Stack direction="column" spacing={2}>
-            <Button variant="contained">Save</Button>
+            <Button variant="contained" size="small">
+              Save
+            </Button>
           </Stack>
         </Box>
-      </Card>
+      </Box>
       <Box
         sx={{
           display: "flex",
@@ -149,7 +187,7 @@ export default function Profile() {
           gap: 3,
         }}
       >
-        <Card
+        <Box
           variant="outlined"
           sx={{
             //height: "auto",
@@ -200,8 +238,8 @@ export default function Profile() {
 
             <GenderSelection />
           </Box>
-        </Card>
-        <Card
+        </Box>
+        <Box
           variant="outlined"
           sx={{
             //height: "auto",
@@ -213,17 +251,19 @@ export default function Profile() {
             padding: 2,
           }}
         >
-          <Box sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 2,
-            padding: 1,
-            flexDirection: "column",
-            flexGrow: 1,
-            minWidth: "35vh",
-            height: "auto",
-            minHeight: 0,
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 2,
+              padding: 1,
+              flexDirection: "column",
+              flexGrow: 1,
+              minWidth: "35vh",
+              height: "auto",
+              minHeight: 0,
+            }}
+          >
             <Typography>Preffered Activity Type</Typography>
             <ActivityType />
 
@@ -233,9 +273,8 @@ export default function Profile() {
             <Typography>Location</Typography>
             <Location />
           </Box>
-        </Card>
+        </Box>
       </Box>
     </Box>
   );
 }
-

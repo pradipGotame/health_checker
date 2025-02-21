@@ -7,9 +7,9 @@ import LandingPage from "./views/LandingPage";
 import Register from "./views/auth/Register";
 import Login from "./views/auth/Login";
 import CreateActivity from "./components/Activity/createActivity";
-import ActivityPage from "./components/Activity/ActivityPage"
-import Profile from "./components/Profile/Profile"
-// import ProtectedRoute from "./views/protectedRoutes/protectedRoutes";
+import ActivityPage from "./components/Activity/ActivityPage";
+import Profile from "./components/Profile/Profile";
+import DashboardLayout from "./views/layouts/DashboardLayout";
 
 export default function MarketingPage() {
   const navigate = useNavigate();
@@ -29,18 +29,17 @@ export default function MarketingPage() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          }
+        />
         <Route path="/activity" element={<CreateActivity />} />
         <Route path="/activity-page" element={<ActivityPage />} />
         <Route path="/profile" element={<Profile />} />
-        {/* <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        /> */}
       </Routes>
     </>
   );
