@@ -13,8 +13,8 @@ import {
   Backdrop
 } from '@mui/material';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebase/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { app, db } from '../../firebase/firebase';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../Landing/NavBar';
 import GenderSelection from './GenderSelection';
@@ -63,7 +63,7 @@ export default function Profile() {
     });
     return () => unsubscribe();
   }, []);
-
+  const auth = getAuth(app);
   // Handle save button click
   const handleSave = () => {
     if (!auth.currentUser) {
