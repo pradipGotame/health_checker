@@ -1,236 +1,233 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import Card from "@mui/material/Card";
-import Avatar from "@mui/material/Avatar";
-import GenderSelection from "../GenderSelection";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
-import FitnessGoal from "../FitnessGoal";
-import AgeSelect from "../Age";
-import HeightInput from "../Height";
-import WeightInput from "../Weight";
-import ActivityType from "../ActivityType";
-import ExerciseLevel from "../ExerciseLevel";
-import Location from "../Location";
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Card,
+  Avatar,
+  TextField,
+  Button,
+  Stack,
+  CircularProgress,
+  Modal,
+  Fade,
+  Backdrop
+} from '@mui/material';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../firebase/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
+import NavBar from '../Landing/NavBar';
+import GenderSelection from './GenderSelection';
+import FitnessGoal from './FitnessGoal';
+import AgeSelect from './Age';
+import HeightInput from './Height';
+import WeightInput from './Weight';
+import ActivityType from './ActivityType';
+import ExerciseLevel from './ExerciseLevel';
+import Location from './Location';
+
+// Modal style configuration
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+  borderRadius: 2
+};
+
 export default function Profile() {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Load initial user data
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        setLoading(true);
+        if (user) {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          setUserData(userDoc.exists() ? userDoc.data() : {});
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Handle save button click
+  const handleSave = () => {
+    if (!auth.currentUser) {
+      setLoginModalOpen(true);
+      return;
+    }
+    // Add your save logic here
+    console.log('Saving data...');
+  };
+
+  // Close login modal
+  const handleCloseModal = () => setLoginModalOpen(false);
+
+  // Navigate to login page
+  const handleNavigateToLogin = () => {
+    navigate('/login');
+    handleCloseModal();
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <Box
-      sx={{
-        paddingTop: "8vh",
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-      }}
-    >
-      <Card
-        variant="outlined"
-        sx={{
-          height: "auto",
-          width: "100%",
-          display: "flex",
-          alignItems: "flex-start",
-          borderRadius: "16px",
-          position: "relative",
-        }}
+    <Box sx={{
+      paddingTop: "8vh",
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      alignItems: "center"
+    }}>
+      <NavBar />
+
+      {/* Login Required Modal */}
+      <Modal
+        open={loginModalOpen}
+        onClose={handleCloseModal}
+        BackdropComponent={Backdrop}
       >
-        <Box
-          sx={{
-            display: "flex", // 让内部 Box 水平排列
-            flexDirection: "row",
-            gap: 3, // 控制左右间距
-            flexWrap: "wrap",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 0, // 控制 Avatar 和 Username 之间的距离
-              padding: 2,
-              backgroundColor: "background.paper",
-              borderRadius: 2,
-              minHeight: 0,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 1, // 控制 Avatar 和 Username 之间的距离
-                padding: 8,
-                backgroundColor: "background.paper",
-                width: "fit-content",
-                flexShrink: 0, // 防止缩小
-                alignItems: "center",
-                minHeight: 0,
-              }}
+        <Box sx={modalStyle}>
+          <Typography variant="h6" gutterBottom>
+            Login Required
+          </Typography>
+          <Typography sx={{ mb: 3 }}>
+            You need to login to save your changes.
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="contained"
+              onClick={handleNavigateToLogin}
             >
-              <Avatar
-                sx={{
-                  width: 120,
-                  height: 120,
-                }}
-                src="https://github.com/shadcn.png"
-                alt="User Name"
-              />
-              <Typography
-                sx={{
-                  display: "flex",
-                  fontSize: "1.5rem",
-                  color: "text.primary",
-                  whiteSpace: "nowrap", // 避免换行
-                }}
-              >
-                Username
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 2,
-                padding: 4,
-                flexDirection: "column",
-                flexGrow: 1,
-                minWidth: "35vh",
-                height: "auto",
-                minHeight: 0,
-              }}
+              Go to Login
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleCloseModal}
             >
-              <Typography>Fitness Goal</Typography>
-              <FitnessGoal />
+              Cancel
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
 
-              <HeightInput />
-
-              <WeightInput />
-            </Box>
+      {/* Original Layout */}
+      <Card variant="outlined" sx={{
+        height: "auto",
+        width: "70%",
+        display: "flex",
+        alignItems: "flex-start",
+        borderRadius: "16px",
+      }}>
+        <Box sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 3,
+          flexWrap: "wrap",
+          padding: 2,
+          width: "100%"
+        }}>
+          {/* Left Section */}
+          <Box sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            padding: 8,
+            width: "fit-content"
+          }}>
+            <Avatar
+              sx={{ width: 120, height: 120 }}
+              src="https://github.com/shadcn.png"
+            />
+            <Typography sx={{ fontSize: "1.5rem" }}>
+              {userData?.displayName || 'Username'}
+            </Typography>
           </Box>
 
-          {/* <Box
-          sx={{
-            display: "inline-flex	",
-            justifyContent: "flex-start", // 这里也设为 flex-start
-            gap: 20,
-            padding: 2,
-            width: "100%", // 让 Box 占满整个 Card 的宽度
-          }}
-        >
-          <TextField
-            id="outlined-email-input"
-            label="Email"
-            type="email"
-            autoComplete="current-email"
-            sx={{ width: "45%" }}
-          />
-        </Box> */}
+          {/* Center Section */}
+          <Box sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            flexGrow: 1
+          }}>
+            <Typography>Fitness Goal</Typography>
+            <FitnessGoal />
+            <HeightInput />
+            <WeightInput />
+          </Box>
         </Box>
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            position: "absolute",
-            bottom: 16,
-            right: 16,
-          }}
-        >
+        {/* Save Button */}
+        <Box sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          position: "absolute",
+          bottom: 16,
+          right: 16
+        }}>
           <Stack direction="column" spacing={2}>
-            <Button variant="contained">Save</Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+            >
+              Save
+            </Button>
           </Stack>
         </Box>
       </Card>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          //width: "100%",
-          gap: 3,
-        }}
-      >
-        <Card
-          variant="outlined"
-          sx={{
-            //height: "auto",
-            //width: "100%",
-            display: "flex",
-            alignItems: "flex-start",
-            borderRadius: "16px",
-            position: "relative",
-            padding: 2,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 2,
-              padding: 1,
-              flexDirection: "column",
-              flexGrow: 1,
-              minWidth: "35vh",
-              height: "auto",
-              minHeight: 0,
-            }}
-          >
+
+      {/* Bottom Sections */}
+      <Box sx={{
+        display: "flex",
+        flexDirection: "row",
+        gap: 3,
+        width: "70%"
+      }}>
+        <Card variant="outlined" sx={{
+          padding: 2,
+          width: "50%"
+        }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography>Name</Typography>
             <TextField
-              sx={{
-                flexGrow: 1,
-                flexShrink: 1,
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
-                whiteSpace: "normal",
-                width: "100%",
-              }}
-              multiline // 让输入框支持多行
-              maxRows={3}
-              id="outlined-read-only-input"
-              label="Name"
-              defaultValue="User's Name ( from database )"
-              slotProps={{
-                input: {
-                  readOnly: true,
-                },
-              }}
+              value={userData?.name || ''}
+              InputProps={{ readOnly: true }}
             />
-            <Typography>Age</Typography>
             <AgeSelect />
-
             <GenderSelection />
           </Box>
         </Card>
-        <Card
-          variant="outlined"
-          sx={{
-            //height: "auto",
-            width: "50%",
-            display: "flex",
-            alignItems: "flex-start",
-            borderRadius: "16px",
-            position: "relative",
-            padding: 2,
-          }}
-        >
-          <Box sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 2,
-            padding: 1,
-            flexDirection: "column",
-            flexGrow: 1,
-            minWidth: "35vh",
-            height: "auto",
-            minHeight: 0,
-          }}>
-            <Typography>Preffered Activity Type</Typography>
+
+        <Card variant="outlined" sx={{
+          padding: 2,
+          width: "50%"
+        }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography>Preferred Activity Type</Typography>
             <ActivityType />
-
-            <Typography>Activity Level</Typography>
             <ExerciseLevel />
-
-            <Typography>Location</Typography>
             <Location />
           </Box>
         </Card>
@@ -238,4 +235,3 @@ export default function Profile() {
     </Box>
   );
 }
-
