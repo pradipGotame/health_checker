@@ -37,28 +37,28 @@ export default function ActivityPage() {
       <Container
         sx={{
           display: "flex",
-          pt: 12,
-          pb: { xs: 8, sm: 12 },
-          gap: 2
+          pt: { xs: 6, sm: 8 },
+          pb: { xs: 3, sm: 4 },
+          gap: 1.5
         }}
       >
         <Stack
           display="flex"
           direction={{ xs: "column-reverse", sm: "row" }}
           sx={{ flex: 1 }}
-          spacing={3}
+          spacing={1.5}
         >
           {/* Left Column */}
           <Stack
             sx={{
               flex: 5,
-              gap: 3
+              gap: 1.5
             }}
           >
             <Typography 
               sx={{ 
-                color: 'text.secondary',
-                fontSize: '1rem'
+                fontSize: '0.875rem',
+                color: 'text.secondary'
               }}
             >
               {loading ? 'Loading...' : `Logged in as: ${user?.email}`}
@@ -66,12 +66,12 @@ export default function ActivityPage() {
 
             <Button
               sx={{ 
-                p: 2,
+                p: 1,
                 display: "flex",
                 width: "100%",
-                borderRadius: "12px",
+                borderRadius: "8px",
                 textTransform: 'none',
-                fontSize: '1.25rem',
+                fontSize: '1rem',
                 fontWeight: 500,
                 backgroundColor: 'primary.main',
                 '&:hover': {
@@ -85,9 +85,9 @@ export default function ActivityPage() {
             </Button>
 
             <StyledCard
-              spacing={2}
+              spacing={1.25}
               sx={{
-                p: 3,
+                p: 1.5,
               }}
             >
               <Typography 
@@ -113,7 +113,7 @@ export default function ActivityPage() {
 
             <Stack
               sx={{
-                p: 3,
+                p: 2,
                 borderRadius: "12px",
                 backdropFilter: "blur(16px)",
                 background: "rgba(0, 0, 0, 0.2)",
@@ -137,18 +137,18 @@ export default function ActivityPage() {
           <Stack
             sx={{ 
               flex: 5,
-              gap: 3
+              gap: 1.5
             }}
           >
             <Stack
               sx={{
-                p: 3,
+                p: 1.5,
                 borderRadius: "12px",
                 backdropFilter: "blur(16px)",
                 background: "rgba(0, 0, 0, 0.2)",
                 border: "1px solid rgba(132, 204, 22, 0.1)",
               }}
-              spacing={3}
+              spacing={1.5}
             >
               <Stack
                 display="flex"
@@ -213,14 +213,16 @@ export default function ActivityPage() {
                   </Stack>
                   <Stack direction="row" spacing={1}>
                     <IconButton
+                      size="small"
                       sx={{
                         color: 'primary.main',
+                        padding: 0.75,
                         '&:hover': {
                           backgroundColor: 'rgba(132, 204, 22, 0.1)',
                         }
                       }}
                     >
-                      <NavigateBeforeIcon />
+                      <NavigateBeforeIcon fontSize="small" />
                     </IconButton>
                     <IconButton
                       sx={{
