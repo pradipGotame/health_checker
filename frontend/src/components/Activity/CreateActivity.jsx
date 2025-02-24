@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { addDoc, collection, db } from "../../firebase/firebase";
 import { useAuth } from '../../hooks/useAuth';
+import AddIcon from '@mui/icons-material/Add';
 
 const StyledCard = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -27,6 +28,10 @@ const StyledCard = styled(Box)(({ theme }) => ({
     ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
     : alpha(theme.palette.background.default, 0.4),
   boxShadow: (theme.vars || theme).shadows[1],
+  padding: theme.spacing(3),
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(2),
+  },
 }));
 
 const StyledSelect = styled(Select)(({ theme }) => ({
@@ -237,99 +242,52 @@ export default function CreateActivity() {
           </Typography>
         </Stack>
         <Typography 
+          variant="h4" 
           sx={{ 
-            fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
-            fontWeight: "bold",
+            fontWeight: 'bold',
             color: 'primary.main',
-            mb: 1.5
+            fontSize: { xs: '1.75rem', sm: '2.125rem' }
           }}
         >
           New Activity
         </Typography>
         <Stack
           direction={{ xs: "column-reverse", sm: "row" }}
-          spacing={{ xs: 1.5, sm: 2 }}
+          spacing={{ xs: 2, sm: 3 }}
           alignItems="flex-start"
         >
           <StyledCard
             sx={{
               flex: 7,
-              p: { xs: 1.5, sm: 2 },
-              gap: 2,
               width: '100%'
             }}
           >
-            <Stack spacing={1}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Workout Type
-              </Typography>
-              <StyledSelect
-                value={workoutType}
-                size="small"
-                sx={{ 
-                  width: "100%",
-                  '& .MuiSelect-select': {
-                    py: 1,
-                    fontSize: '0.875rem'
-                  }
-                }}
-                onChange={(event) => {
-                  updateWorkoutType(event.target.value);
-                  updateActivity(''); // Reset activity when type changes
-                }}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      maxHeight: 300,
-                      backdropFilter: "blur(24px)",
-                      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                      border: "1px solid",
-                      borderColor: 'divider',
-                      '& .MuiMenuItem-root': {
-                        '&:hover': {
-                          backgroundColor: 'rgba(132, 204, 22, 0.1)',
-                        },
-                        '&.Mui-selected': {
-                          backgroundColor: 'rgba(132, 204, 22, 0.2)',
-                          '&:hover': {
-                            backgroundColor: 'rgba(132, 204, 22, 0.3)',
-                          }
-                        }
-                      }
-                    }
-                  },
-                  anchorOrigin: {
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  },
-                  transformOrigin: {
-                    vertical: 'top',
-                    horizontal: 'left',
-                  }
-                }}
-              >
-                {Object.values(Activities.WorkoutType).map((type) => (
-                  <MenuItem key={type} value={type}>{type}</MenuItem>
-                ))}
-              </StyledSelect>
-            </Stack>
-
-            {workoutType && (
-              <Stack spacing={1}>
-                <Typography variant="subtitle1" color="text.secondary">
-                  Activity
+            <Stack spacing={{ xs: 2, sm: 3 }}>
+              <Box>
+                <Typography 
+                  variant="subtitle1" 
+                  color="text.secondary" 
+                  sx={{ 
+                    mb: { xs: 0.5, sm: 1 },
+                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                  }}
+                >
+                  Workout Type
                 </Typography>
                 <StyledSelect
-                  value={activity}
+                  value={workoutType}
                   size="small"
                   sx={{ 
                     width: "100%",
                     '& .MuiSelect-select': {
-                      py: 1,
-                      fontSize: '0.875rem'
+                      py: { xs: 0.75, sm: 1 },
+                      fontSize: { xs: '0.875rem', sm: '1rem' }
                     }
                   }}
-                  onChange={(event) => updateActivity(event.target.value)}
+                  onChange={(event) => {
+                    updateWorkoutType(event.target.value);
+                    updateActivity(''); // Reset activity when type changes
+                  }}
                   MenuProps={{
                     PaperProps: {
                       sx: {
@@ -361,193 +319,184 @@ export default function CreateActivity() {
                     }
                   }}
                 >
-                  {Object.values(getActivities()).map((workout) => (
-                    <MenuItem key={workout} value={workout}>{workout}</MenuItem>
+                  {Object.values(Activities.WorkoutType).map((type) => (
+                    <MenuItem key={type} value={type}>{type}</MenuItem>
                   ))}
                 </StyledSelect>
-              </Stack>
-            )}
+              </Box>
 
-            {workoutType === Activities.WorkoutType.CARDIO && (
-              <Stack spacing={3}>
-                <Stack direction="row" spacing={3}>
-                  <Stack spacing={1} flex={1}>
-                    <Typography variant="subtitle1" color="text.secondary">
-                      Duration
-                    </Typography>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      type="number"
-                      inputProps={{
-                        step: "1",
-                        min: "0"
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': {
-                            borderColor: (theme) => theme.palette.divider,
-                          },
-                          '&:hover fieldset': {
-                            borderColor: 'primary.main',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: 'primary.main',
-                          },
-                        },
-                        '& .MuiOutlinedInput-input': {
-                          py: 1,
-                          fontSize: '0.875rem'
-                        }
-                      }}
-                      error={!!formErrors.duration}
-                      helperText={formErrors.duration}
-                      value={formData.duration}
-                      onChange={handleInputChange('duration')}
-                    />
-                  </Stack>
-                  <Stack spacing={1} sx={{ width: "120px" }}>
-                    <Typography variant="subtitle1" color="text.secondary">
-                      Unit
-                    </Typography>
-                    <StyledSelect
-                      size="small"
-                      value={formData.durationUnit}
-                      onChange={handleInputChange('durationUnit')}
-                      sx={{ width: "100%" }}
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            maxHeight: 300,
-                            backdropFilter: "blur(24px)",
-                            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                            border: "1px solid",
-                            borderColor: 'divider',
-                            '& .MuiMenuItem-root': {
+              {workoutType && (
+                <Box>
+                  <Typography 
+                    variant="subtitle1" 
+                    color="text.secondary"
+                    sx={{ 
+                      mb: { xs: 0.5, sm: 1 },
+                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                    }}
+                  >
+                    Activity
+                  </Typography>
+                  <StyledSelect
+                    value={activity}
+                    size="small"
+                    sx={{ 
+                      width: "100%",
+                      '& .MuiSelect-select': {
+                        py: { xs: 0.75, sm: 1 },
+                        fontSize: { xs: '0.875rem', sm: '1rem' }
+                      }
+                    }}
+                    onChange={(event) => updateActivity(event.target.value)}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          maxHeight: 300,
+                          backdropFilter: "blur(24px)",
+                          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                          border: "1px solid",
+                          borderColor: 'divider',
+                          '& .MuiMenuItem-root': {
+                            '&:hover': {
+                              backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                            },
+                            '&.Mui-selected': {
+                              backgroundColor: 'rgba(132, 204, 22, 0.2)',
                               '&:hover': {
-                                backgroundColor: 'rgba(132, 204, 22, 0.1)',
-                              },
-                              '&.Mui-selected': {
-                                backgroundColor: 'rgba(132, 204, 22, 0.2)',
-                                '&:hover': {
-                                  backgroundColor: 'rgba(132, 204, 22, 0.3)',
-                                }
+                                backgroundColor: 'rgba(132, 204, 22, 0.3)',
                               }
                             }
                           }
                         }
-                      }}
-                    >
-                      <MenuItem value="min">Minutes</MenuItem>
-                      <MenuItem value="hr">Hours</MenuItem>
-                    </StyledSelect>
-                  </Stack>
-                </Stack>
-
-                <Stack spacing={1}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Distance
-                  </Typography>
-                  <Stack direction="row" spacing={2}>
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      type="number"
-                      inputProps={{
-                        step: "1",
-                        min: "0"
-                      }}
-                      sx={{ 
-                        flex: 1,
-                        '& .MuiOutlinedInput-input': {
-                          py: 1,
-                          fontSize: '0.875rem'
-                        }
-                      }}
-                      error={!!formErrors.distance}
-                      helperText={formErrors.distance}
-                      value={formData.distance}
-                      onChange={handleInputChange('distance')}
-                    />
-                    <StyledSelect
-                      size="small"
-                      value={formData.distanceUnit}
-                      onChange={handleInputChange('distanceUnit')}
-                      sx={{ 
-                        width: "120px",
-                        '& .MuiSelect-select': {
-                          py: 1,
-                          fontSize: '0.875rem'
-                        }
-                      }}
-                    >
-                      <MenuItem value="km">Kilometers</MenuItem>
-                      <MenuItem value="mi">Miles</MenuItem>
-                      <MenuItem value="m">Meters</MenuItem>
-                    </StyledSelect>
-                  </Stack>
-                </Stack>
-              </Stack>
-            )}
-
-            {(workoutType === Activities.WorkoutType.STRENGTH || workoutType === Activities.WorkoutType.MOBILITY) && (
-              <Stack direction="row" spacing={3}>
-                <Stack spacing={1} sx={{ flex: 1 }}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Reps
-                  </Typography>
-                  <TextField
-                    id="outlined-basic"
-                    variant="outlined"
-                    size="small"
-                    margin="none"
-                    type="number"
-                    inputProps={{
-                      step: "1",
-                      min: "0"
-                    }}
-                    sx={{ 
-                      '& .MuiOutlinedInput-input': {
-                        py: 1,
-                        fontSize: '0.875rem'
+                      },
+                      anchorOrigin: {
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      },
+                      transformOrigin: {
+                        vertical: 'top',
+                        horizontal: 'left',
                       }
                     }}
-                    error={!!formErrors.reps}
-                    helperText={formErrors.reps}
-                    value={formData.reps}
-                    onChange={handleInputChange('reps')}
-                  />
+                  >
+                    {Object.values(getActivities()).map((workout) => (
+                      <MenuItem key={workout} value={workout}>{workout}</MenuItem>
+                    ))}
+                  </StyledSelect>
+                </Box>
+              )}
+
+              {workoutType === Activities.WorkoutType.CARDIO && (
+                <Stack spacing={{ xs: 2, sm: 3 }}>
+                  <Stack 
+                    direction={{ xs: 'column', sm: 'row' }} 
+                    spacing={{ xs: 2, sm: 3 }}
+                  >
+                    <Box flex={1}>
+                      <Typography 
+                        variant="subtitle1" 
+                        color="text.secondary"
+                        sx={{ 
+                          mb: { xs: 0.5, sm: 1 },
+                          fontSize: { xs: '0.875rem', sm: '1rem' }
+                        }}
+                      >
+                        Duration
+                      </Typography>
+                      <Stack 
+                        direction="row" 
+                        spacing={1}
+                        sx={{ 
+                          flexWrap: { xs: 'wrap', sm: 'nowrap' }
+                        }}
+                      >
+                        <TextField
+                          variant="outlined"
+                          size="small"
+                          type="number"
+                          inputProps={{
+                            step: "1",
+                            min: "0"
+                          }}
+                          sx={{ 
+                            flex: 1,
+                            minWidth: { xs: '100%', sm: 'auto' },
+                            mb: { xs: 1, sm: 0 }
+                          }}
+                          error={!!formErrors.duration}
+                          helperText={formErrors.duration}
+                          value={formData.duration}
+                          onChange={handleInputChange('duration')}
+                        />
+                        <StyledSelect
+                          size="small"
+                          value={formData.durationUnit}
+                          onChange={handleInputChange('durationUnit')}
+                          sx={{ 
+                            width: { xs: '100%', sm: '120px' }
+                          }}
+                        >
+                          <MenuItem value="min">Minutes</MenuItem>
+                          <MenuItem value="hr">Hours</MenuItem>
+                        </StyledSelect>
+                      </Stack>
+                    </Box>
+                  </Stack>
+
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      Distance
+                    </Typography>
+                    <Stack direction="row" spacing={2}>
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        type="number"
+                        inputProps={{
+                          step: "1",
+                          min: "0"
+                        }}
+                        sx={{ 
+                          flex: 1,
+                          '& .MuiOutlinedInput-input': {
+                            py: 1,
+                            fontSize: '0.875rem'
+                          }
+                        }}
+                        error={!!formErrors.distance}
+                        helperText={formErrors.distance}
+                        value={formData.distance}
+                        onChange={handleInputChange('distance')}
+                      />
+                      <StyledSelect
+                        size="small"
+                        value={formData.distanceUnit}
+                        onChange={handleInputChange('distanceUnit')}
+                        sx={{ 
+                          width: "120px",
+                          '& .MuiSelect-select': {
+                            py: 1,
+                            fontSize: '0.875rem'
+                          }
+                        }}
+                      >
+                        <MenuItem value="km">Kilometers</MenuItem>
+                        <MenuItem value="mi">Miles</MenuItem>
+                        <MenuItem value="m">Meters</MenuItem>
+                      </StyledSelect>
+                    </Stack>
+                  </Stack>
                 </Stack>
-                <Stack spacing={1} sx={{ flex: 1 }}>
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Sets
-                  </Typography>
-                  <TextField
-                    id="outlined-basic"
-                    variant="outlined"
-                    size="small"
-                    margin="none"
-                    type="number"
-                    inputProps={{
-                      step: "1",
-                      min: "0"
-                    }}
-                    sx={{ 
-                      '& .MuiOutlinedInput-input': {
-                        py: 1,
-                        fontSize: '0.875rem'
-                      }
-                    }}
-                    error={!!formErrors.sets}
-                    helperText={formErrors.sets}
-                    value={formData.sets}
-                    onChange={handleInputChange('sets')}
-                  />
-                </Stack>
-                {workoutType === Activities.WorkoutType.STRENGTH && (
+              )}
+
+              {(workoutType === Activities.WorkoutType.STRENGTH || workoutType === Activities.WorkoutType.MOBILITY) && (
+                <Stack 
+                  direction={{ xs: 'column', sm: 'row' }} 
+                  spacing={{ xs: 2, sm: 3 }}
+                >
                   <Stack spacing={1} sx={{ flex: 1 }}>
                     <Typography variant="subtitle1" color="text.secondary">
-                      Weight
+                      Reps
                     </Typography>
                     <TextField
                       id="outlined-basic"
@@ -559,41 +508,119 @@ export default function CreateActivity() {
                         step: "1",
                         min: "0"
                       }}
-                      error={!!formErrors.weight}
-                      helperText={formErrors.weight}
-                      value={formData.weight}
-                      onChange={handleInputChange('weight')}
+                      sx={{ 
+                        '& .MuiOutlinedInput-input': {
+                          py: 1,
+                          fontSize: '0.875rem'
+                        }
+                      }}
+                      error={!!formErrors.reps}
+                      helperText={formErrors.reps}
+                      value={formData.reps}
+                      onChange={handleInputChange('reps')}
                     />
                   </Stack>
-                )}
-              </Stack>
-            )}
+                  <Stack spacing={1} sx={{ flex: 1 }}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      Sets
+                    </Typography>
+                    <TextField
+                      id="outlined-basic"
+                      variant="outlined"
+                      size="small"
+                      margin="none"
+                      type="number"
+                      inputProps={{
+                        step: "1",
+                        min: "0"
+                      }}
+                      sx={{ 
+                        '& .MuiOutlinedInput-input': {
+                          py: 1,
+                          fontSize: '0.875rem'
+                        }
+                      }}
+                      error={!!formErrors.sets}
+                      helperText={formErrors.sets}
+                      value={formData.sets}
+                      onChange={handleInputChange('sets')}
+                    />
+                  </Stack>
+                  {workoutType === Activities.WorkoutType.STRENGTH && (
+                    <Stack spacing={1} sx={{ flex: 1 }}>
+                      <Typography variant="subtitle1" color="text.secondary">
+                        Weight
+                      </Typography>
+                      <TextField
+                        id="outlined-basic"
+                        variant="outlined"
+                        size="small"
+                        margin="none"
+                        type="number"
+                        inputProps={{
+                          step: "1",
+                          min: "0"
+                        }}
+                        error={!!formErrors.weight}
+                        helperText={formErrors.weight}
+                        value={formData.weight}
+                        onChange={handleInputChange('weight')}
+                      />
+                    </Stack>
+                  )}
+                </Stack>
+              )}
 
-            <Button 
-              variant="contained"
-              disabled={saving}
-              onClick={handleSubmit}
-              sx={{ 
-                width: "100%",
-                py: 1.5,
-                mt: 1.5,
-                textTransform: 'none',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                borderRadius: '8px',
-                backgroundColor: 'primary.main',
-                '&:hover': {
-                  backgroundColor: 'primary.dark',
-                }
-              }}
-            >
-              {saving ? 'Saving...' : 'Save Activity'}
-            </Button>
+              <Box sx={{ 
+                display: 'flex',
+                justifyContent: 'flex-end',
+                mt: { xs: 3, sm: 4 },
+                gap: 2
+              }}>
+                <Button 
+                  variant="outlined"
+                  onClick={() => navigate('/activity-page')}
+                  sx={{ 
+                    px: { xs: 2, sm: 3 },
+                    py: { xs: 0.75, sm: 1 },
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    borderColor: 'divider',
+                    color: 'text.secondary',
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      backgroundColor: 'rgba(132, 204, 22, 0.04)',
+                    }
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="contained"
+                  disabled={saving}
+                  onClick={handleSubmit}
+                  startIcon={saving ? null : <AddIcon />}
+                  sx={{ 
+                    px: { xs: 2, sm: 3 },
+                    py: { xs: 0.75, sm: 1 },
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    backgroundColor: 'primary.main',
+                    '&:hover': {
+                      backgroundColor: 'primary.dark',
+                    }
+                  }}
+                >
+                  {saving ? 'Saving...' : 'Save Activity'}
+                </Button>
+              </Box>
+            </Stack>
           </StyledCard>
           <StyledCard
             sx={{
               flex: 3,
-              p: { xs: 1.5, sm: 2 },
               width: { xs: '100%', sm: 'auto' }
             }}
           >
