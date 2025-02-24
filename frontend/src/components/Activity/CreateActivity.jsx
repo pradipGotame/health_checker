@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import NavBar from "../Landing/NavBar";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
-import { Typography, Tooltip } from "@mui/material";
+import { Typography, Tooltip, Snackbar, Alert } from "@mui/material";
 import Select from "@mui/material/Select";
 import InfoIcon from '@mui/icons-material/Info';
 import TryIcon from '@mui/icons-material/Try';
 import * as Activities from "./Activities";
 import { styled, alpha } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { addDoc, collection, db } from "../../firebase/firebase";
+import { useAuth } from '../../hooks/useAuth';
 
 const StyledCard = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -53,8 +56,15 @@ export default function CreateActivity() {
     distance: '',
     reps: '',
     sets: '',
-    weight: ''
+    weight: '',
+    durationUnit: 'min',
+    distanceUnit: 'km'
   });
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState({ message: '', severity: 'success' });
+  const [saving, setSaving] = useState(false);
 
   const handleInputChange = (field) => (event) => {
     let value = event.target.value;
@@ -122,18 +132,56 @@ export default function CreateActivity() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
-      // Submit form logic here
-      console.log('Form is valid', { workoutType, activity, ...formData });
-    } else {
-      console.log('Form has errors', formErrors);
+      setSaving(true);
+      try {
+        const activityData = {
+          userId: user.uid,
+          workoutType,
+          activity,
+          createdAt: new Date().toISOString(),
+          ...(workoutType === Activities.WorkoutType.CARDIO && {
+            duration: Number(formData.duration),
+            distance: Number(formData.distance),
+            durationUnit: formData.durationUnit,
+            distanceUnit: formData.distanceUnit
+          }),
+          ...(workoutType === Activities.WorkoutType.STRENGTH && {
+            reps: Number(formData.reps),
+            sets: Number(formData.sets),
+            weight: Number(formData.weight)
+          }),
+          ...(workoutType === Activities.WorkoutType.MOBILITY && {
+            reps: Number(formData.reps),
+            sets: Number(formData.sets)
+          })
+        };
+
+        await addDoc(collection(db, "activities"), activityData);
+        setOpenSnackbar(true);
+        setSnackbarMessage({
+          message: 'Activity saved successfully!',
+          severity: 'success'
+        });
+        setTimeout(() => {
+          navigate('/activity-page');
+        }, 1500);
+      } catch (error) {
+        console.error("Error saving activity:", error);
+        setOpenSnackbar(true);
+        setSnackbarMessage({
+          message: 'Failed to save activity. Please try again.',
+          severity: 'error'
+        });
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
-  const handleWorkoutTypeChange = (event) => {
-    updateWorkoutType(event.target.value);
-    updateActivity(''); // Reset activity when workout type changes
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   function getActivities() {
@@ -156,7 +204,6 @@ export default function CreateActivity() {
         minHeight: '100vh'
       }}
     >
-      <NavBar />
       <Container
         sx={{
           display: "flex",
@@ -166,17 +213,28 @@ export default function CreateActivity() {
           gap: 1.5
         }}
       >
-        <Stack direction="row" spacing={1.5}>
+        <Stack 
+          direction="row" 
+          spacing={1} 
+          sx={{ 
+            cursor: 'pointer',
+            width: 'fit-content',
+            '&:hover': { 
+              color: 'primary.main',
+            }
+          }}
+          onClick={() => navigate('/activity-page')}
+        >
+          <ArrowBackIcon sx={{ fontSize: 20 }} />
           <Typography 
             sx={{ 
-              color: 'text.secondary',
-              cursor: 'pointer',
-              '&:hover': { color: 'primary.main' }
+              color: 'inherit',
+              fontSize: '0.875rem',
+              fontWeight: 500
             }}
           >
-            Back
+            Back to Activities
           </Typography>
-          <Typography color="text.secondary">Programs / Activity</Typography>
         </Stack>
         <Typography 
           sx={{ 
@@ -206,8 +264,6 @@ export default function CreateActivity() {
                 Workout Type
               </Typography>
               <StyledSelect
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
                 value={workoutType}
                 size="small"
                 sx={{ 
@@ -217,10 +273,14 @@ export default function CreateActivity() {
                     fontSize: '0.875rem'
                   }
                 }}
-                onChange={handleWorkoutTypeChange}
+                onChange={(event) => {
+                  updateWorkoutType(event.target.value);
+                  updateActivity(''); // Reset activity when type changes
+                }}
                 MenuProps={{
                   PaperProps: {
                     sx: {
+                      maxHeight: 300,
                       backdropFilter: "blur(24px)",
                       backgroundColor: 'rgba(0, 0, 0, 0.4)',
                       border: "1px solid",
@@ -237,68 +297,76 @@ export default function CreateActivity() {
                         }
                       }
                     }
+                  },
+                  anchorOrigin: {
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  },
+                  transformOrigin: {
+                    vertical: 'top',
+                    horizontal: 'left',
                   }
                 }}
-                error={!!formErrors.workoutType}
-                helperText={formErrors.workoutType}
               >
-                {
-                  Object.values(Activities.WorkoutType).map((workout) => (
-                    <MenuItem key={workout} value={workout}>{workout}</MenuItem>
-                  ))
-                }
+                {Object.values(Activities.WorkoutType).map((type) => (
+                  <MenuItem key={type} value={type}>{type}</MenuItem>
+                ))}
               </StyledSelect>
             </Stack>
 
-            <Stack spacing={1}>
-              <Typography variant="subtitle1" color="text.secondary">
-                Activity
-              </Typography>
-              <StyledSelect
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={activity}
-                size="small"
-                sx={{ 
-                  width: "100%",
-                  '& .MuiSelect-select': {
-                    py: 1,
-                    fontSize: '0.875rem'
-                  }
-                }}
-                onChange={(event) => updateActivity(event.target.value)}
-                MenuProps={{
-                  PaperProps: {
-                    sx: {
-                      backdropFilter: "blur(24px)",
-                      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                      border: "1px solid",
-                      borderColor: 'divider',
-                      maxHeight: 300,
-                      '& .MuiMenuItem-root': {
-                        '&:hover': {
-                          backgroundColor: 'rgba(132, 204, 22, 0.1)',
-                        },
-                        '&.Mui-selected': {
-                          backgroundColor: 'rgba(132, 204, 22, 0.2)',
+            {workoutType && (
+              <Stack spacing={1}>
+                <Typography variant="subtitle1" color="text.secondary">
+                  Activity
+                </Typography>
+                <StyledSelect
+                  value={activity}
+                  size="small"
+                  sx={{ 
+                    width: "100%",
+                    '& .MuiSelect-select': {
+                      py: 1,
+                      fontSize: '0.875rem'
+                    }
+                  }}
+                  onChange={(event) => updateActivity(event.target.value)}
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        maxHeight: 300,
+                        backdropFilter: "blur(24px)",
+                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        border: "1px solid",
+                        borderColor: 'divider',
+                        '& .MuiMenuItem-root': {
                           '&:hover': {
-                            backgroundColor: 'rgba(132, 204, 22, 0.3)',
+                            backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                          },
+                          '&.Mui-selected': {
+                            backgroundColor: 'rgba(132, 204, 22, 0.2)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(132, 204, 22, 0.3)',
+                            }
                           }
                         }
                       }
+                    },
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
                     }
-                  }
-                }}
-                error={!!formErrors.activity}
-                helperText={formErrors.activity}
-              >
-                {
-                  Object.values(getActivities()).map((workout) => (
+                  }}
+                >
+                  {Object.values(getActivities()).map((workout) => (
                     <MenuItem key={workout} value={workout}>{workout}</MenuItem>
-                  ))
-                }
-              </StyledSelect>
-            </Stack>
+                  ))}
+                </StyledSelect>
+              </Stack>
+            )}
 
             {workoutType === Activities.WorkoutType.CARDIO && (
               <Stack spacing={3}>
@@ -344,11 +412,13 @@ export default function CreateActivity() {
                     </Typography>
                     <StyledSelect
                       size="small"
-                      defaultValue="min"
+                      value={formData.durationUnit}
+                      onChange={handleInputChange('durationUnit')}
                       sx={{ width: "100%" }}
                       MenuProps={{
                         PaperProps: {
                           sx: {
+                            maxHeight: 300,
                             backdropFilter: "blur(24px)",
                             backgroundColor: 'rgba(0, 0, 0, 0.4)',
                             border: "1px solid",
@@ -401,7 +471,8 @@ export default function CreateActivity() {
                     />
                     <StyledSelect
                       size="small"
-                      defaultValue="km"
+                      value={formData.distanceUnit}
+                      onChange={handleInputChange('distanceUnit')}
                       sx={{ 
                         width: "120px",
                         '& .MuiSelect-select': {
@@ -500,6 +571,8 @@ export default function CreateActivity() {
 
             <Button 
               variant="contained"
+              disabled={saving}
+              onClick={handleSubmit}
               sx={{ 
                 width: "100%",
                 py: 1.5,
@@ -513,9 +586,8 @@ export default function CreateActivity() {
                   backgroundColor: 'primary.dark',
                 }
               }}
-              onClick={handleSubmit}
             >
-              Save Activity
+              {saving ? 'Saving...' : 'Save Activity'}
             </Button>
           </StyledCard>
           <StyledCard
@@ -736,6 +808,27 @@ export default function CreateActivity() {
           </StyledCard>
         </Stack>
       </Container>
+      
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={1500}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          severity={snackbarMessage.severity}
+          variant="filled"
+          sx={{ 
+            width: '100%',
+            bgcolor: 'primary.main',
+            '& .MuiAlert-icon': {
+              color: 'white'
+            }
+          }}
+        >
+          {snackbarMessage.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

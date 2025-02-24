@@ -13,7 +13,7 @@ export default function Dashboard() {
         <Button 
           variant="contained" 
           color="primary"
-          onClick={() => navigate('/activity')}
+          onClick={() => navigate('/activity-page')}
         >
           Create Activity
         </Button>

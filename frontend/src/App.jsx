@@ -28,7 +28,7 @@ export default function MarketingPage() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/activity" element={<CreateActivity />} />
+        <Route path="/create-activity" element={<CreateActivity />} />
         <Route path="/activity-page" element={<ActivityPage />} />
         <Route path="/profile" element={<Profile />} />
         {/* <Route
