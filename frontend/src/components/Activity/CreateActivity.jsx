@@ -11,11 +11,12 @@ import InfoIcon from '@mui/icons-material/Info';
 import TryIcon from '@mui/icons-material/Try';
 import * as Activities from "./Activities";
 import { styled, alpha } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { addDoc, collection, db } from "../../firebase/firebase";
+import { addDoc, collection, db, updateDoc, doc } from "../../firebase/firebase";
 import { useAuth } from '../../hooks/useAuth';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 
 const StyledCard = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -53,17 +54,21 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 }));
 
 export default function CreateActivity() {
-  const [workoutType, updateWorkoutType] = useState('');
-  const [activity, updateActivity] = useState('');
+  const location = useLocation();
+  const editMode = location.state?.editMode;
+  const editActivity = location.state?.activity;
+  
+  const [workoutType, updateWorkoutType] = useState(editMode ? editActivity.workoutType : '');
+  const [activity, updateActivity] = useState(editMode ? editActivity.activity : '');
   const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
-    duration: '',
-    distance: '',
-    reps: '',
-    sets: '',
-    weight: '',
-    durationUnit: 'min',
-    distanceUnit: 'km'
+    duration: editMode && editActivity.duration ? editActivity.duration : '',
+    distance: editMode && editActivity.distance ? editActivity.distance : '',
+    reps: editMode && editActivity.reps ? editActivity.reps : '',
+    sets: editMode && editActivity.sets ? editActivity.sets : '',
+    weight: editMode && editActivity.weight ? editActivity.weight : '',
+    durationUnit: editMode && editActivity.durationUnit ? editActivity.durationUnit : 'min',
+    distanceUnit: editMode && editActivity.distanceUnit ? editActivity.distanceUnit : 'km'
   });
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -145,7 +150,7 @@ export default function CreateActivity() {
           userId: user.uid,
           workoutType,
           activity,
-          createdAt: new Date().toISOString(),
+          createdAt: editMode ? editActivity.createdAt : new Date().toISOString(),
           ...(workoutType === Activities.WorkoutType.CARDIO && {
             duration: Number(formData.duration),
             distance: Number(formData.distance),
@@ -163,20 +168,31 @@ export default function CreateActivity() {
           })
         };
 
-        await addDoc(collection(db, "activities"), activityData);
+        if (editMode) {
+          // Update existing document
+          await updateDoc(doc(db, "activities", editActivity.id), activityData);
+          setSnackbarMessage({
+            message: 'Activity updated successfully!',
+            severity: 'success'
+          });
+        } else {
+          // Create new document
+          await addDoc(collection(db, "activities"), activityData);
+          setSnackbarMessage({
+            message: 'Activity saved successfully!',
+            severity: 'success'
+          });
+        }
+        
         setOpenSnackbar(true);
-        setSnackbarMessage({
-          message: 'Activity saved successfully!',
-          severity: 'success'
-        });
         setTimeout(() => {
           navigate('/activity-page');
         }, 1500);
       } catch (error) {
-        console.error("Error saving activity:", error);
+        console.error(editMode ? "Error updating activity:" : "Error saving activity:", error);
         setOpenSnackbar(true);
         setSnackbarMessage({
-          message: 'Failed to save activity. Please try again.',
+          message: editMode ? 'Failed to update activity. Please try again.' : 'Failed to save activity. Please try again.',
           severity: 'error'
         });
       } finally {
@@ -249,7 +265,7 @@ export default function CreateActivity() {
             fontSize: { xs: '1.75rem', sm: '2.125rem' }
           }}
         >
-          New Activity
+          {editMode ? 'Edit Activity' : 'New Activity'}
         </Typography>
         <Stack
           direction={{ xs: "column-reverse", sm: "row" }}
@@ -600,7 +616,7 @@ export default function CreateActivity() {
                   variant="contained"
                   disabled={saving}
                   onClick={handleSubmit}
-                  startIcon={saving ? null : <AddIcon />}
+                  startIcon={saving ? null : editMode ? <EditIcon /> : <AddIcon />}
                   sx={{ 
                     px: { xs: 2, sm: 3 },
                     py: { xs: 0.75, sm: 1 },
@@ -613,7 +629,7 @@ export default function CreateActivity() {
                     }
                   }}
                 >
-                  {saving ? 'Saving...' : 'Save Activity'}
+                  {saving ? 'Saving...' : editMode ? 'Update Activity' : 'Save Activity'}
                 </Button>
               </Box>
             </Stack>

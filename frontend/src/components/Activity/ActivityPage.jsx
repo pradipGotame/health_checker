@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
-import { Typography, Grid, Divider, Skeleton } from "@mui/material";
+import { Typography, Grid, Divider, Skeleton, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +12,11 @@ import AddIcon from '@mui/icons-material/Add';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import EditIcon from '@mui/icons-material/Edit';
+import { collection, query, where, orderBy, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { format, isToday, startOfWeek, startOfMonth, isWithinInterval, subDays } from 'date-fns';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const StyledCard = styled(Stack)(({ theme }) => ({
   borderRadius: 12,
@@ -64,6 +66,7 @@ export default function ActivityPage() {
     weekCount: 0,
     monthCount: 0,
   });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, activityId: null });
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -130,6 +133,109 @@ export default function ActivityPage() {
       return `${activity.sets} sets × ${activity.reps} reps`;
     }
   };
+
+  const handleDelete = async (activityId) => {
+    try {
+      await deleteDoc(doc(db, "activities", activityId));
+      
+      // Update local state
+      setActivities(prev => prev.filter(activity => activity.id !== activityId));
+      
+      // Update stats
+      const updatedActivities = activities.filter(activity => activity.id !== activityId);
+      const todayActivities = updatedActivities.filter(activity => isToday(activity.createdAt));
+      
+      setStats({
+        streak: 0,
+        todayCount: todayActivities.length,
+        weekCount: updatedActivities.length,
+        monthCount: updatedActivities.length,
+      });
+    } catch (error) {
+      console.error("Error deleting activity:", error);
+    }
+    setDeleteDialog({ open: false, activityId: null });
+  };
+
+  const ActivityItemWithDelete = ({ activity }) => (
+    <ActivityItem key={activity.id}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+            {activity.activity}
+          </Typography>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ 
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              wordBreak: 'break-word'
+            }}
+          >
+            {formatActivityDetails(activity)}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {format(activity.createdAt, 'MMM d, yyyy h:mm a')}
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1}>
+          <IconButton 
+            size="small"
+            onClick={() => navigate('/create-activity', { 
+              state: { 
+                editMode: true, 
+                activity 
+              }
+            })}
+            sx={{ 
+              opacity: 0.2,
+              color: 'text.secondary',
+              padding: '4px',
+              transition: 'all 0.2s ease-in-out',
+              '& svg': {
+                fontSize: '1.1rem'
+              },
+              '&:hover': {
+                opacity: 1,
+                color: 'primary.main',
+                backgroundColor: 'primary.light',
+                transform: 'scale(1.1)'
+              },
+              [`${ActivityItem}:hover &`]: {
+                opacity: 0.7
+              }
+            }}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton 
+            size="small"
+            onClick={() => setDeleteDialog({ open: true, activityId: activity.id })}
+            sx={{ 
+              opacity: 0.2,
+              color: 'text.secondary',
+              padding: '4px',
+              transition: 'all 0.2s ease-in-out',
+              '& svg': {
+                fontSize: '1.1rem'
+              },
+              '&:hover': {
+                opacity: 1,
+                color: 'error.main',
+                backgroundColor: 'error.light',
+                transform: 'scale(1.1)'
+              },
+              [`${ActivityItem}:hover &`]: {
+                opacity: 0.7
+              }
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Stack>
+      </Box>
+    </ActivityItem>
+  );
 
   if (loading) {
     return (
@@ -320,26 +426,13 @@ export default function ActivityPage() {
               <StyledCard>
                 <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CalendarTodayIcon sx={{ color: 'primary.main' }} />
-                  Today's Activities
+                  Today&apos;s Activities
                 </Typography>
                 {activities.filter(activity => isToday(activity.createdAt)).length > 0 ? (
                   activities
                     .filter(activity => isToday(activity.createdAt))
                     .map((activity) => (
-                      <ActivityItem key={activity.id}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                          {activity.activity}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                          wordBreak: 'break-word'
-                        }}>
-                          {formatActivityDetails(activity)}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {format(activity.createdAt, 'h:mm a')}
-                        </Typography>
-                      </ActivityItem>
+                      <ActivityItemWithDelete key={activity.id} activity={activity} />
                     ))
                 ) : (
                   <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
@@ -355,20 +448,7 @@ export default function ActivityPage() {
                   Previous Activities
                 </Typography>
                 {activities.map((activity) => (
-                  <ActivityItem key={activity.id}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                      {activity.activity}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ 
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                      wordBreak: 'break-word'
-                    }}>
-                      {formatActivityDetails(activity)}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {format(activity.createdAt, 'MMM d, yyyy h:mm a')}
-                    </Typography>
-                  </ActivityItem>
+                  <ActivityItemWithDelete key={activity.id} activity={activity} />
                 ))}
               </StyledCard>
             </Stack>
@@ -427,6 +507,64 @@ export default function ActivityPage() {
             </StyledCard>
           </Grid>
         </Grid>
+
+        {/* Add Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialog.open}
+          onClose={() => setDeleteDialog({ open: false, activityId: null })}
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              backdropFilter: "blur(24px)",
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              border: "1px solid",
+              borderColor: 'divider',
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            pb: 1,
+            color: 'primary.main',
+            fontSize: { xs: '1.25rem', sm: '1.5rem' }
+          }}>
+            Delete Activity
+          </DialogTitle>
+          <DialogContent>
+            <Typography color="text.secondary">
+              Are you sure you want to delete this activity? This action cannot be undone.
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ p: 2, pt: 1 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setDeleteDialog({ open: false, activityId: null })}
+              sx={{ 
+                borderColor: 'divider',
+                color: 'text.secondary',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  backgroundColor: 'rgba(132, 204, 22, 0.04)',
+                }
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => handleDelete(deleteDialog.activityId)}
+              sx={{ 
+                ml: 1,
+                bgcolor: 'error.main',
+                '&:hover': {
+                  bgcolor: 'error.dark',
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Box>
   );
