@@ -8,6 +8,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import { useNavigate } from "react-router-dom";
 import { styled, alpha } from "@mui/material/styles";
+import { useAuth } from '../../hooks/useAuth';
 
 const StyledCard = styled(Stack)(({ theme }) => ({
   borderRadius: 12,
@@ -22,6 +23,8 @@ const StyledCard = styled(Stack)(({ theme }) => ({
 
 export default function ActivityPage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
   return (
     <Box
       sx={{
@@ -52,6 +55,15 @@ export default function ActivityPage() {
               gap: 3
             }}
           >
+            <Typography 
+              sx={{ 
+                color: 'text.secondary',
+                fontSize: '1rem'
+              }}
+            >
+              {loading ? 'Loading...' : `Logged in as: ${user?.email}`}
+            </Typography>
+
             <Button
               sx={{ 
                 p: 2,
