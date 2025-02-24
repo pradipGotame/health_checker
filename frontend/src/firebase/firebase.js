@@ -3,10 +3,12 @@ import {
   getFirestore, 
   collection, 
   addDoc,
+  updateDoc,
   query,
   where,
   orderBy,
-  getDocs 
+  getDocs,
+  doc
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -31,5 +33,7 @@ export {
   where,
   orderBy,
   getDocs,
-  app 
+  updateDoc,
+  app,
+  doc
 };
