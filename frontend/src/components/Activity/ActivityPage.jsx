@@ -61,12 +61,17 @@ export default function ActivityPage() {
 
   useEffect(() => {
     const fetchActivities = async () => {
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
       try {
         const activitiesRef = collection(db, "activities");
+        // Simplified query that doesn't require an index
         const q = query(
           activitiesRef,
-          where("userId", "==", user.uid),
-          orderBy("createdAt", "desc")
+          where("userId", "==", user.uid)
         );
         
         const querySnapshot = await getDocs(q);
@@ -74,64 +79,32 @@ export default function ActivityPage() {
           id: doc.id,
           ...doc.data(),
           createdAt: new Date(doc.data().createdAt)
-        }));
+        }))
+        // Sort the data in memory instead
+        .sort((a, b) => b.createdAt - a.createdAt);
 
         setActivities(activitiesData);
-        
-        // Calculate stats
-        const now = new Date();
-        const weekStart = startOfWeek(now);
-        const monthStart = startOfMonth(now);
         
         const todayActivities = activitiesData.filter(activity => 
           isToday(activity.createdAt)
         );
 
-        const weekActivities = activitiesData.filter(activity =>
-          isWithinInterval(activity.createdAt, {
-            start: weekStart,
-            end: now
-          })
-        );
-
-        const monthActivities = activitiesData.filter(activity =>
-          isWithinInterval(activity.createdAt, {
-            start: monthStart,
-            end: now
-          })
-        );
-
-        // Calculate streak
-        let streak = 0;
-        let currentDate = new Date();
-        let hasActivityToday = todayActivities.length > 0;
-        
-        if (!hasActivityToday) {
-          currentDate = subDays(currentDate, 1);
-        }
-
-        for (let i = 0; i < 365; i++) {
-          const activitiesOnDate = activitiesData.filter(activity =>
-            format(activity.createdAt, 'yyyy-MM-dd') === format(currentDate, 'yyyy-MM-dd')
-          );
-          
-          if (activitiesOnDate.length === 0) {
-            break;
-          }
-          
-          streak++;
-          currentDate = subDays(currentDate, 1);
-        }
-
         setStats({
-          streak,
+          streak: 0,
           todayCount: todayActivities.length,
-          weekCount: weekActivities.length,
-          monthCount: monthActivities.length,
+          weekCount: activitiesData.length,
+          monthCount: activitiesData.length,
         });
 
       } catch (error) {
         console.error("Error fetching activities:", error);
+        setActivities([]);
+        setStats({
+          streak: 0,
+          todayCount: 0,
+          weekCount: 0,
+          monthCount: 0,
+        });
       } finally {
         setLoading(false);
       }
@@ -140,7 +113,7 @@ export default function ActivityPage() {
     if (user) {
       fetchActivities();
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const formatActivityDetails = (activity) => {
     if (activity.workoutType === 'Cardio') {
