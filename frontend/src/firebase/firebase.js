@@ -1,5 +1,13 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc,
+  query,
+  where,
+  orderBy,
+  getDocs 
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
@@ -15,4 +23,13 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
-export { db, collection, addDoc, app };
+export { 
+  db, 
+  collection, 
+  addDoc, 
+  query,
+  where,
+  orderBy,
+  getDocs,
+  app 
+};
