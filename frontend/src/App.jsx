@@ -6,7 +6,7 @@ import Dashboard from "./views/Dashboard/Dashboard";
 import LandingPage from "./views/LandingPage";
 import Register from "./views/auth/Register";
 import Login from "./views/auth/Login";
-import CreateActivity from "./components/Activity/createActivity";
+import CreateActivity from "./components/Activity/CreateActivity";
 import ActivityPage from "./components/Activity/ActivityPage"
 import Profile from "./components/Profile/Profile"
 // import ProtectedRoute from "./views/protectedRoutes/protectedRoutes";
@@ -14,10 +14,8 @@ import Profile from "./components/Profile/Profile"
 export default function MarketingPage() {
   const navigate = useNavigate();
   useEffect(() => {
-    // Maybe we can use a custom hook here to check if the user is logged in
-    // Should avoid using localStorage directly
     const userId = localStorage.getItem("userId");
-    if (userId) {
+    if (userId && window.location.pathname === '/') {
       navigate("/dashboard");
     }
   }, [navigate]);
