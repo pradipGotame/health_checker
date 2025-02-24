@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import NavBar from "../Landing/NavBar";
@@ -9,13 +10,63 @@ import { Typography } from "@mui/material";
 import Select from "@mui/material/Select";
 import InfoIcon from '@mui/icons-material/Info';
 import TryIcon from '@mui/icons-material/Try';
+import * as Activities from "./Activities";
+import { styled, alpha } from "@mui/material/styles";
+
+const StyledCard = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  borderRadius: 12,
+  backdropFilter: "blur(24px)",
+  border: "1px solid",
+  borderColor: (theme.vars || theme).palette.divider,
+  backgroundColor: theme.vars
+    ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
+    : alpha(theme.palette.background.default, 0.4),
+  boxShadow: (theme.vars || theme).shadows[1],
+}));
+
+const StyledSelect = styled(Select)(({ theme }) => ({
+  '& .MuiSelect-select': {
+    backdropFilter: "blur(24px)",
+    backgroundColor: theme.vars
+      ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
+      : alpha(theme.palette.background.default, 0.4),
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: (theme.vars || theme).palette.divider,
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: theme.palette.primary.main,
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: theme.palette.primary.main,
+  }
+}));
 
 export default function CreateActivity() {
+
+  const [workoutType, updateWorkoutType] = useState('')
+  const [activity, updateActivity] = useState('')
+
+  function getActivities() {
+    if (workoutType == Activities.WorkoutType.CARDIO) {
+      return Activities.Cardio;
+    } else if (workoutType == Activities.WorkoutType.STRENGTH) {
+      return Activities.Strength;
+    }  else if (workoutType === Activities.WorkoutType.MOBILITY) {
+      return Activities.Mobility;
+    } else {
+      return Activities.Mobility;
+    }
+  }
+
   return (
     <Box
       sx={{
         backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% 50%, hsl(84, 81%, 14%), transparent)",
+          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+        minHeight: '100vh'
       }}
     >
       <NavBar />
@@ -23,238 +74,315 @@ export default function CreateActivity() {
         sx={{
           display: "flex",
           flexDirection: "column",
-          pt: 12,
-          pb: { xs: 8, sm: 12 },
+          pt: { xs: 10, sm: 12 },
+          pb: { xs: 6, sm: 8 },
+          gap: 3
         }}
       >
-        <Stack direction="row" spacing={2} sx={{ pl: 2 }}>
-          <Typography>Back</Typography>
-          <Typography>Programs / Activity</Typography>
+        <Stack direction="row" spacing={2}>
+          <Typography 
+            sx={{ 
+              color: 'text.secondary',
+              cursor: 'pointer',
+              '&:hover': { color: 'primary.main' }
+            }}
+          >
+            Back
+          </Typography>
+          <Typography color="text.secondary">Programs / Activity</Typography>
         </Stack>
-        <Typography sx={{ fontSize: 36, fontWeight: "bold", p: 2 }}>
+        <Typography 
+          sx={{ 
+            fontSize: "clamp(2rem, 5vw, 2.5rem)",
+            fontWeight: "bold",
+            color: 'primary.main',
+            mb: 2
+          }}
+        >
           New Activity
         </Typography>
         <Stack
-          display="flex"
-          justifyContent="space-between"
-          alignItems={{ sm: "flex-start" }}
           direction={{ xs: "column-reverse", sm: "row" }}
-          spacing={2}
+          spacing={{ xs: 3, sm: 4 }}
+          alignItems="flex-start"
         >
-          <Box
+          <StyledCard
             sx={{
-              backdropFilter: "blur(24px)",
-              background: "rgba(132, 204, 22, 0.05)",
-              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-              borderRadius: "8px",
               flex: 7,
-              p: 2,
+              p: { xs: 3, sm: 4 },
+              gap: 4,
+              width: '100%'
             }}
           >
-            <Stack
-              direction="row"
-              display="flex"
-              justifyContent="space-between"
-              sx={{ mb: 4, width: "100%" }}
-              spacing={2}
-            >
-              <Stack sx={{ width: "100%" }}>
-                <Box>Workout Type</Box>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value="Workout"
-                  size="small"
-                  sx={{ width: "100%" }}
-                >
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
-                </Select>
-              </Stack>
-            </Stack>
-
-            <Stack sx={{ mb: 4 }}>
-              <Typography>Activity</Typography>
-              <TextField
-                id="outlined-basic"
-                variant="outlined"
-                size="small"
-                margin="none"
-                sx={{ width: "100%" }}
-              />
-            </Stack>
-
-            <Stack
-              direction="row"
-              display="flex"
-              justifyContent="space-between"
-              sx={{ mb: 4, width: "100%" }}
-              spacing={2}
-            >
-              <Stack sx={{ width: "90%" }}>
-                <Typography>Duration</Typography>
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  size="small"
-                  type="number"
-                  sx={{ width: "100%" }}
-                />
-              </Stack>
-              <Stack sx={{ width: "10%" }}>
-                <Typography>Unit</Typography>
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  size="small"
-                  type="number"
-                  sx={{ width: "100%" }}
-                />
-              </Stack>
-            </Stack>
-
-            <Stack
-              direction="row"
-              display="flex"
-              justifyContent="space-between"
-              sx={{ mb: 4, width: "100%" }}
-              spacing={2}
-            >
-              <Stack sx={{ width: "100%" }}>
-                <Typography>Distance</Typography>
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  size="small"
-                  type="time"
-                  sx={{ width: "100%" }}
-                />
-              </Stack>
-            </Stack>
-
-            <Stack
-              direction="row"
-              display="flex"
-              justifyContent="space-between"
-              sx={{ mb: 4, width: "100%" }}
-              spacing={2}
-            >
-              <Stack sx={{ width: "30%" }}>
-                <Typography>Reps</Typography>
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  size="small"
-                  margin="none"
-                  type="number"
-                  sx={{ width: "100%" }}
-                />
-              </Stack>
-              <Stack sx={{ width: "30%" }}>
-                <Typography>Sets</Typography>
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  size="small"
-                  margin="none"
-                  type="number"
-                  sx={{ width: "100%" }}
-                />
-              </Stack>
-              <Stack sx={{ width: "30%" }}>
-                <Typography>Weight</Typography>
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  size="small"
-                  margin="none"
-                  type="number"
-                />
-              </Stack>
-
-              <Stack sx={{ width: "10%" }}>
-                <Typography>Unit</Typography>
-                <TextField
-                  id="outlined-basic"
-                  variant="outlined"
-                  size="small"
-                  margin="none"
-                  type="number"
-                />
-              </Stack>
-            </Stack>
-
-            <Stack sx={{ mb: 4 }}>
-              <Typography sx={{ mb: 1 }}>Location</Typography>
-              <Select
+            <Stack spacing={1}>
+              <Typography variant="subtitle1" color="text.secondary">
+                Workout Type
+              </Typography>
+              <StyledSelect
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value="Workout"
+                value={workoutType}
                 size="small"
                 sx={{ width: "100%" }}
+                onChange={(event)=> updateWorkoutType(event.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      backdropFilter: "blur(24px)",
+                      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                      border: "1px solid",
+                      borderColor: 'divider',
+                      '& .MuiMenuItem-root': {
+                        '&:hover': {
+                          backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                        },
+                        '&.Mui-selected': {
+                          backgroundColor: 'rgba(132, 204, 22, 0.2)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(132, 204, 22, 0.3)',
+                          }
+                        }
+                      }
+                    }
+                  }
+                }}
               >
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
-              </Select>
+                {
+                  Object.values(Activities.WorkoutType).map((workout) => (
+                    <MenuItem key={workout} value={workout}>{workout}</MenuItem>
+                  ))
+                }
+              </StyledSelect>
             </Stack>
 
-            <Stack
-              direction="row"
-              display="flex"
-              justifyContent={{ sm: "flex-end", xs: "flex-start" }}
-              sx={{ width: "100%" }}
-            >
-              <Button sx={{ width: "100%" }} variant="contained">
-                Save
-              </Button>
+            <Stack spacing={1}>
+              <Typography variant="subtitle1" color="text.secondary">
+                Activity
+              </Typography>
+              <StyledSelect
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={activity}
+                size="small"
+                sx={{ width: "100%" }}
+                onChange={(event) => updateActivity(event.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      backdropFilter: "blur(24px)",
+                      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                      border: "1px solid",
+                      borderColor: 'divider',
+                      maxHeight: 300,
+                      '& .MuiMenuItem-root': {
+                        '&:hover': {
+                          backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                        },
+                        '&.Mui-selected': {
+                          backgroundColor: 'rgba(132, 204, 22, 0.2)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(132, 204, 22, 0.3)',
+                          }
+                        }
+                      }
+                    }
+                  }
+                }}
+              >
+                {
+                  Object.values(getActivities()).map((workout) => (
+                    <MenuItem key={workout} value={workout}>{workout}</MenuItem>
+                  ))
+                }
+              </StyledSelect>
             </Stack>
-          </Box>
-          <Box
+
+            {workoutType === Activities.WorkoutType.CARDIO && (
+              <Stack spacing={3}>
+                <Stack direction="row" spacing={3}>
+                  <Stack spacing={1} flex={1}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      Duration
+                    </Typography>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      type="number"
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': {
+                            borderColor: (theme) => theme.palette.divider,
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'primary.main',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'primary.main',
+                          },
+                        }
+                      }}
+                    />
+                  </Stack>
+                  <Stack spacing={1} sx={{ width: "120px" }}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      Unit
+                    </Typography>
+                    <StyledSelect
+                      size="small"
+                      defaultValue="min"
+                      sx={{ width: "100%" }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backdropFilter: "blur(24px)",
+                            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                            border: "1px solid",
+                            borderColor: 'divider',
+                            '& .MuiMenuItem-root': {
+                              '&:hover': {
+                                backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                              },
+                              '&.Mui-selected': {
+                                backgroundColor: 'rgba(132, 204, 22, 0.2)',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(132, 204, 22, 0.3)',
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }}
+                    >
+                      <MenuItem value="min">Minutes</MenuItem>
+                      <MenuItem value="hr">Hours</MenuItem>
+                    </StyledSelect>
+                  </Stack>
+                </Stack>
+
+                <Stack spacing={1}>
+                  <Typography variant="subtitle1" color="text.secondary">
+                    Distance
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    variant="outlined"
+                    size="small"
+                    type="time"
+                    sx={{ width: "100%" }}
+                  />
+                </Stack>
+              </Stack>
+            )}
+
+            {(workoutType === Activities.WorkoutType.STRENGTH || workoutType === Activities.WorkoutType.MOBILITY) && (
+              <Stack direction="row" spacing={3}>
+                <Stack spacing={1} sx={{ flex: 1 }}>
+                  <Typography variant="subtitle1" color="text.secondary">
+                    Reps
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    variant="outlined"
+                    size="small"
+                    margin="none"
+                    type="number"
+                    sx={{ width: "100%" }}
+                  />
+                </Stack>
+                <Stack spacing={1} sx={{ flex: 1 }}>
+                  <Typography variant="subtitle1" color="text.secondary">
+                    Sets
+                  </Typography>
+                  <TextField
+                    id="outlined-basic"
+                    variant="outlined"
+                    size="small"
+                    margin="none"
+                    type="number"
+                    sx={{ width: "100%" }}
+                  />
+                </Stack>
+                {workoutType === Activities.WorkoutType.STRENGTH && (
+                  <Stack spacing={1} sx={{ flex: 1 }}>
+                    <Typography variant="subtitle1" color="text.secondary">
+                      Weight
+                    </Typography>
+                    <TextField
+                      id="outlined-basic"
+                      variant="outlined"
+                      size="small"
+                      margin="none"
+                      type="number"
+                    />
+                  </Stack>
+                )}
+              </Stack>
+            )}
+
+            <Button 
+              variant="contained"
+              sx={{ 
+                width: "100%",
+                py: 2,
+                mt: 2,
+                textTransform: 'none',
+                fontSize: '1rem',
+                fontWeight: 500,
+                borderRadius: '8px',
+                backgroundColor: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
+                }
+              }}
+            >
+              Save Activity
+            </Button>
+          </StyledCard>
+          <StyledCard
             sx={{
-              backdropFilter: "blur(24px)",
-              background: "rgba(132, 204, 22, 0.05)",
-              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-              borderRadius: "8px",
               flex: 3,
-              p: 2,
+              p: { xs: 3, sm: 4 },
+              width: { xs: '100%', sm: 'auto' }
             }}
           >
-            <Stack display="flex" alignItems="center">
+            <Stack spacing={3} width="100%">
               <Stack
-                display="flex"
-                direction="column"
                 alignItems="center"
+                spacing={2}
                 sx={{
-                  p: 1,
-                  m: 1,
-                  width: "100%",
-                  borderRadius: "8px",
-                  backgroundColor: "rgba(132, 204, 22, 0.025)",
+                  p: 3,
+                  borderRadius: "12px",
+                  background: "rgba(132, 204, 22, 0.03)",
                 }}
               >
-                <InfoIcon />
-                <Typography>Select a workout to learn more about it</Typography>
+                <InfoIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                <Typography 
+                  align="center"
+                  sx={{ 
+                    color: 'text.secondary',
+                    lineHeight: 1.5
+                  }}
+                >
+                  Select a workout to learn more about it
+                </Typography>
               </Stack>
+
               <Stack
-                display="flex"
-                direction="column"
                 alignItems="center"
+                spacing={2}
                 sx={{
-                  p: 1,
-                  m: 1,
-                  width: "100%",
-                  borderRadius: "8px",
-                  backgroundColor: "rgba(132, 204, 22, 0.025)",
+                  p: 3,
+                  borderRadius: "12px",
+                  background: "rgba(132, 204, 22, 0.03)",
                 }}
-                spacing={1}
               >
-                <Typography>AI Recommendation</Typography>
-                <TryIcon />
+                <Typography variant="subtitle1" fontWeight="bold">
+                  AI Recommendation
+                </Typography>
+                <TryIcon sx={{ fontSize: 40, color: 'primary.main' }} />
               </Stack>
             </Stack>
-          </Box>
+          </StyledCard>
         </Stack>
       </Container>
     </Box>

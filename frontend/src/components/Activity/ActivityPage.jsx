@@ -7,14 +7,27 @@ import Box from "@mui/material/Box";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import { useNavigate } from "react-router-dom";
+import { styled, alpha } from "@mui/material/styles";
+
+const StyledCard = styled(Stack)(({ theme }) => ({
+  borderRadius: 12,
+  backdropFilter: "blur(24px)",
+  border: "1px solid",
+  borderColor: (theme.vars || theme).palette.divider,
+  backgroundColor: theme.vars
+    ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
+    : alpha(theme.palette.background.default, 0.4),
+  boxShadow: (theme.vars || theme).shadows[1],
+}));
+
 export default function ActivityPage() {
   const navigate = useNavigate();
   return (
     <Box
       sx={{
-        height: "100vh",
+        minHeight: "100vh",
         backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% 50%, hsl(84, 81%, 14%), transparent)",
+          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
       }}
     >
       <NavBar />
@@ -23,125 +36,200 @@ export default function ActivityPage() {
           display: "flex",
           pt: 12,
           pb: { xs: 8, sm: 12 },
+          gap: 2
         }}
       >
         <Stack
           display="flex"
           direction={{ xs: "column-reverse", sm: "row" }}
           sx={{ flex: 1 }}
+          spacing={3}
         >
+          {/* Left Column */}
           <Stack
             sx={{
               flex: 5,
-              p: 2,
-              borderRadius: "8px",
+              gap: 3
             }}
           >
             <Button
-              sx={{ p: 2, display: "flex", width: "100%" }}
-              color="primary"
+              sx={{ 
+                p: 2,
+                display: "flex",
+                width: "100%",
+                borderRadius: "12px",
+                textTransform: 'none',
+                fontSize: '1.25rem',
+                fontWeight: 500,
+                backgroundColor: 'primary.main',
+                '&:hover': {
+                  backgroundColor: 'primary.dark',
+                }
+              }}
               variant="contained"
               onClick={() => navigate("/activity")}
             >
-              <Typography fontSize="large">New Activity</Typography>
+              New Activity
             </Button>
 
-            <Stack
-              display="flex"
-              alignItems="flex-start"
-              justifyContent="flex-start"
-              sx={{
-                mt: 2,
-                p: 2,
-                bordeRadius: "8px",
-                backgroundColor: "rgba(0,0,0, 0.5)",
-              }}
+            <StyledCard
               spacing={2}
+              sx={{
+                p: 3,
+              }}
             >
-              <Typography fontSize="large">Today's Activity</Typography>
-              <Stack sx={{ borderRadius: "8px" }} spacing={1}>
-                Nothing to show
+              <Typography 
+                sx={{
+                  fontSize: '1.25rem',
+                  fontWeight: 500,
+                  color: 'primary.main'
+                }}
+              >
+                Today&apos;s Activity
+              </Typography>
+              <Stack 
+                sx={{ 
+                  borderRadius: "12px",
+                  p: 2,
+                  background: "rgba(132, 204, 22, 0.03)",
+                }} 
+                spacing={1}
+              >
+                <Typography color="text.secondary">Nothing to show</Typography>
               </Stack>
-            </Stack>
+            </StyledCard>
 
             <Stack
-              display="flex"
-              direction="row"
-              alignItems="center"
-              justifyContent="flex-start"
               sx={{
-                mt: 2,
-                p: 2,
-                bordeRadius: "8px",
-                backgroundColor: "rgba(0,0,0, 0.5)",
+                p: 3,
+                borderRadius: "12px",
+                backdropFilter: "blur(16px)",
+                background: "rgba(0, 0, 0, 0.2)",
+                border: "1px solid rgba(132, 204, 22, 0.1)",
               }}
               spacing={2}
             >
-              <Typography fontSize="large">Previous Activities</Typography>
+              <Typography 
+                sx={{
+                  fontSize: '1.25rem',
+                  fontWeight: 500,
+                  color: 'primary.main'
+                }}
+              >
+                Previous Activities
+              </Typography>
             </Stack>
           </Stack>
+
+          {/* Right Column */}
           <Stack
-            direction="row"
-            display="flex"
-            justifyContent="flex-start"
-            spacing={2}
-            sx={{ flex: 5, p: 2 }}
+            sx={{ 
+              flex: 5,
+              gap: 3
+            }}
           >
             <Stack
-              display="flex"
-              direction={{ sm: "column", md: "row" }}
-              justifyContent="space-between"
               sx={{
-                p: 2,
-                borderRadius: "8px",
-                background: "rgba(132, 204, 22, 0.05)",
-                flex: 1,
+                p: 3,
+                borderRadius: "12px",
+                backdropFilter: "blur(16px)",
+                background: "rgba(0, 0, 0, 0.2)",
+                border: "1px solid rgba(132, 204, 22, 0.1)",
               }}
-              spacing={2}
+              spacing={3}
             >
               <Stack
                 display="flex"
                 alignItems="center"
-                spacing={1}
-                sx={{ p: 2, background: "rgba(132, 204, 22, 0.05)" }}
+                spacing={2}
+                sx={{ 
+                  p: 3,
+                  borderRadius: "12px",
+                  background: "rgba(132, 204, 22, 0.03)",
+                }}
               >
-                <Typography fontSize="large" fontWeight="bold">
+                <Typography 
+                  sx={{
+                    fontSize: '1.25rem',
+                    fontWeight: 600,
+                    color: 'primary.main'
+                  }}
+                >
                   Streak
                 </Typography>
                 <Typography
                   variant="h3"
-                  style={{ textShadow: "0 0 2px yellow" }}
+                  sx={{
+                    textShadow: "0 0 8px rgba(255, 255, 0, 0.3)"
+                  }}
                 >
                   🔥
                 </Typography>
-                <Typography fontSize="small">0 days</Typography>
+                <Typography 
+                  sx={{
+                    color: 'text.secondary',
+                    fontWeight: 500
+                  }}
+                >
+                  0 days
+                </Typography>
               </Stack>
 
-              <Stack
-                sx={{ width: "100%", background: "rgba(132, 204, 22, 0.05)" }}
-              >
+              {/* Calendar section */}
+              <Stack sx={{ width: "100%" }}>
                 <Stack
                   display="flex"
                   justifyContent="space-between"
                   alignItems="flex-start"
                   direction="row"
-                  sx={{ p: 2 }}
+                  sx={{ 
+                    p: 2,
+                    borderRadius: '12px',
+                    background: "rgba(132, 204, 22, 0.03)",
+                  }}
                 >
-                  <Stack display="flex" justifyContent="center" sx={{ pt: 1 }}>
-                    <Typography>February 2025</Typography>
+                  <Stack display="flex" justifyContent="center">
+                    <Typography
+                      sx={{
+                        fontSize: '1.25rem',
+                        fontWeight: 500,
+                        color: 'text.secondary'
+                      }}
+                    >
+                      February 2025
+                    </Typography>
                   </Stack>
-                  <Stack direction="row">
-                    <IconButton>
+                  <Stack direction="row" spacing={1}>
+                    <IconButton
+                      sx={{
+                        color: 'primary.main',
+                        '&:hover': {
+                          backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                        }
+                      }}
+                    >
                       <NavigateBeforeIcon />
                     </IconButton>
-                    <IconButton>
+                    <IconButton
+                      sx={{
+                        color: 'primary.main',
+                        '&:hover': {
+                          backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                        }
+                      }}
+                    >
                       <NavigateNextIcon />
                     </IconButton>
                   </Stack>
                 </Stack>
 
                 <Stack
-                  sx={{ p: 2, height: "auto" }}
+                  sx={{ 
+                    mt: 2,
+                    p: 2, 
+                    borderRadius: '12px',
+                    background: "rgba(132, 204, 22, 0.03)",
+                  }}
                   direction="row"
                   display="flex"
                   justifyContent="space-between"
@@ -153,14 +241,32 @@ export default function ActivityPage() {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        height: "5em",
                         p: 2,
-                        borderRadius: "24px",
+                        borderRadius: "12px",
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          backgroundColor: "rgba(132, 204, 22, 0.1)",
+                          cursor: 'pointer'
+                        }
                       }}
                     >
-                      <Stack display="flex" alignItems="center">
-                        <Typography>M</Typography>
-                        <Typography> {index}</Typography>
+                      <Stack display="flex" alignItems="center" spacing={1}>
+                        <Typography
+                          sx={{
+                            color: 'text.secondary',
+                            fontWeight: 500
+                          }}
+                        >
+                          M
+                        </Typography>
+                        <Typography
+                          sx={{
+                            color: 'primary.main',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {index}
+                        </Typography>
                       </Stack>
                     </Box>
                   ))}
