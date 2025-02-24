@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
-import { Typography, Grid, Divider, CircularProgress } from "@mui/material";
+import { Typography, Grid, Divider, Skeleton } from "@mui/material";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,9 @@ const StyledCard = styled(Stack)(({ theme }) => ({
     : alpha(theme.palette.background.default, 0.4),
   boxShadow: (theme.vars || theme).shadows[1],
   padding: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1.5),
+  },
 }));
 
 const StatCard = styled(Box)(({ theme }) => ({
@@ -44,7 +47,10 @@ const ActivityItem = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(1),
   '&:hover': {
     backgroundColor: alpha(theme.palette.background.paper, 0.6),
-  }
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1),
+  },
 }));
 
 export default function ActivityPage() {
@@ -130,12 +136,110 @@ export default function ActivityPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          backgroundImage:
+            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
         }}
       >
-        <CircularProgress />
+        <Container
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            pt: { xs: 6, sm: 8 },
+            pb: { xs: 3, sm: 4 },
+            gap: 3
+          }}
+        >
+          <Stack 
+            direction="row" 
+            spacing={1} 
+            sx={{ 
+              cursor: 'pointer',
+              width: 'fit-content',
+              '&:hover': { 
+                color: 'primary.main',
+              }
+            }}
+          >
+            <ArrowBackIcon sx={{ fontSize: 20 }} />
+            <Typography 
+              sx={{ 
+                color: 'inherit',
+                fontSize: '0.875rem',
+                fontWeight: 500
+              }}
+            >
+              Back to Dashboard
+            </Typography>
+          </Stack>
+
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontWeight: 'bold',
+              color: 'primary.main',
+              fontSize: { xs: '1.75rem', sm: '2.125rem' }
+            }}
+          >
+            Activity History
+          </Typography>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Stack spacing={3}>
+                {/* Today's Activities Skeleton */}
+                <StyledCard>
+                  <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CalendarTodayIcon sx={{ color: 'primary.main' }} />
+                    Today&apos;s Activities
+                  </Typography>
+                  {[1, 2].map((item) => (
+                    <Box key={item} sx={{ mb: 1 }}>
+                      <Skeleton variant="rounded" height={80} />
+                    </Box>
+                  ))}
+                </StyledCard>
+
+                {/* Previous Activities Skeleton */}
+                <StyledCard>
+                  <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FitnessCenterIcon sx={{ color: 'primary.main' }} />
+                    Previous Activities
+                  </Typography>
+                  {[1, 2, 3].map((item) => (
+                    <Box key={item} sx={{ mb: 1 }}>
+                      <Skeleton variant="rounded" height={80} />
+                    </Box>
+                  ))}
+                </StyledCard>
+              </Stack>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <StyledCard>
+                <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LocalFireDepartmentIcon sx={{ color: 'primary.main' }} />
+                  Stats
+                </Typography>
+                
+                <Stack spacing={2}>
+                  <Skeleton variant="rounded" height={60} />
+                  <Divider />
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Activity Summary</Typography>
+                    <Stack spacing={1}>
+                      {[1, 2, 3].map((item) => (
+                        <Box key={item} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Skeleton variant="text" width={80} />
+                          <Skeleton variant="text" width={60} />
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
+                </Stack>
+              </StyledCard>
+            </Grid>
+          </Grid>
+        </Container>
       </Box>
     );
   }
@@ -186,7 +290,8 @@ export default function ActivityPage() {
             variant="h4" 
             sx={{ 
               fontWeight: 'bold',
-              color: 'primary.main'
+              color: 'primary.main',
+              fontSize: { xs: '1.75rem', sm: '2.125rem' }
             }}
           >
             Activity History
@@ -197,7 +302,11 @@ export default function ActivityPage() {
             onClick={() => navigate('/create-activity')}
             sx={{
               textTransform: 'none',
-              borderRadius: 2
+              borderRadius: 2,
+              whiteSpace: 'nowrap',
+              px: { xs: 2, sm: 3 },
+              py: { xs: 0.75, sm: 1 },
+              fontSize: { xs: '0.875rem', sm: '1rem' }
             }}
           >
             New Activity
@@ -221,7 +330,10 @@ export default function ActivityPage() {
                         <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                           {activity.activity}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                          wordBreak: 'break-word'
+                        }}>
                           {formatActivityDetails(activity)}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -247,7 +359,10 @@ export default function ActivityPage() {
                     <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                       {activity.activity}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ 
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      wordBreak: 'break-word'
+                    }}>
                       {formatActivityDetails(activity)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
