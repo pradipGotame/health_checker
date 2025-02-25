@@ -528,17 +528,14 @@ export default function ActivityPage() {
           <DialogTitle sx={{ 
             py: 2,
             px: 2.5,
-            fontSize: { xs: '1rem', sm: '1.125rem' },
+            fontSize: '1.125rem',
             fontWeight: 500,
             color: 'error.light'
           }}>
             Delete Activity?
           </DialogTitle>
           <DialogContent sx={{ py: 1, px: 2.5 }}>
-            <Typography 
-              variant="body2" 
-              color="text.secondary"
-            >
+            <Typography variant="body2" color="text.secondary">
               This action cannot be undone.
             </Typography>
           </DialogContent>
@@ -548,7 +545,6 @@ export default function ActivityPage() {
               onClick={() => setDeleteDialog({ open: false, activityId: null })}
               sx={{ 
                 color: 'text.secondary',
-                textTransform: 'none',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 }
@@ -564,7 +560,6 @@ export default function ActivityPage() {
               sx={{ 
                 ml: 1,
                 px: 2,
-                textTransform: 'none',
                 bgcolor: 'error.main',
                 '&:hover': {
                   bgcolor: 'error.dark',
