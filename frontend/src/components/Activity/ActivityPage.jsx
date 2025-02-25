@@ -508,7 +508,7 @@ export default function ActivityPage() {
           </Grid>
         </Grid>
 
-        {/* Add Delete Confirmation Dialog */}
+        {/* Delete Confirmation Dialog */}
         <Dialog
           open={deleteDialog.open}
           onClose={() => setDeleteDialog({ open: false, activityId: null })}
@@ -519,42 +519,52 @@ export default function ActivityPage() {
               backgroundColor: 'rgba(0, 0, 0, 0.8)',
               border: "1px solid",
               borderColor: 'divider',
+              maxWidth: '360px',
+              width: '100%',
+              m: 2
             }
           }}
         >
           <DialogTitle sx={{ 
-            pb: 1,
-            color: 'primary.main',
-            fontSize: { xs: '1.25rem', sm: '1.5rem' }
+            py: 2,
+            px: 2.5,
+            fontSize: { xs: '1rem', sm: '1.125rem' },
+            fontWeight: 500,
+            color: 'error.light'
           }}>
-            Delete Activity
+            Delete Activity?
           </DialogTitle>
-          <DialogContent>
-            <Typography color="text.secondary">
-              Are you sure you want to delete this activity? This action cannot be undone.
+          <DialogContent sx={{ py: 1, px: 2.5 }}>
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+            >
+              This action cannot be undone.
             </Typography>
           </DialogContent>
-          <DialogActions sx={{ p: 2, pt: 1 }}>
+          <DialogActions sx={{ px: 2.5, py: 2 }}>
             <Button
-              variant="outlined"
+              size="small"
               onClick={() => setDeleteDialog({ open: false, activityId: null })}
               sx={{ 
-                borderColor: 'divider',
                 color: 'text.secondary',
+                textTransform: 'none',
                 '&:hover': {
-                  borderColor: 'primary.main',
-                  backgroundColor: 'rgba(132, 204, 22, 0.04)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 }
               }}
             >
               Cancel
             </Button>
             <Button
+              size="small"
               variant="contained"
               color="error"
               onClick={() => handleDelete(deleteDialog.activityId)}
               sx={{ 
                 ml: 1,
+                px: 2,
+                textTransform: 'none',
                 bgcolor: 'error.main',
                 '&:hover': {
                   bgcolor: 'error.dark',

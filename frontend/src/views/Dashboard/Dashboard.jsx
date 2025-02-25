@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Box, Button, Typography, Stack, Grid, Container, Tooltip, Skeleton } from "@mui/material";
+import { Box, Button, Typography, Stack, Container, Tooltip, Skeleton } from "@mui/material";
+import Grid from '@mui/material/Grid';
 import { useNavigate } from "react-router-dom";
 import { styled, alpha, keyframes } from "@mui/material/styles";
 import useLogout from "../../hooks/useLogout";
@@ -777,154 +778,156 @@ export default function Dashboard() {
               </StyledCard>
 
               {/* Recent Activities & Goals Split */}
-              <Grid container spacing={3}>
-                {/* Recent Activities */}
-                <Grid item xs={12} md={7}>
-                  <StyledCard>
-                    <Stack 
-                      direction="row" 
-                      justifyContent="space-between" 
-                      alignItems="center"
-                      sx={{ mb: 2 }}
-                    >
-                      <Typography variant="h6">Recent Activities</Typography>
-                      <Button 
-                        onClick={() => navigate('/activity-page')}
-                        sx={{ 
-                          textTransform: 'none',
-                          color: 'primary.main'
-                        }}
+              <Box sx={{ mt: 3 }}>
+                <Grid container spacing={3}>
+                  {/* Recent Activities */}
+                  <Grid item xs={12} md={7}>
+                    <StyledCard>
+                      <Stack 
+                        direction="row" 
+                        justifyContent="space-between" 
+                        alignItems="center"
+                        sx={{ mb: 2 }}
                       >
-                        View All
-                      </Button>
-                    </Stack>
-                    {loading ? <LoadingRecentActivities /> : (
-                      <Stack spacing={2}>
-                        {recentActivities.map((activity) => (
-                          <Box 
-                            key={activity.id}
-                            sx={{
-                              p: 2,
-                              borderRadius: 1,
-                              bgcolor: 'background.paper',
-                              '&:hover': { bgcolor: alpha('#fff', 0.1) }
-                            }}
-                          >
-                            <Stack direction="row" justifyContent="space-between" alignItems="center">
-                              <Box>
-                                <Typography variant="subtitle2">{activity.activity}</Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {formatActivityDetails(activity)}
-                                </Typography>
-                              </Box>
-                              <Typography variant="caption" color="text.secondary">
-                                {format(activity.createdAt, 'MMM d, yyyy')}
-                              </Typography>
-                            </Stack>
-                          </Box>
-                        ))}
+                        <Typography variant="h6">Recent Activities</Typography>
+                        <Button 
+                          onClick={() => navigate('/activity-page')}
+                          sx={{ 
+                            textTransform: 'none',
+                            color: 'primary.main'
+                          }}
+                        >
+                          View All
+                        </Button>
                       </Stack>
-                    )}
-                  </StyledCard>
-                </Grid>
-
-                {/* Goals Section */}
-                <Grid item xs={12} md={5}>
-                  <StyledCard>
-                    <Stack 
-                      direction="row" 
-                      justifyContent="space-between" 
-                      alignItems="center" 
-                      sx={{ mb: 2 }}
-                    >
-                      <Typography variant="h6">Goals</Typography>
-                      <Button 
-                        size="small"
-                        sx={{ 
-                          textTransform: 'none',
-                          color: 'primary.main'
-                        }}
-                      >
-                        Add Goal
-                      </Button>
-                    </Stack>
-                    {loading ? (
-                      <LoadingOverview />
-                    ) : (
-                      <Stack spacing={2}>
-                        <Box sx={{ 
-                          p: 1.5, 
-                          bgcolor: alpha('#fff', 0.05), 
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: alpha('#84CC16', 0.3),
-                        }}>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Box>
-                              <Typography variant="subtitle2">Run 5km</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                Progress: 3.2km
-                              </Typography>
-                            </Box>
-                            <Typography 
-                              variant="caption" 
-                              sx={{ 
-                                color: 'primary.main',
-                                fontWeight: 500
+                      {loading ? <LoadingRecentActivities /> : (
+                        <Stack spacing={2}>
+                          {recentActivities.map((activity) => (
+                            <Box 
+                              key={activity.id}
+                              sx={{
+                                p: 2,
+                                borderRadius: 1,
+                                bgcolor: 'background.paper',
+                                '&:hover': { bgcolor: alpha('#fff', 0.1) }
                               }}
                             >
-                              64%
-                            </Typography>
-                          </Stack>
-                          <Box 
-                            sx={{ 
-                              mt: 1,
-                              width: '100%',
-                              height: 4,
-                              bgcolor: alpha('#fff', 0.1),
-                              borderRadius: 2,
-                              overflow: 'hidden'
-                            }}
-                          >
-                            <Box 
-                              sx={{ 
-                                width: '64%',
-                                height: '100%',
-                                bgcolor: 'primary.main',
-                                borderRadius: 2
-                              }}
-                            />
-                          </Box>
-                        </Box>
+                              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                <Box>
+                                  <Typography variant="subtitle2">{activity.activity}</Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {formatActivityDetails(activity)}
+                                  </Typography>
+                                </Box>
+                                <Typography variant="caption" color="text.secondary">
+                                  {format(activity.createdAt, 'MMM d, yyyy')}
+                                </Typography>
+                              </Stack>
+                            </Box>
+                          ))}
+                        </Stack>
+                      )}
+                    </StyledCard>
+                  </Grid>
 
-                        <Box sx={{ p: 1.5, bgcolor: alpha('#fff', 0.05), borderRadius: 1 }}>
-                          <Typography variant="subtitle2">Weekly Workouts</Typography>
-                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            {[1, 2, 3, 4, 5].map((day) => (
-                              <Box
-                                key={day}
-                                sx={{
-                                  width: 24,
-                                  height: 24,
-                                  borderRadius: '50%',
-                                  bgcolor: day <= 3 ? 'primary.main' : alpha('#fff', 0.1),
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center'
-                                }}
-                              >
-                                <Typography variant="caption" sx={{ color: day <= 3 ? 'white' : 'text.secondary' }}>
-                                  {day}
+                  {/* Goals Section */}
+                  <Grid item xs={12} md={5}>
+                    <StyledCard>
+                      <Stack 
+                        direction="row" 
+                        justifyContent="space-between" 
+                        alignItems="center" 
+                        sx={{ mb: 2 }}
+                      >
+                        <Typography variant="h6">Goals</Typography>
+                        <Button 
+                          size="small"
+                          sx={{ 
+                            textTransform: 'none',
+                            color: 'primary.main'
+                          }}
+                        >
+                          Add Goal
+                        </Button>
+                      </Stack>
+                      {loading ? (
+                        <LoadingOverview />
+                      ) : (
+                        <Stack spacing={2}>
+                          <Box sx={{ 
+                            p: 1.5, 
+                            bgcolor: alpha('#fff', 0.05), 
+                            borderRadius: 1,
+                            border: '1px solid',
+                            borderColor: alpha('#84CC16', 0.3),
+                          }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                              <Box>
+                                <Typography variant="subtitle2">Run 5km</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Progress: 3.2km
                                 </Typography>
                               </Box>
-                            ))}
-                          </Stack>
-                        </Box>
-                      </Stack>
-                    )}
-                  </StyledCard>
+                              <Typography 
+                                variant="caption" 
+                                sx={{ 
+                                  color: 'primary.main',
+                                  fontWeight: 500
+                                }}
+                              >
+                                64%
+                              </Typography>
+                            </Stack>
+                            <Box 
+                              sx={{ 
+                                mt: 1,
+                                width: '100%',
+                                height: 4,
+                                bgcolor: alpha('#fff', 0.1),
+                                borderRadius: 2,
+                                overflow: 'hidden'
+                              }}
+                            >
+                              <Box 
+                                sx={{ 
+                                  width: '64%',
+                                  height: '100%',
+                                  bgcolor: 'primary.main',
+                                  borderRadius: 2
+                                }}
+                              />
+                            </Box>
+                          </Box>
+
+                          <Box sx={{ p: 1.5, bgcolor: alpha('#fff', 0.05), borderRadius: 1 }}>
+                            <Typography variant="subtitle2">Weekly Workouts</Typography>
+                            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                              {[1, 2, 3, 4, 5].map((day) => (
+                                <Box
+                                  key={day}
+                                  sx={{
+                                    width: 24,
+                                    height: 24,
+                                    borderRadius: '50%',
+                                    bgcolor: day <= 3 ? 'primary.main' : alpha('#fff', 0.1),
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                  }}
+                                >
+                                  <Typography variant="caption" sx={{ color: day <= 3 ? 'white' : 'text.secondary' }}>
+                                    {day}
+                                  </Typography>
+                                </Box>
+                              ))}
+                            </Stack>
+                          </Box>
+                        </Stack>
+                      )}
+                    </StyledCard>
+                  </Grid>
                 </Grid>
-              </Grid>
+              </Box>
             </Stack>
           </Grid>
         </Grid>
