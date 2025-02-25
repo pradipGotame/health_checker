@@ -9,24 +9,17 @@ import Logo from "./Logo";
 
 function Copyright() {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-      <Typography
-        variant="body2"
-        sx={{ display: "flex", color: "text.secondary", mt: 1 }}
-      >
-        {"Copyright © "}
-      </Typography>
-      <Typography variant="body2" sx={{ color: "text.secondary", mt: 1 }}>
+    <Typography
+      variant="body2"
+      sx={{ display: "flex", color: "text.secondary", mt: 1 }}
+    >
+      {"Copyright © "}
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
         ActiveX
       </Typography>
-      <Typography
-        variant="body2"
-        sx={{ display: "flex", color: "text.secondary", mt: 1 }}
-      >
-        &nbsp;
-        {new Date().getFullYear()}
-      </Typography>
-    </Box>
+      &nbsp;
+      {new Date().getFullYear()}
+    </Typography>
   );
 }
 
@@ -59,6 +52,7 @@ export default function Footer() {
           }}
         >
           <Box sx={{ width: { xs: "100%", sm: "60%" } }}>
+            {/* <SitemarkIcon /> */}
             <Logo gutterBottom />
             <Typography variant="body2" sx={{ color: "text.secondary" }}>
               ActiveX is a fitness app that helps you track your progress, train
@@ -79,6 +73,22 @@ export default function Footer() {
           <Link color="text.secondary" variant="body2" href="#features">
             Features
           </Link>
+        </Box>
+        <Box
+          sx={{
+            display: { xs: "none", sm: "flex" },
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
+        </Box>
+        <Box
+          sx={{
+            display: { xs: "none", sm: "flex" },
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
         </Box>
       </Box>
       <Box

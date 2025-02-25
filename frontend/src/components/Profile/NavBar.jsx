@@ -1,7 +1,6 @@
 import * as React from "react";
 import { styled, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
@@ -13,8 +12,7 @@ import Drawer from "@mui/material/Drawer";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Logo from "./Logo";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import Link from "@mui/material/Link";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -33,7 +31,6 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }));
 
 export default function NavBar() {
-  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -66,13 +63,7 @@ export default function NavBar() {
             }}
           >
             <Logo variant="h6" />
-            <Stack
-              direction="row"
-              sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}
-              spacing={2}
-            >
-              <Link to="/">Home</Link>
-
+            <Box sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}>
               <Link
                 color="text.secondary"
                 variant="body2"
@@ -82,21 +73,19 @@ export default function NavBar() {
                 Features
               </Link>
 
-              {/* <Link
-                component={"button"}
+            </Box>
+
+            <Box sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}>
+              <Link
+                color="text.secondary"
                 variant="body2"
-                color="secondary"
+                href="#features"
                 underline="hover"
               >
-                Features
-              </Link> */}
-              {/* <Button variant="text" color="info" size="small">
-                Pricing
-              </Button> */}
+                Profile
+              </Link>
 
-              <Link to="/activity-page">Workout</Link>
-              <Link to="/profile">Profile</Link>
-            </Stack>
+            </Box>
           </Box>
           <Box
             sx={{
@@ -109,8 +98,6 @@ export default function NavBar() {
               variant="text"
               color="secondary"
               sx={{ textTransform: "none" }}
-              component={Link}
-              to="/login"
             >
               Sign in
             </Button>

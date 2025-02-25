@@ -10,32 +10,42 @@ const useRegister = () => {
     setLoading(true);
     setError(null);
 
-    const { username, password, name, email, age, weight, height, location } =
-      data;
+    const { email, password, full_name, age, weight, height, location } = data;
 
     try {
       const auth = getAuth();
-      await createUserWithEmailAndPassword(auth, username, password);
-
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const userId = user.uid;
       const userRef = collection(db, "users");
-      const docRef = await addDoc(userRef, {
-        name,
+
+      await addDoc(userRef, {
+        userId,
+        email,
+        full_name,
         age,
         weight,
         height,
         location,
       });
 
-      localStorage.setItem("userId", docRef.id);
-
+      localStorage.setItem("userId", userId);
       setLoading(false);
+
+      return user;
     } catch (error) {
+      console.log("error =>> ", error.message);
       setError("Error saving data: " + error.message);
       setLoading(false);
+
+      return null;
     }
   };
 
-  return { registerUser, loading, error, setError };
+  return { registerUser, loading, error };
 };
 
 export default useRegister;

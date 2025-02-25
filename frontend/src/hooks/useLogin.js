@@ -11,16 +11,19 @@ const useLogin = () => {
 
     try {
       const auth = getAuth();
-      await signInWithEmailAndPassword(auth, email, password);
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      const userId = user.uid;
 
-      const user = auth.currentUser;
-      console.log("userid =>> ", user.uid);
-      localStorage.setItem("userId", user.uid);
+      localStorage.setItem("userId", userId);
       setLoading(false);
-    } catch (err) {
-      console.log("error =>> ", err.message);
-      setError("Error: " + err.message);
+
+      return user;
+    } catch (error) {
+      console.log("error =>> ", error.message);
+      setError("Error logging in: " + error.message);
       setLoading(false);
+
+      return null;
     }
   };
 

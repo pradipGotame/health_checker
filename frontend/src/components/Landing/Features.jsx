@@ -6,19 +6,169 @@ import Card from "@mui/material/Card";
 import MuiChip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
+import { styled, alpha } from "@mui/material/styles";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
 
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import ViewQuiltRoundedIcon from "@mui/icons-material/ViewQuiltRounded";
+import AddIcon from "@mui/icons-material/Add";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import SelfImprovementIcon from "@mui/icons-material/SelfImprovement";
+
+const StyledCard = styled(Box)(({ theme }) => ({
+  borderRadius: 12,
+  backdropFilter: "blur(24px)",
+  border: "1px solid",
+  borderColor: (theme.vars || theme).palette.divider,
+  backgroundColor: theme.vars
+    ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
+    : alpha(theme.palette.background.default, 0.4),
+  boxShadow: (theme.vars || theme).shadows[1],
+  padding: theme.spacing(3),
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(2),
+  },
+}));
 
 const items = [
   {
     icon: <ViewQuiltRoundedIcon />,
-    title: "Dashboard",
+    title: "Smart Dashboard",
     description:
-      "Analyze your data with our dashboard. You can view your progress, track your goals, and see your achievements.",
-    //imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/dash-light.png")`,
-    //imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/dash-dark.png")`,
+      "Track your fitness journey with our intuitive dashboard. View your progress, analyze trends, and stay motivated with personalized insights.",
+    preview: (
+      <Box
+        sx={{
+          height: '100%',
+          width: '100%',
+          overflow: 'hidden',
+          borderRadius: 2,
+          position: 'relative',
+          background: 'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)',
+          p: { xs: 2, sm: 2.5 }
+        }}
+      >
+        {/* Welcome Section */}
+        <StyledCard sx={{ mb: 2 }}>
+          <Stack 
+            direction="row" 
+            justifyContent="space-between" 
+            alignItems="center"
+            spacing={2}
+          >
+            <Box>
+              <Typography 
+                variant="h5" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  color: 'primary.main',
+                  mb: 0.5,
+                  fontSize: { xs: '1.25rem', sm: '1.5rem' }
+                }}
+              >
+                Welcome back!
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Track your fitness journey
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 2,
+                px: 2
+              }}
+            >
+              New Activity
+            </Button>
+          </Stack>
+        </StyledCard>
+
+        {/* Stats Overview */}
+        <StyledCard sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500 }}>
+            Activity Overview
+          </Typography>
+          <Grid container spacing={2}>
+            {[
+              { label: "Today", value: "3" },
+              { label: "Week", value: "12" },
+              { label: "Month", value: "42" }
+            ].map((stat) => (
+              <Grid item xs={4} key={stat.label}>
+                <Box sx={{ 
+                  textAlign: 'center',
+                  p: 1,
+                  bgcolor: 'rgba(255,255,255,0.02)',
+                  borderRadius: 1
+                }}>
+                  <Typography 
+                    variant="h6" 
+                    color="primary.main" 
+                    sx={{ 
+                      mb: 0.5,
+                      fontSize: { xs: '1.125rem', sm: '1.25rem' }
+                    }}
+                  >
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {stat.label}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </StyledCard>
+
+        {/* Quick Actions */}
+        <StyledCard>
+          <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 500 }}>
+            Quick Actions
+          </Typography>
+          <Stack spacing={1}>
+            {[
+              { icon: <DirectionsRunIcon />, label: 'Cardio' },
+              { icon: <FitnessCenterIcon />, label: 'Strength' },
+              { icon: <SelfImprovementIcon />, label: 'Mobility' }
+            ].map(({ icon, label }) => (
+              <Box 
+                key={label}
+                sx={{ 
+                  p: 1.25,
+                  borderRadius: 1,
+                  bgcolor: 'rgba(255,255,255,0.05)',
+                  cursor: 'pointer',
+                  '&:hover': { 
+                    bgcolor: 'rgba(255,255,255,0.1)',
+                    transform: 'translateY(-1px)',
+                  },
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                  <Box sx={{ 
+                    p: 0.75, 
+                    borderRadius: 0.75, 
+                    bgcolor: 'primary.main', 
+                    color: 'white',
+                    display: 'flex'
+                  }}>
+                    {React.cloneElement(icon, { sx: { fontSize: 18 } })}
+                  </Box>
+                  <Typography variant="body2">{label}</Typography>
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        </StyledCard>
+      </Box>
+    )
   },
   {
     icon: <AutoAwesomeOutlinedIcon />,
@@ -223,41 +373,24 @@ export default function Features() {
         {/* Feature Image Section */}
         <Box
           sx={{
-            display: { xs: "none", sm: "flex" },
-            width: { xs: "100%", md: "70%" },
-            height: "var(--items-image-height)",
+            display: { xs: 'none', sm: 'flex' },
+            width: { xs: '100%', md: '70%' },
+            height: 600,
+            position: 'relative',
           }}
         >
           <Card
             variant="outlined"
             sx={{
-              height: "100%",
-              width: "100%",
-              display: { xs: "none", sm: "flex" },
-              pointerEvents: "none",
-              borderRadius: "16px",
+              height: '100%',
+              width: '100%',
+              display: { xs: 'none', sm: 'flex' },
+              borderRadius: '16px',
+              overflow: 'hidden',
+              bgcolor: 'background.paper',
             }}
           >
-            <Box
-              sx={(theme) => ({
-                m: "auto",
-                width: 420,
-                height: 500,
-                backgroundSize: "contain",
-                backgroundImage: "var(--items-imageLight)",
-                ...theme.applyStyles("dark", {
-                  backgroundImage: "var(--items-imageDark)",
-                }),
-              })}
-              style={
-                items[selectedItemIndex]
-                  ? {
-                      "--items-imageLight": items[selectedItemIndex].imageLight,
-                      "--items-imageDark": items[selectedItemIndex].imageDark,
-                    }
-                  : {}
-              }
-            />
+            {selectedFeature.preview}
           </Card>
         </Box>
       </Box>
