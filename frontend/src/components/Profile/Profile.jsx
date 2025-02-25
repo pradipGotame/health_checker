@@ -38,6 +38,21 @@ const modalStyle = {
   borderRadius: 2
 };
 
+// Add this constant at the top of your file, after imports
+const textFieldStyle = {
+  '& .MuiOutlinedInput-root': {
+    '&:hover fieldset': {
+      borderColor: 'hsl(84, 81%, 14%)',  // Green color matching your background
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: 'hsl(84, 81%, 14%)',
+    }
+  },
+  '& .MuiInputLabel-root.Mui-focused': {
+    color: 'hsl(84, 81%, 14%)'
+  }
+};
+
 export default function Profile() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -217,7 +232,9 @@ export default function Profile() {
       display: "flex",
       flexDirection: "column",
       gap: 3,
-      alignItems: "center"
+      alignItems: "center",
+      backgroundImage:
+        "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
     }}>
       <NavBar />
 
@@ -306,6 +323,9 @@ export default function Profile() {
         display: "flex",
         alignItems: "flex-start",
         borderRadius: "16px",
+        backdropFilter: "blur(10px)",
+        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+        border: "1px solid rgba(255, 255, 255, 0.3)"
       }}>
         <Box sx={{
           display: "flex",
@@ -342,34 +362,28 @@ export default function Profile() {
             <Typography>
               Fitness Goal <span style={{ color: 'red' }}>*</span>
             </Typography>
-            <FitnessGoal value={profileData.fitnessGoal} onChange={(value) => handleChange('fitnessGoal', value)} />
+            <FitnessGoal
+              value={profileData.fitnessGoal}
+              onChange={(value) => handleChange('fitnessGoal', value)}
+              sx={textFieldStyle}
+            />
             <Typography>
               Height (cm) <span style={{ color: 'red' }}>*</span>
             </Typography>
-            <HeightInput value={profileData.height} onChange={(value) => handleChange('height', value)} />
+            <HeightInput
+              value={profileData.height}
+              onChange={(value) => handleChange('height', value)}
+              sx={textFieldStyle}
+            />
             <Typography>
               Weight (kg) <span style={{ color: 'red' }}>*</span>
             </Typography>
-            <WeightInput value={profileData.weight} onChange={(value) => handleChange('weight', value)} />
+            <WeightInput
+              value={profileData.weight}
+              onChange={(value) => handleChange('weight', value)}
+              sx={textFieldStyle}
+            />
           </Box>
-        </Box>
-
-        {/* Save Button */}
-        <Box sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          position: "absolute",
-          bottom: 16,
-          right: 16
-        }}>
-          <Stack direction="column" spacing={2}>
-            <Button
-              variant="contained"
-              onClick={handleSave}
-            >
-              Save
-            </Button>
-          </Stack>
         </Box>
       </Card>
 
@@ -382,18 +396,27 @@ export default function Profile() {
       }}>
         <Card variant="outlined" sx={{
           padding: 2,
-          width: "50%"
+          width: "50%",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          transition: "transform 0.2s",  // Smooth hover effect
+          "&:hover": {
+            transform: "translateY(-5px)"
+          }
         }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography>Name</Typography>
             <TextField
               value={profileData.full_name || ''}
               onChange={(e) => handleChange('full_name', e.target.value)}
+              sx={textFieldStyle}
             />
             <Typography>Age</Typography>
             <TextField
               value={profileData.age || ''}
               onChange={(e) => handleChange('age', e.target.value)}
+              sx={textFieldStyle}
             />
             <GenderSelection value={profileData.gender} onChange={(value) => handleChange('gender', value)} />
           </Box>
@@ -401,24 +424,63 @@ export default function Profile() {
 
         <Card variant="outlined" sx={{
           padding: 2,
-          width: "50%"
+          width: "50%",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          transition: "transform 0.2s",
+          "&:hover": {
+            transform: "translateY(-5px)"
+          }
         }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography>Preferred Activity Type</Typography>
             <ActivityType
               value={profileData.activityType}
               onChange={(value) => handleChange('activityType', value)}
+              sx={textFieldStyle}
             />
             <ExerciseLevel
               value={profileData.exerciseLevel}
               onChange={(value) => handleChange('exerciseLevel', value)}
+              sx={textFieldStyle}
             />
             <Location
               value={profileData.sportsVenue}
               onChange={(value) => handleChange('sportsVenue', value)}
+              sx={textFieldStyle}
             />
           </Box>
         </Card>
+      </Box>
+
+      {/* Add a floating save button at the bottom of the page */}
+      <Box sx={{
+        position: "fixed",
+        bottom: 32,
+        right: 32,
+        zIndex: 1000
+      }}>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          sx={{
+            padding: "12px 36px",
+            fontSize: "1.1rem",
+            borderRadius: "28px",
+            boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+            backdropFilter: "blur(10px)",
+            backgroundColor: "primary.main",
+            "&:hover": {
+              backgroundColor: "primary.dark",
+              transform: "translateY(-2px)",
+              boxShadow: "0 12px 20px rgba(0, 0, 0, 0.3)"
+            },
+            transition: "all 0.2s"
+          }}
+        >
+          Save Profile
+        </Button>
       </Box>
     </Box>
   );
