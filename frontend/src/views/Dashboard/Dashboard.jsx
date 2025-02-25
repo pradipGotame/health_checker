@@ -392,9 +392,7 @@ export default function Dashboard() {
               <StyledCard>
                 <Typography variant="h6" sx={{ mb: 2 }}>Quick Actions</Typography>
                 <Stack spacing={2}>
-                  <QuickActionCard onClick={() => navigate('/create-activity', { 
-                    state: { workoutType: 'Cardio' }
-                  })}>
+                  <QuickActionCard onClick={() => navigate('/create-activity')}>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box sx={{ 
                         p: 1, 
@@ -413,9 +411,7 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate('/create-activity', {
-                    state: { workoutType: 'Strength' }
-                  })}>
+                  <QuickActionCard onClick={() => navigate('/create-activity')}>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box sx={{ 
                         p: 1, 
@@ -434,9 +430,7 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate('/create-activity', {
-                    state: { workoutType: 'Mobility' }
-                  })}>
+                  <QuickActionCard onClick={() => navigate('/create-activity')}>
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box sx={{ 
                         p: 1, 
