@@ -57,8 +57,9 @@ export default function CreateActivity() {
   const location = useLocation();
   const editMode = location.state?.editMode;
   const editActivity = location.state?.activity;
+  const preselectedType = location.state?.workoutType;
   
-  const [workoutType, updateWorkoutType] = useState(editMode ? editActivity.workoutType : '');
+  const [workoutType, updateWorkoutType] = useState(editMode ? editActivity.workoutType : preselectedType || '');
   const [activity, updateActivity] = useState(editMode ? editActivity.activity : '');
   const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
@@ -244,7 +245,7 @@ export default function CreateActivity() {
               color: 'primary.main',
             }
           }}
-          onClick={() => navigate('/activity-page')}
+          onClick={() => navigate('/dashboard')}
         >
           <ArrowBackIcon sx={{ fontSize: 20 }} />
           <Typography 
@@ -254,7 +255,7 @@ export default function CreateActivity() {
               fontWeight: 500
             }}
           >
-            Back to Activities
+            Back to Dashboard
           </Typography>
         </Stack>
         <Typography 
