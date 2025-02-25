@@ -43,7 +43,6 @@ export default function WeightInput({ value, onChange }) {
   return (
     <div>
       <FormControl sx={{ m: 0 }} variant="standard">
-        <InputLabel htmlFor="weight" sx={{ fontSize: "1.35rem", color: "text.primary" }} shrink> Weight (kg)</InputLabel>
         <BootstrapInput
           id="weight"
           value={value || ""}

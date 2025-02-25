@@ -44,7 +44,7 @@ export default function HeightInput({ value, onChange }) {
   return (
     <div>
       <FormControl sx={{ m: 0 }} variant="standard">
-        <InputLabel htmlFor="height" sx={{ fontSize: "1.35rem", color: "text.primary" }} shrink>Height (cm)</InputLabel>
+        {/* <InputLabel htmlFor="height" sx={{ fontSize: "1.35rem", color: "text.primary" }} shrink>Height (cm)</InputLabel> */}
         <BootstrapInput
           id="height"
           value={value || ""}
