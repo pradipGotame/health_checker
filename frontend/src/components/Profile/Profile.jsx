@@ -12,7 +12,7 @@ import {
   Fade,
   Backdrop
 } from '@mui/material';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { app, db } from '../../firebase/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
@@ -25,7 +25,6 @@ import WeightInput from './Weight';
 import ActivityType from './ActivityType';
 import ExerciseLevel from './ExerciseLevel';
 import Location from './Location';
-
 // Modal style configuration
 const modalStyle = {
   position: 'absolute',
@@ -44,7 +43,20 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [profileData, setProfileData] = useState({
+    height: '',
+    weight: '',
+    age: '',
+    gender: '',
+    activityType: '',
+    exerciseLevel: '',
+    location: '',
+    fitnessGoal: '',
+    full_name: ''
+  });
+
   const navigate = useNavigate();
+  const auth = getAuth(app);
 
   // Load initial user data
   useEffect(() => {
@@ -52,8 +64,21 @@ export default function Profile() {
       try {
         setLoading(true);
         if (user) {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          setUserData(userDoc.exists() ? userDoc.data() : {});
+          console.log('userId:', user.uid);
+          const q = query(
+            collection(db, 'users'),
+            where('userId', '==', user.uid)
+          );
+          console.log('query:', q);
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const fetchedData = querySnapshot.docs[0].data();
+            console.log('Fetched data:', fetchedData);
+            loadUserData(fetchedData);
+          } else {
+            console.log('No matching document');
+            setError('User data not found');
+          }
         }
       } catch (err) {
         setError(err.message);
@@ -63,7 +88,7 @@ export default function Profile() {
     });
     return () => unsubscribe();
   }, []);
-  const auth = getAuth(app);
+
   // Handle save button click
   const handleSave = () => {
     if (!auth.currentUser) {
@@ -74,6 +99,26 @@ export default function Profile() {
     console.log('Saving data...');
   };
 
+  const handleChange = (field, value) => {
+    setProfileData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
+  const loadUserData = (data) => {
+    handleChange('height', data.height);
+    handleChange('weight', data.weight);
+    handleChange('age', data.age);
+    handleChange('gender', data.gender);
+    handleChange('activityType', data.activityType);
+    handleChange('exerciseLevel', data.exerciseLevel);
+    handleChange('location', data.location);
+    handleChange('fitnessGoal', data.fitnessGoal);
+    handleChange('full_name', data.full_name);
+    console.log(data);
+    console.log(profileData);
+  }
   // Close login modal
   const handleCloseModal = () => setLoginModalOpen(false);
 
@@ -173,9 +218,9 @@ export default function Profile() {
             flexGrow: 1
           }}>
             <Typography>Fitness Goal</Typography>
-            <FitnessGoal />
-            <HeightInput />
-            <WeightInput />
+            <FitnessGoal value={profileData.gender} onChange={(value) => handleChange('gender', value)} />
+            <HeightInput value={profileData.height} onChange={(value) => handleChange('height', value)} />
+            <WeightInput value={profileData.weight} onChange={(value) => handleChange('weight', value)} />
           </Box>
         </Box>
 
@@ -212,11 +257,13 @@ export default function Profile() {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography>Name</Typography>
             <TextField
-              value={userData?.name || ''}
-              InputProps={{ readOnly: true }}
+              value={profileData.full_name || ''}
             />
-            <AgeSelect />
-            <GenderSelection />
+            <Typography>Age</Typography>
+            <TextField
+              value={profileData.age} onChange={(value) => handleChange('age', value)}
+            />
+            <GenderSelection value={profileData.gender} onChange={(value) => handleChange('gender', value)} />
           </Box>
         </Card>
 
