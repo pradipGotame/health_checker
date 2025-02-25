@@ -35,20 +35,19 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function HeightInput() {
-  const [height, setHeight] = React.useState(""); // ✅ 修改变量名
+export default function HeightInput({ value, onChange }) {
 
   const handleChange = (event) => {
-    setHeight(event.target.value);
+    onChange(event.target.value);
   };
 
   return (
     <div>
-      <FormControl sx={{ m: 0 }}  variant="standard">
-        <InputLabel htmlFor="height" sx={{ fontSize: "1.35rem", color: "text.primary"}} shrink>Height (cm)</InputLabel> 
+      <FormControl sx={{ m: 0 }} variant="standard">
+        {/* <InputLabel htmlFor="height" sx={{ fontSize: "1.35rem", color: "text.primary" }} shrink>Height (cm)</InputLabel> */}
         <BootstrapInput
           id="height"
-          value={height} // ✅ 绑定 height
+          value={value || ""}
           onChange={handleChange} // ✅ 监听输入变化
           placeholder="Enter your height" // ✅ 添加占位符
         />

@@ -35,20 +35,17 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export default function WeightInput() {
-  const [weight, setWeight] = React.useState(""); // ✅ 修改变量名
-
+export default function WeightInput({ value, onChange }) {
   const handleChange = (event) => {
-    setWeight(event.target.value);
+    onChange(event.target.value);
   };
 
   return (
     <div>
-      <FormControl sx={{ m: 0 }}  variant="standard">
-        <InputLabel htmlFor="weight" sx={{ fontSize: "1.35rem", color: "text.primary"}} shrink> Weight (kg)</InputLabel> 
+      <FormControl sx={{ m: 0 }} variant="standard">
         <BootstrapInput
           id="weight"
-          value={weight} 
+          value={value || ""}
           onChange={handleChange} // ✅ 监听输入变化
           placeholder="Enter your weight" // ✅ 添加占位符
         />

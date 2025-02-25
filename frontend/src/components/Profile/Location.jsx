@@ -3,7 +3,10 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
 
-export default function FreeSolo() {
+export default function FreeSolo({ value, onChange }) {
+  const handleChange = (event, newValue) => {
+    onChange(newValue);
+  };
   return (
     <Stack spacing={2} sx={{ width: "100%", minWidth: 215 }}>
       <Autocomplete
@@ -11,6 +14,8 @@ export default function FreeSolo() {
         id="location"
         disableClearable
         options={location.map((option) => option.title)}
+        value={value || null}
+        onChange={handleChange}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -29,8 +34,8 @@ export default function FreeSolo() {
 }
 
 const location = [
-    { title: 'Home'},
-    { title: 'Gym'},
-    { title: 'Outdoor'},
+  { title: 'Home' },
+  { title: 'Gym' },
+  { title: 'Outdoor' },
 
 ];

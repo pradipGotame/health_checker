@@ -1,46 +1,48 @@
-import * as React from 'react';
-import TextField from '@mui/material/TextField';
-import Stack from '@mui/material/Stack';
-import Autocomplete from '@mui/material/Autocomplete';
+import React from 'react';
+import { Autocomplete, TextField, Chip } from '@mui/material';
 
-export default function FreeSolo() {
+const activityTypes = [
+  'Running',
+  'Swimming',
+  'Cycling',
+  'Weight Training',
+  'Yoga',
+  'Basketball',
+  'Football',
+  'Tennis',
+  'Dancing',
+  'Hiking'
+];
+
+export default function ActivityType({ value = [], onChange }) {
+  // Ensure value is always an array
+  const safeValue = Array.isArray(value) ? value : [];
+
   return (
-    <Stack spacing={2} sx={{ width: "100%", minWidth: 215 }}>
-      <Autocomplete
-        freeSolo
-        id="activity-type"
-        disableClearable
-        options={activityType.map((option) => option.title)}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Search/Select the Activity Type"
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                type: 'search',
-              },
-            }}
+    <Autocomplete
+      multiple
+      value={safeValue}
+      onChange={(event, newValue) => {
+        onChange(newValue || []);  // Ensure we always pass an array
+      }}
+      options={activityTypes}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          label="Activity Types"
+          placeholder="Select activities"
+        />
+      )}
+      renderTags={(tagValue, getTagProps) =>
+        (tagValue || []).map((option, index) => (
+          <Chip
+            label={option}
+            {...getTagProps({ index })}
+            key={option}
           />
-        )}
-      />
-    </Stack>
+        ))
+      }
+    />
   );
 }
-
-const activityType = [
-  { title: 'Strength training' },
-  { title: 'Cardio' },
-  { title: 'HIIT' },
-  { title: 'Endurance' },
-  { title: 'Flexibility' },
-  { title: 'Calisthenics' },
-  { title: 'Mindfulness' },
-  { title: 'Yoga' },
-  { title: 'Pilates' },
-  { title: 'Jogging' },
-  { title: 'Swimming' },
-  { title: 'Cycling' },
-  { title: 'Jump Rope' },
-  { title: 'No Equipment Exercise' },
-];
