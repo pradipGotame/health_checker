@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
@@ -16,14 +16,17 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   addDoc,
   collection,
-  db,
   updateDoc,
   doc,
+  app,
 } from "../../firebase/firebase";
 import { useAuth } from "../../hooks/useAuth";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getDocs, getFirestore, query, where } from "firebase/firestore";
+import { getStrengthSuggestionsWithAi } from "../../ai/suggestions";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -92,6 +95,79 @@ export default function CreateActivity() {
     severity: "success",
   });
   const [saving, setSaving] = useState(false);
+  const [userDoc, setUserDoc] = useState(null);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState({});
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        if (user) {
+          console.log("userId:", user.uid);
+          const q = query(
+            collection(db, "users"),
+            where("userId", "==", user.uid)
+          );
+          console.log("query:", q);
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            const fetchedData = doc.data();
+            setUserDoc(fetchedData);
+            console.log("Fetched data:", fetchedData);
+          } else {
+            console.log("No matching document");
+          }
+        }
+      } catch (err) {
+        console.error("Error getting user document:", err);
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, db]);
+
+  useEffect(() => {
+    if (isSuggesting) {
+      // Call AI suggestion API
+      const user = userDoc;
+      const workout = {
+        type: workoutType,
+        activity,
+        ...formData,
+      };
+      if (
+        !user ||
+        !workoutType ||
+        !activity ||
+        !formData.sets ||
+        !formData.reps ||
+        workoutType !== Activities.WorkoutType.STRENGTH // Only suggest for strength workouts for now
+      ) {
+        setIsSuggesting(false);
+        return;
+      }
+      async function getSuggestions(user, workout) {
+        try {
+          console.log("Getting AI suggestion...");
+          const suggestions = await getStrengthSuggestionsWithAi(user, {
+            type: workout.type,
+            activity: workout.activity,
+            sets: workout.sets,
+            reps: workout.reps,
+          });
+          console.log("AI suggestions:", suggestions);
+          setSuggestions(suggestions);
+        } catch (error) {
+          console.error("Error getting AI suggestion:", error);
+        } finally {
+          setIsSuggesting(false);
+        }
+      }
+      getSuggestions(user, workout);
+    }
+  }, [isSuggesting, userDoc, workoutType, activity, formData]);
 
   const handleInputChange = (field) => (event) => {
     let value = event.target.value;
@@ -251,8 +327,6 @@ export default function CreateActivity() {
   return (
     <Box
       sx={{
-        backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
         minHeight: "100vh",
       }}
     >
@@ -637,7 +711,7 @@ export default function CreateActivity() {
                   sx={{
                     textTransform: "none",
                     border: "none",
-                    color: "text.secondary",
+                    color: "white",
                     background:
                       "linear-gradient(90deg, #1565C0, #6A1B9A, #E91E63)",
                     transition: "all 0.3s ease",
@@ -647,6 +721,8 @@ export default function CreateActivity() {
                       boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
                     },
                   }}
+                  onClick={() => setIsSuggesting(true)}
+                  disabled={isSuggesting || saving}
                 >
                   Get AI Suggestion
                 </Button>
@@ -911,6 +987,68 @@ export default function CreateActivity() {
             </Stack>
           </StyledCard>
         </Stack>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            mt: 3,
+          }}
+        >
+          {Object.keys(suggestions).length > 0 && (
+            <StyledCard
+              sx={{
+                width: "100%",
+                p: 2,
+                borderRadius: 2,
+                backdropFilter: "blur(24px)",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: "primary.main",
+                  mb: 1,
+                }}
+              >
+                AI Suggestions
+              </Typography>
+              <div>
+                <h2>Training Techniques</h2>
+                <ul>
+                  {Object.entries(suggestions.techniques).map(
+                    ([key, value]) => (
+                      <li key={key}>
+                        <strong>{key.replace(/_/g, " ")}:</strong> {value}
+                      </li>
+                    )
+                  )}
+                </ul>
+
+                <h2>Supplementary Exercises</h2>
+                <ul>
+                  {suggestions.supplementary.map((item, index) => (
+                    <li key={index}>
+                      <strong>{item.activity}</strong> - Sets: {item.sets},
+                      Reps: {item.reps}
+                    </li>
+                  ))}
+                </ul>
+
+                <h2>Recovery Strategies</h2>
+                <ul>
+                  {Object.entries(suggestions.recovary).map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key.replace(/_/g, " ")}:</strong> {value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </StyledCard>
+          )}
+        </Box>
       </Container>
 
       <Snackbar
@@ -933,6 +1071,7 @@ export default function CreateActivity() {
           {snackbarMessage.message}
         </Alert>
       </Snackbar>
+      {/* Create suggestions section */}
     </Box>
   );
 }
