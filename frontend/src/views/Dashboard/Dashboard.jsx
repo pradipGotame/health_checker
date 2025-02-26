@@ -19,15 +19,9 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import SelfImprovementIcon from "@mui/icons-material/SelfImprovement";
 import InfoIcon from "@mui/icons-material/Info";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import {
-  format,
-  isToday,
-  subDays,
-  startOfWeek,
-  eachDayOfInterval,
-} from "date-fns";
+import { format, isToday, subDays, eachDayOfInterval } from "date-fns";
 import {
   BarChart,
   Bar,
@@ -83,29 +77,29 @@ const StreakCard = styled(Box)(({ theme }) => ({
 }));
 
 // Add custom tooltip component
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <Box
-        sx={{
-          bgcolor: "rgba(0, 0, 0, 0.8)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          borderRadius: 1,
-          p: 1.5,
-          backdropFilter: "blur(24px)",
-        }}
-      >
-        <Typography variant="caption" sx={{ color: "#fff" }}>
-          {label}
-        </Typography>
-        <Typography variant="body2" sx={{ color: "#84CC16", mt: 0.5 }}>
-          {`${payload[0].value} activities`}
-        </Typography>
-      </Box>
-    );
-  }
-  return null;
-};
+// const CustomTooltip = ({ active, payload, label }) => {
+//   if (active && payload && payload.length) {
+//     return (
+//       <Box
+//         sx={{
+//           bgcolor: "rgba(0, 0, 0, 0.8)",
+//           border: "1px solid rgba(255, 255, 255, 0.1)",
+//           borderRadius: 1,
+//           p: 1.5,
+//           backdropFilter: "blur(24px)",
+//         }}
+//       >
+//         <Typography variant="caption" sx={{ color: "#fff" }}>
+//           {label}
+//         </Typography>
+//         <Typography variant="body2" sx={{ color: "#84CC16", mt: 0.5 }}>
+//           {`${payload[0].value} activities`}
+//         </Typography>
+//       </Box>
+//     );
+//   }
+//   return null;
+// };
 
 // Add a keyframe animation for the wave effect
 const pulseKeyframe = keyframes`
@@ -182,7 +176,7 @@ export default function Dashboard() {
 
         // Prepare weekly activity data
         const today = new Date();
-        const weekStart = startOfWeek(today);
+        // const weekStart = startOfWeek(today);
         const last7Days = eachDayOfInterval({
           start: subDays(today, 6),
           end: today,
@@ -356,9 +350,7 @@ export default function Dashboard() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage: !darkMode
-          ? "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(185, 100%, 14%), transparent)"
-          : "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+        backgroundImage: !darkMode ? "" : "",
       }}
     >
       <Container
@@ -394,15 +386,13 @@ export default function Dashboard() {
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={2}>
+                  <ThemeToggle />
                   <Button
                     variant="contained"
                     startIcon={<AddIcon />}
                     onClick={() => navigate("/create-activity")}
                     sx={{
                       textTransform: "none",
-                      borderRadius: 2,
-                      px: { xs: 2, sm: 3 },
-                      py: { xs: 0.75, sm: 1 },
                     }}
                   >
                     New Activity
@@ -412,7 +402,6 @@ export default function Dashboard() {
                     onClick={logout}
                     sx={{
                       textTransform: "none",
-                      borderRadius: 2,
                       borderColor: "divider",
                       color: "text.secondary",
                       "&:hover": {
@@ -423,7 +412,6 @@ export default function Dashboard() {
                   >
                     Sign Out
                   </Button>
-                  <ThemeToggle />
                 </Stack>
               </Stack>
             </StyledCard>
@@ -438,7 +426,14 @@ export default function Dashboard() {
                   Quick Actions
                 </Typography>
                 <Stack spacing={2}>
-                  <QuickActionCard onClick={() => navigate("/create-activity")}>
+                  <QuickActionCard
+                    onClick={() => navigate("/create-activity?type=Cardio")}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "divider",
+                      },
+                    }}
+                  >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box
                         sx={{
@@ -446,6 +441,9 @@ export default function Dashboard() {
                           borderRadius: 1,
                           bgcolor: "primary.main",
                           color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         <DirectionsRunIcon />
@@ -461,7 +459,14 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate("/create-activity")}>
+                  <QuickActionCard
+                    onClick={() => navigate("/create-activity?type=Strength")}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "divider",
+                      },
+                    }}
+                  >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box
                         sx={{
@@ -469,6 +474,9 @@ export default function Dashboard() {
                           borderRadius: 1,
                           bgcolor: "primary.main",
                           color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         <FitnessCenterIcon />
@@ -484,7 +492,14 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate("/create-activity")}>
+                  <QuickActionCard
+                    onClick={() => navigate("/create-activity?type=Mobility")}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "divider",
+                      },
+                    }}
+                  >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box
                         sx={{
@@ -492,6 +507,9 @@ export default function Dashboard() {
                           borderRadius: 1,
                           bgcolor: "primary.main",
                           color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         <SelfImprovementIcon />
@@ -530,7 +548,10 @@ export default function Dashboard() {
                     >
                       <Typography
                         variant="h4"
-                        sx={{ color: "white", fontWeight: "bold" }}
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
                       >
                         {loading ? <Skeleton width={30} /> : stats.streak || 0}
                       </Typography>
@@ -622,7 +643,7 @@ export default function Dashboard() {
                           {stats.todayCount}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Today's Activities
+                          Today&apos;s Activities
                         </Typography>
                       </Box>
                     </Grid>
