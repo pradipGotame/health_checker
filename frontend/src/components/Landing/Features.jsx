@@ -27,7 +27,7 @@ const StyledCard = styled(Box)(({ theme }) => ({
     : alpha(theme.palette.background.default, 0.4),
   boxShadow: (theme.vars || theme).shadows[1],
   padding: theme.spacing(3),
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(2),
   },
 }));
@@ -41,31 +41,30 @@ const items = [
     preview: (
       <Box
         sx={{
-          height: '100%',
-          width: '100%',
-          overflow: 'hidden',
+          height: "100%",
+          width: "100%",
+          overflow: "hidden",
           borderRadius: 2,
-          position: 'relative',
-          background: 'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)',
-          p: { xs: 2, sm: 2.5 }
+          position: "relative",
+          p: { xs: 2, sm: 2.5 },
         }}
       >
         {/* Welcome Section */}
         <StyledCard sx={{ mb: 2 }}>
-          <Stack 
-            direction="row" 
-            justifyContent="space-between" 
+          <Stack
+            direction="row"
+            justifyContent="space-between"
             alignItems="center"
             spacing={2}
           >
             <Box>
-              <Typography 
-                variant="h5" 
-                sx={{ 
-                  fontWeight: 'bold',
-                  color: 'primary.main',
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: "bold",
+                  color: "primary.main",
                   mb: 0.5,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem' }
+                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
                 }}
               >
                 Welcome back!
@@ -79,9 +78,9 @@ const items = [
               size="small"
               startIcon={<AddIcon />}
               sx={{
-                textTransform: 'none',
+                textTransform: "none",
                 borderRadius: 2,
-                px: 2
+                px: 2,
               }}
             >
               New Activity
@@ -98,21 +97,23 @@ const items = [
             {[
               { label: "Today", value: "3" },
               { label: "Week", value: "12" },
-              { label: "Month", value: "42" }
+              { label: "Month", value: "42" },
             ].map((stat) => (
               <Grid item xs={4} key={stat.label}>
-                <Box sx={{ 
-                  textAlign: 'center',
-                  p: 1,
-                  bgcolor: 'rgba(255,255,255,0.02)',
-                  borderRadius: 1
-                }}>
-                  <Typography 
-                    variant="h6" 
-                    color="primary.main" 
-                    sx={{ 
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    p: 1,
+                    bgcolor: "rgba(255,255,255,0.02)",
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    color="primary.main"
+                    sx={{
                       mb: 0.5,
-                      fontSize: { xs: '1.125rem', sm: '1.25rem' }
+                      fontSize: { xs: "1.125rem", sm: "1.25rem" },
                     }}
                   >
                     {stat.value}
@@ -133,32 +134,34 @@ const items = [
           </Typography>
           <Stack spacing={1}>
             {[
-              { icon: <DirectionsRunIcon />, label: 'Cardio' },
-              { icon: <FitnessCenterIcon />, label: 'Strength' },
-              { icon: <SelfImprovementIcon />, label: 'Mobility' }
+              { icon: <DirectionsRunIcon />, label: "Cardio" },
+              { icon: <FitnessCenterIcon />, label: "Strength" },
+              { icon: <SelfImprovementIcon />, label: "Mobility" },
             ].map(({ icon, label }) => (
-              <Box 
+              <Box
                 key={label}
-                sx={{ 
+                sx={{
                   p: 1.25,
                   borderRadius: 1,
-                  bgcolor: 'rgba(255,255,255,0.05)',
-                  cursor: 'pointer',
-                  '&:hover': { 
-                    bgcolor: 'rgba(255,255,255,0.1)',
-                    transform: 'translateY(-1px)',
+                  bgcolor: "rgba(255,255,255,0.05)",
+                  cursor: "pointer",
+                  "&:hover": {
+                    bgcolor: "rgba(255,255,255,0.1)",
+                    transform: "translateY(-1px)",
                   },
-                  transition: 'all 0.2s'
+                  transition: "all 0.2s",
                 }}
               >
                 <Stack direction="row" spacing={1.5} alignItems="center">
-                  <Box sx={{ 
-                    p: 0.75, 
-                    borderRadius: 0.75, 
-                    bgcolor: 'primary.main', 
-                    color: 'white',
-                    display: 'flex'
-                  }}>
+                  <Box
+                    sx={{
+                      p: 0.75,
+                      borderRadius: 0.75,
+                      bgcolor: "primary.main",
+                      color: "white",
+                      display: "flex",
+                    }}
+                  >
                     {React.cloneElement(icon, { sx: { fontSize: 18 } })}
                   </Box>
                   <Typography variant="body2">{label}</Typography>
@@ -168,7 +171,7 @@ const items = [
           </Stack>
         </StyledCard>
       </Box>
-    )
+    ),
   },
   {
     icon: <AutoAwesomeOutlinedIcon />,
@@ -266,8 +269,8 @@ MobileLayout.propTypes = {
   selectedFeature: PropTypes.shape({
     description: PropTypes.string.isRequired,
     icon: PropTypes.element,
-    imageDark: PropTypes.string.isRequired,
-    imageLight: PropTypes.string.isRequired,
+    imageDark: PropTypes.string,
+    imageLight: PropTypes.string,
     title: PropTypes.string.isRequired,
   }).isRequired,
   selectedItemIndex: PropTypes.number.isRequired,
@@ -288,16 +291,11 @@ export default function Features() {
     <Container id="features" sx={{ py: { xs: 8, sm: 16 } }}>
       {/* Features Header Section */}
       <Box sx={{ width: { sm: "100%", md: "60%" } }}>
-        <Typography
-          component="h2"
-          variant="h4"
-          gutterBottom
-          sx={{ color: "text.primary" }}
-        >
+        <Typography variant="h3" gutterBottom sx={{ color: "text.primary" }}>
           Features
         </Typography>
         <Typography
-          variant="body1"
+          variant="body2"
           sx={{ color: "text.secondary", mb: { xs: 2, sm: 4 } }}
         >
           Choose from a variety of features to help you achieve your fitness
@@ -373,21 +371,21 @@ export default function Features() {
         {/* Feature Image Section */}
         <Box
           sx={{
-            display: { xs: 'none', sm: 'flex' },
-            width: { xs: '100%', md: '70%' },
+            display: { xs: "none", sm: "flex" },
+            width: { xs: "100%", md: "70%" },
             height: 600,
-            position: 'relative',
+            position: "relative",
           }}
         >
           <Card
             variant="outlined"
             sx={{
-              height: '100%',
-              width: '100%',
-              display: { xs: 'none', sm: 'flex' },
-              borderRadius: '16px',
-              overflow: 'hidden',
-              bgcolor: 'background.paper',
+              height: "100%",
+              width: "100%",
+              display: { xs: "none", sm: "flex" },
+              borderRadius: "16px",
+              overflow: "hidden",
+              bgcolor: "background.paper",
             }}
           >
             {selectedFeature.preview}

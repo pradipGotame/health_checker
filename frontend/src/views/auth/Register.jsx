@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Box,
   Button,
@@ -13,11 +13,14 @@ import { useNavigate } from "react-router-dom";
 
 import useRegister from "../../hooks/userRegister";
 import Logo from "../../components/Landing/Logo";
+import ThemeToggle from "../../components/ui/ThemeToggle";
+import { ThemeContext } from "../../lib/ThemeContext";
 
 export default function Register() {
   const navigate = useNavigate();
   const { registerUser, loading } = useRegister();
   const [formError, setFormError] = useState(null);
+  const { darkMode } = useContext(ThemeContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -86,8 +89,9 @@ export default function Register() {
         sx={() => ({
           width: "100%",
           backgroundRepeat: "no-repeat",
-          backgroundImage:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+          backgroundImage: !darkMode
+            ? "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(185, 100%, 14%), transparent)"
+            : "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
           position: "absolute",
           height: "100%",
           left: 0,
@@ -95,7 +99,15 @@ export default function Register() {
           zIndex: -1,
         })}
       />
-      <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
+      <Container
+        component="main"
+        maxWidth="xs"
+        sx={{
+          paddingTop: 8,
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
         <Button
           variant="outlined"
           onClick={() => navigate("/")}
@@ -103,8 +115,9 @@ export default function Register() {
         >
           <Logo />
         </Button>
+        <ThemeToggle />
       </Container>
-      <Container component="main" maxWidth="xs" sx={{ paddingTop: 4 }}>
+      <Container component="main" maxWidth="xs" sx={{ marginY: 4 }}>
         <CssBaseline />
         <Paper
           elevation={3}
