@@ -3,8 +3,10 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useNavigate } from "react-router-dom";
 
 export default function Hero() {
+  const navigate = useNavigate();
   return (
     <Box
       id="hero"
@@ -68,6 +70,7 @@ export default function Hero() {
             size="large"
             sx={{ width: { xs: "100%", sm: "auto" }, minWidth: 200 }}
             className="Button"
+            onClick={() => navigate("/register")}
           >
             Join us now
           </Button>

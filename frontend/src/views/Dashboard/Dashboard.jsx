@@ -1,22 +1,45 @@
 import { useState, useEffect } from "react";
-import { Box, Button, Typography, Stack, Container, Tooltip, Skeleton } from "@mui/material";
-import Grid from '@mui/material/Grid';
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  Container,
+  Tooltip,
+  Skeleton,
+} from "@mui/material";
+import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
 import { styled, alpha, keyframes } from "@mui/material/styles";
 import useLogout from "../../hooks/useLogout";
 import { useAuth } from "../../hooks/useAuth";
-import AddIcon from '@mui/icons-material/Add';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
-import SelfImprovementIcon from '@mui/icons-material/SelfImprovement';
-import InfoIcon from '@mui/icons-material/Info';
+import AddIcon from "@mui/icons-material/Add";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import SelfImprovementIcon from "@mui/icons-material/SelfImprovement";
+import InfoIcon from "@mui/icons-material/Info";
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { format, isToday, subDays, startOfWeek, eachDayOfInterval } from 'date-fns';
-import { 
-  BarChart, Bar, XAxis, YAxis, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, CartesianGrid 
-} from 'recharts';
+import {
+  format,
+  isToday,
+  subDays,
+  startOfWeek,
+  eachDayOfInterval,
+} from "date-fns";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  CartesianGrid,
+} from "recharts";
+import NavBar from "../../components/Landing/NavBar";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   borderRadius: 12,
@@ -28,7 +51,7 @@ const StyledCard = styled(Box)(({ theme }) => ({
     : alpha(theme.palette.background.default, 0.4),
   boxShadow: (theme.vars || theme).shadows[1],
   padding: theme.spacing(3),
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(2),
   },
 }));
@@ -37,18 +60,21 @@ const QuickActionCard = styled(Box)(({ theme }) => ({
   borderRadius: 8,
   padding: theme.spacing(2),
   backgroundColor: alpha(theme.palette.background.paper, 0.4),
-  cursor: 'pointer',
-  transition: 'all 0.2s ease-in-out',
-  '&:hover': {
+  cursor: "pointer",
+  transition: "all 0.2s ease-in-out",
+  "&:hover": {
     backgroundColor: alpha(theme.palette.background.paper, 0.6),
-    transform: 'translateY(-2px)',
+    transform: "translateY(-2px)",
   },
 }));
 
 const StreakCard = styled(Box)(({ theme }) => ({
   borderRadius: 8,
   padding: theme.spacing(2),
-  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.2)} 0%, ${alpha(theme.palette.primary.main, 0.1)} 100%)`,
+  background: `linear-gradient(135deg, ${alpha(
+    theme.palette.primary.main,
+    0.2
+  )} 0%, ${alpha(theme.palette.primary.main, 0.1)} 100%)`,
   backdropFilter: "blur(24px)",
   border: "1px solid",
   borderColor: alpha(theme.palette.primary.main, 0.2),
@@ -60,17 +86,17 @@ const CustomTooltip = ({ active, payload, label }) => {
     return (
       <Box
         sx={{
-          bgcolor: 'rgba(0, 0, 0, 0.8)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
+          bgcolor: "rgba(0, 0, 0, 0.8)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
           borderRadius: 1,
           p: 1.5,
-          backdropFilter: 'blur(24px)',
+          backdropFilter: "blur(24px)",
         }}
       >
-        <Typography variant="caption" sx={{ color: '#fff' }}>
+        <Typography variant="caption" sx={{ color: "#fff" }}>
           {label}
         </Typography>
-        <Typography variant="body2" sx={{ color: '#84CC16', mt: 0.5 }}>
+        <Typography variant="body2" sx={{ color: "#84CC16", mt: 0.5 }}>
           {`${payload[0].value} activities`}
         </Typography>
       </Box>
@@ -102,11 +128,13 @@ export default function Dashboard() {
     cardioCount: 0,
     strengthCount: 0,
     mobilityCount: 0,
-    streak: 0
+    streak: 0,
   });
   const [weeklyData, setWeeklyData] = useState([]);
   const [distributionData, setDistributionData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // const { app } = firebase;
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -114,33 +142,40 @@ export default function Dashboard() {
       setLoading(true);
       try {
         const activitiesRef = collection(db, "activities");
-        const q = query(
-          activitiesRef,
-          where("userId", "==", user.uid),
-        );
-        
+        const q = query(activitiesRef, where("userId", "==", user.uid));
+
         const querySnapshot = await getDocs(q);
-        const activities = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: new Date(doc.data().createdAt)
-        })).sort((a, b) => b.createdAt - a.createdAt);
+        const activities = querySnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: new Date(doc.data().createdAt),
+          }))
+          .sort((a, b) => b.createdAt - a.createdAt);
 
         // Set recent activities (limit to 5)
         setRecentActivities(activities.slice(0, 5));
 
         // Calculate stats
-        const todayActivities = activities.filter(activity => isToday(activity.createdAt));
-        const cardioActivities = activities.filter(activity => activity.workoutType === 'Cardio');
-        const strengthActivities = activities.filter(activity => activity.workoutType === 'Strength');
-        const mobilityActivities = activities.filter(activity => activity.workoutType === 'Mobility');
+        const todayActivities = activities.filter((activity) =>
+          isToday(activity.createdAt)
+        );
+        const cardioActivities = activities.filter(
+          (activity) => activity.workoutType === "Cardio"
+        );
+        const strengthActivities = activities.filter(
+          (activity) => activity.workoutType === "Strength"
+        );
+        const mobilityActivities = activities.filter(
+          (activity) => activity.workoutType === "Mobility"
+        );
 
         setStats({
           todayCount: todayActivities.length,
           cardioCount: cardioActivities.length,
           strengthCount: strengthActivities.length,
           mobilityCount: mobilityActivities.length,
-          streak: todayActivities.length > 0 ? stats.streak + 1 : 0
+          streak: todayActivities.length > 0 ? stats.streak + 1 : 0,
         });
 
         // Prepare weekly activity data
@@ -148,24 +183,25 @@ export default function Dashboard() {
         const weekStart = startOfWeek(today);
         const last7Days = eachDayOfInterval({
           start: subDays(today, 6),
-          end: today
+          end: today,
         });
 
-        const weeklyData = last7Days.map(date => ({
-          date: format(date, 'EEE'),
-          count: activities.filter(activity => 
-            format(activity.createdAt, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-          ).length
+        const weeklyData = last7Days.map((date) => ({
+          date: format(date, "EEE"),
+          count: activities.filter(
+            (activity) =>
+              format(activity.createdAt, "yyyy-MM-dd") ===
+              format(date, "yyyy-MM-dd")
+          ).length,
         }));
         setWeeklyData(weeklyData);
 
         // Prepare distribution data
         setDistributionData([
-          { name: 'Cardio', value: cardioActivities.length },
-          { name: 'Strength', value: strengthActivities.length },
-          { name: 'Mobility', value: mobilityActivities.length }
+          { name: "Cardio", value: cardioActivities.length },
+          { name: "Strength", value: strengthActivities.length },
+          { name: "Mobility", value: mobilityActivities.length },
         ]);
-
       } catch (error) {
         console.error("Error fetching activities:", error);
       } finally {
@@ -177,12 +213,12 @@ export default function Dashboard() {
   }, [user]);
 
   // Add chart colors
-  const COLORS = ['#84CC16', '#65a30d', '#4d7c0f'];
+  const COLORS = ["#84CC16", "#65a30d", "#4d7c0f"];
 
   const formatActivityDetails = (activity) => {
-    if (activity.workoutType === 'Cardio') {
+    if (activity.workoutType === "Cardio") {
       return `${activity.distance}${activity.distanceUnit} in ${activity.duration}${activity.durationUnit}`;
-    } else if (activity.workoutType === 'Strength') {
+    } else if (activity.workoutType === "Strength") {
       return `${activity.sets} sets × ${activity.reps} reps at ${activity.weight}kg`;
     } else {
       return `${activity.sets} sets × ${activity.reps} reps`;
@@ -194,27 +230,27 @@ export default function Dashboard() {
     <Grid container spacing={2}>
       {[1, 2, 3, 4].map((item) => (
         <Grid item xs={6} sm={3} key={item}>
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Skeleton 
-              variant="text" 
-              width="60%" 
-              height={48} 
-              sx={{ 
-                mx: 'auto',
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
+          <Box sx={{ p: 2, textAlign: "center" }}>
+            <Skeleton
+              variant="text"
+              width="60%"
+              height={48}
+              sx={{
+                mx: "auto",
+                bgcolor: "rgba(255, 255, 255, 0.1)",
                 animation: `${pulseKeyframe} 1.5s ease-in-out infinite`,
-                transform: 'none'  // Prevents default animation
-              }} 
+                transform: "none", // Prevents default animation
+              }}
             />
-            <Skeleton 
-              variant="text" 
-              width="80%" 
-              sx={{ 
-                mx: 'auto',
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
+            <Skeleton
+              variant="text"
+              width="80%"
+              sx={{
+                mx: "auto",
+                bgcolor: "rgba(255, 255, 255, 0.1)",
                 animation: `${pulseKeyframe} 1.5s ease-in-out 0.2s infinite`,
-                transform: 'none'
-              }} 
+                transform: "none",
+              }}
             />
           </Box>
         </Grid>
@@ -226,47 +262,47 @@ export default function Dashboard() {
     <Grid container spacing={3}>
       <Grid item xs={12} md={8}>
         <Stack spacing={2}>
-          <Skeleton 
-            variant="text" 
-            width={200} 
-            sx={{ 
-              bgcolor: 'rgba(255, 255, 255, 0.1)',
+          <Skeleton
+            variant="text"
+            width={200}
+            sx={{
+              bgcolor: "rgba(255, 255, 255, 0.1)",
               animation: `${pulseKeyframe} 1.5s ease-in-out infinite`,
-              transform: 'none'
-            }} 
+              transform: "none",
+            }}
           />
-          <Skeleton 
-            variant="rectangular" 
+          <Skeleton
+            variant="rectangular"
             height={300}
-            sx={{ 
-              bgcolor: 'rgba(255, 255, 255, 0.1)',
+            sx={{
+              bgcolor: "rgba(255, 255, 255, 0.1)",
               borderRadius: 1,
               animation: `${pulseKeyframe} 1.5s ease-in-out 0.1s infinite`,
-              transform: 'none'
-            }} 
+              transform: "none",
+            }}
           />
         </Stack>
       </Grid>
       <Grid item xs={12} md={4}>
         <Stack spacing={2}>
-          <Skeleton 
-            variant="text" 
-            width={200} 
-            sx={{ 
-              bgcolor: 'rgba(255, 255, 255, 0.1)',
+          <Skeleton
+            variant="text"
+            width={200}
+            sx={{
+              bgcolor: "rgba(255, 255, 255, 0.1)",
               animation: `${pulseKeyframe} 1.5s ease-in-out 0.2s infinite`,
-              transform: 'none'
-            }} 
+              transform: "none",
+            }}
           />
-          <Skeleton 
-            variant="rectangular" 
+          <Skeleton
+            variant="rectangular"
             height={300}
-            sx={{ 
-              bgcolor: 'rgba(255, 255, 255, 0.1)',
+            sx={{
+              bgcolor: "rgba(255, 255, 255, 0.1)",
               borderRadius: 1,
               animation: `${pulseKeyframe} 1.5s ease-in-out 0.3s infinite`,
-              transform: 'none'
-            }} 
+              transform: "none",
+            }}
           />
         </Stack>
       </Grid>
@@ -276,33 +312,37 @@ export default function Dashboard() {
   const LoadingRecentActivities = () => (
     <Stack spacing={2}>
       {[1, 2, 3].map((item, index) => (
-        <Box 
+        <Box
           key={item}
           sx={{
             p: 2,
             borderRadius: 1,
-            bgcolor: 'background.paper',
-            transition: 'all 0.3s ease-in-out',
+            bgcolor: "background.paper",
+            transition: "all 0.3s ease-in-out",
           }}
         >
           <Stack spacing={1}>
-            <Skeleton 
-              variant="text" 
-              width="40%" 
-              sx={{ 
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                animation: `${pulseKeyframe} 1.5s ease-in-out ${index * 0.1}s infinite`,
-                transform: 'none'
-              }} 
+            <Skeleton
+              variant="text"
+              width="40%"
+              sx={{
+                bgcolor: "rgba(255, 255, 255, 0.1)",
+                animation: `${pulseKeyframe} 1.5s ease-in-out ${
+                  index * 0.1
+                }s infinite`,
+                transform: "none",
+              }}
             />
-            <Skeleton 
-              variant="text" 
-              width="60%" 
-              sx={{ 
-                bgcolor: 'rgba(255, 255, 255, 0.1)',
-                animation: `${pulseKeyframe} 1.5s ease-in-out ${index * 0.1 + 0.1}s infinite`,
-                transform: 'none'
-              }} 
+            <Skeleton
+              variant="text"
+              width="60%"
+              sx={{
+                bgcolor: "rgba(255, 255, 255, 0.1)",
+                animation: `${pulseKeyframe} 1.5s ease-in-out ${
+                  index * 0.1 + 0.1
+                }s infinite`,
+                transform: "none",
+              }}
             />
           </Stack>
         </Box>
@@ -323,25 +363,26 @@ export default function Dashboard() {
           pt: { xs: 6, sm: 8 },
           pb: { xs: 3, sm: 4 },
         }}
+        style={{ marginTop: 40 }}
       >
         <Grid container spacing={3}>
           {/* Welcome Section */}
           <Grid item xs={12}>
             <StyledCard>
-              <Stack 
-                direction={{ xs: 'column', sm: 'row' }} 
-                justifyContent="space-between" 
-                alignItems={{ xs: 'flex-start', sm: 'center' }}
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                justifyContent="space-between"
+                alignItems={{ xs: "flex-start", sm: "center" }}
                 spacing={2}
               >
                 <Box>
-                  <Typography 
-                    variant="h4" 
-                    sx={{ 
-                      fontWeight: 'bold',
-                      color: 'primary.main',
-                      fontSize: { xs: '1.75rem', sm: '2.125rem' },
-                      mb: 0.5
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: "bold",
+                      color: "primary.main",
+                      fontSize: { xs: "1.75rem", sm: "2.125rem" },
+                      mb: 0.5,
                     }}
                   >
                     Welcome back!
@@ -354,9 +395,9 @@ export default function Dashboard() {
                   <Button
                     variant="contained"
                     startIcon={<AddIcon />}
-                    onClick={() => navigate('/create-activity')}
+                    onClick={() => navigate("/create-activity")}
                     sx={{
-                      textTransform: 'none',
+                      textTransform: "none",
                       borderRadius: 2,
                       px: { xs: 2, sm: 3 },
                       py: { xs: 0.75, sm: 1 },
@@ -364,18 +405,18 @@ export default function Dashboard() {
                   >
                     New Activity
                   </Button>
-                  <Button 
-                    variant="outlined" 
+                  <Button
+                    variant="outlined"
                     onClick={logout}
                     sx={{
-                      textTransform: 'none',
+                      textTransform: "none",
                       borderRadius: 2,
-                      borderColor: 'divider',
-                      color: 'text.secondary',
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                        backgroundColor: 'rgba(132, 204, 22, 0.04)',
-                      }
+                      borderColor: "divider",
+                      color: "text.secondary",
+                      "&:hover": {
+                        borderColor: "primary.main",
+                        backgroundColor: "rgba(132, 204, 22, 0.04)",
+                      },
                     }}
                   >
                     Sign Out
@@ -390,20 +431,26 @@ export default function Dashboard() {
             <Stack spacing={3}>
               {/* Quick Actions */}
               <StyledCard>
-                <Typography variant="h6" sx={{ mb: 2 }}>Quick Actions</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Quick Actions
+                </Typography>
                 <Stack spacing={2}>
-                  <QuickActionCard onClick={() => navigate('/create-activity')}>
+                  <QuickActionCard onClick={() => navigate("/create-activity")}>
                     <Stack direction="row" spacing={2} alignItems="center">
-                      <Box sx={{ 
-                        p: 1, 
-                        borderRadius: 1, 
-                        bgcolor: 'primary.main',
-                        color: 'white'
-                      }}>
+                      <Box
+                        sx={{
+                          p: 1,
+                          borderRadius: 1,
+                          bgcolor: "primary.main",
+                          color: "white",
+                        }}
+                      >
                         <DirectionsRunIcon />
                       </Box>
                       <Box>
-                        <Typography variant="subtitle2">Cardio Workout</Typography>
+                        <Typography variant="subtitle2">
+                          Cardio Workout
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
                           Record your cardio session
                         </Typography>
@@ -411,18 +458,22 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate('/create-activity')}>
+                  <QuickActionCard onClick={() => navigate("/create-activity")}>
                     <Stack direction="row" spacing={2} alignItems="center">
-                      <Box sx={{ 
-                        p: 1, 
-                        borderRadius: 1, 
-                        bgcolor: 'primary.main',
-                        color: 'white'
-                      }}>
+                      <Box
+                        sx={{
+                          p: 1,
+                          borderRadius: 1,
+                          bgcolor: "primary.main",
+                          color: "white",
+                        }}
+                      >
                         <FitnessCenterIcon />
                       </Box>
                       <Box>
-                        <Typography variant="subtitle2">Strength Training</Typography>
+                        <Typography variant="subtitle2">
+                          Strength Training
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
                           Log your strength workout
                         </Typography>
@@ -430,18 +481,22 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate('/create-activity')}>
+                  <QuickActionCard onClick={() => navigate("/create-activity")}>
                     <Stack direction="row" spacing={2} alignItems="center">
-                      <Box sx={{ 
-                        p: 1, 
-                        borderRadius: 1, 
-                        bgcolor: 'primary.main',
-                        color: 'white'
-                      }}>
+                      <Box
+                        sx={{
+                          p: 1,
+                          borderRadius: 1,
+                          bgcolor: "primary.main",
+                          color: "white",
+                        }}
+                      >
                         <SelfImprovementIcon />
                       </Box>
                       <Box>
-                        <Typography variant="subtitle2">Mobility Work</Typography>
+                        <Typography variant="subtitle2">
+                          Mobility Work
+                        </Typography>
                         <Typography variant="caption" color="text.secondary">
                           Track your mobility exercises
                         </Typography>
@@ -453,20 +508,27 @@ export default function Dashboard() {
 
               {/* Streak Widget */}
               <StyledCard>
-                <Typography variant="h6" sx={{ mb: 2 }}>Workout Streak</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Workout Streak
+                </Typography>
                 <StreakCard>
                   <Stack direction="row" spacing={2} alignItems="center">
-                    <Box sx={{ 
-                      width: 60,
-                      height: 60,
-                      borderRadius: '50%',
-                      bgcolor: 'primary.main',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 0 20px rgba(132, 204, 22, 0.3)'
-                    }}>
-                      <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold' }}>
+                    <Box
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: "50%",
+                        bgcolor: "primary.main",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: "0 0 20px rgba(132, 204, 22, 0.3)",
+                      }}
+                    >
+                      <Typography
+                        variant="h4"
+                        sx={{ color: "white", fontWeight: "bold" }}
+                      >
                         {loading ? <Skeleton width={30} /> : stats.streak || 0}
                       </Typography>
                     </Box>
@@ -484,35 +546,49 @@ export default function Dashboard() {
 
               {/* Personal Bests */}
               <StyledCard>
-                <Typography variant="h6" sx={{ mb: 2 }}>Personal Bests</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Personal Bests
+                </Typography>
                 <Stack spacing={2}>
                   {loading ? (
                     <LoadingOverview />
                   ) : (
                     <>
-                      <Box sx={{ p: 1.5, bgcolor: alpha('#fff', 0.05), borderRadius: 1 }}>
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          bgcolor: alpha("#fff", 0.05),
+                          borderRadius: 1,
+                        }}
+                      >
                         <Typography variant="caption" color="text.secondary">
                           Longest Run
                         </Typography>
-                        <Typography variant="subtitle1">
-                          5.2 km
-                        </Typography>
+                        <Typography variant="subtitle1">5.2 km</Typography>
                       </Box>
-                      <Box sx={{ p: 1.5, bgcolor: alpha('#fff', 0.05), borderRadius: 1 }}>
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          bgcolor: alpha("#fff", 0.05),
+                          borderRadius: 1,
+                        }}
+                      >
                         <Typography variant="caption" color="text.secondary">
                           Max Weight (Bench Press)
                         </Typography>
-                        <Typography variant="subtitle1">
-                          80 kg
-                        </Typography>
+                        <Typography variant="subtitle1">80 kg</Typography>
                       </Box>
-                      <Box sx={{ p: 1.5, bgcolor: alpha('#fff', 0.05), borderRadius: 1 }}>
+                      <Box
+                        sx={{
+                          p: 1.5,
+                          bgcolor: alpha("#fff", 0.05),
+                          borderRadius: 1,
+                        }}
+                      >
                         <Typography variant="caption" color="text.secondary">
                           Most Weekly Activities
                         </Typography>
-                        <Typography variant="subtitle1">
-                          12 workouts
-                        </Typography>
+                        <Typography variant="subtitle1">12 workouts</Typography>
                       </Box>
                     </>
                   )}
@@ -526,12 +602,20 @@ export default function Dashboard() {
             <Stack spacing={3}>
               {/* Activity Overview */}
               <StyledCard>
-                <Typography variant="h6" sx={{ mb: 2 }}>Activity Overview</Typography>
-                {loading ? <LoadingOverview /> : (
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Activity Overview
+                </Typography>
+                {loading ? (
+                  <LoadingOverview />
+                ) : (
                   <Grid container spacing={2}>
                     <Grid item xs={6} sm={3}>
-                      <Box sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="h4" color="primary.main" sx={{ mb: 0.5 }}>
+                      <Box sx={{ p: 2, textAlign: "center" }}>
+                        <Typography
+                          variant="h4"
+                          color="primary.main"
+                          sx={{ mb: 0.5 }}
+                        >
                           {stats.todayCount}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -540,8 +624,12 @@ export default function Dashboard() {
                       </Box>
                     </Grid>
                     <Grid item xs={6} sm={3}>
-                      <Box sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="h4" color="primary.main" sx={{ mb: 0.5 }}>
+                      <Box sx={{ p: 2, textAlign: "center" }}>
+                        <Typography
+                          variant="h4"
+                          color="primary.main"
+                          sx={{ mb: 0.5 }}
+                        >
                           {stats.cardioCount}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -550,8 +638,12 @@ export default function Dashboard() {
                       </Box>
                     </Grid>
                     <Grid item xs={6} sm={3}>
-                      <Box sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="h4" color="primary.main" sx={{ mb: 0.5 }}>
+                      <Box sx={{ p: 2, textAlign: "center" }}>
+                        <Typography
+                          variant="h4"
+                          color="primary.main"
+                          sx={{ mb: 0.5 }}
+                        >
                           {stats.strengthCount}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -560,8 +652,12 @@ export default function Dashboard() {
                       </Box>
                     </Grid>
                     <Grid item xs={6} sm={3}>
-                      <Box sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="h4" color="primary.main" sx={{ mb: 0.5 }}>
+                      <Box sx={{ p: 2, textAlign: "center" }}>
+                        <Typography
+                          variant="h4"
+                          color="primary.main"
+                          sx={{ mb: 0.5 }}
+                        >
                           {stats.mobilityCount}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -575,81 +671,116 @@ export default function Dashboard() {
 
               {/* Activity Insights */}
               <StyledCard>
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 3 }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1}
+                  sx={{ mb: 3 }}
+                >
                   <Typography variant="h6">Activity Insights</Typography>
-                  <Tooltip 
+                  <Tooltip
                     title="Visual representation of your workout patterns and distribution"
                     arrow
                     placement="right"
                   >
-                    <InfoIcon 
-                      sx={{ 
-                        fontSize: 18, 
-                        color: 'text.secondary',
-                        cursor: 'help',
-                        '&:hover': { color: 'primary.main' }
-                      }} 
+                    <InfoIcon
+                      sx={{
+                        fontSize: 18,
+                        color: "text.secondary",
+                        cursor: "help",
+                        "&:hover": { color: "primary.main" },
+                      }}
                     />
                   </Tooltip>
                 </Stack>
-                {loading ? <LoadingInsights /> : (
+                {loading ? (
+                  <LoadingInsights />
+                ) : (
                   <Grid container spacing={3}>
                     {/* Weekly Activity Trend */}
                     <Grid item xs={12} md={8}>
-                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                        sx={{ mb: 2 }}
+                      >
                         <Typography variant="subtitle2" color="text.secondary">
                           Weekly Activity Trend
                         </Typography>
-                        <Tooltip 
+                        <Tooltip
                           title="Number of activities completed each day over the past week"
                           arrow
                           placement="right"
                         >
-                          <InfoIcon 
-                            sx={{ 
-                              fontSize: 16, 
-                              color: 'text.secondary',
-                              cursor: 'help',
-                              '&:hover': { color: 'primary.main' }
-                            }} 
+                          <InfoIcon
+                            sx={{
+                              fontSize: 16,
+                              color: "text.secondary",
+                              cursor: "help",
+                              "&:hover": { color: "primary.main" },
+                            }}
                           />
                         </Tooltip>
                       </Stack>
-                      <Box sx={{ 
-                        width: '100%', 
-                        height: 300,
-                        '.recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line': {
-                          stroke: 'rgba(255, 255, 255, 0.1)',
-                        },
-                        '.recharts-bar-rectangle': {
-                          filter: 'drop-shadow(0px 2px 4px rgba(132, 204, 22, 0.2))',
-                        }
-                      }}>
+                      <Box
+                        sx={{
+                          width: "100%",
+                          height: 300,
+                          ".recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line":
+                            {
+                              stroke: "rgba(255, 255, 255, 0.1)",
+                            },
+                          ".recharts-bar-rectangle": {
+                            filter:
+                              "drop-shadow(0px 2px 4px rgba(132, 204, 22, 0.2))",
+                          },
+                        }}
+                      >
                         <ResponsiveContainer>
-                          <BarChart 
+                          <BarChart
                             data={weeklyData}
-                            margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+                            margin={{
+                              top: 10,
+                              right: 10,
+                              left: -15,
+                              bottom: 0,
+                            }}
                           >
                             <defs>
-                              <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#84CC16" stopOpacity={0.8}/>
-                                <stop offset="100%" stopColor="#84CC16" stopOpacity={0.3}/>
+                              <linearGradient
+                                id="colorBar"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop
+                                  offset="0%"
+                                  stopColor="#84CC16"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="100%"
+                                  stopColor="#84CC16"
+                                  stopOpacity={0.3}
+                                />
                               </linearGradient>
                             </defs>
-                            <CartesianGrid 
-                              strokeDasharray="3 3" 
-                              vertical={false} 
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              vertical={false}
                               stroke="rgba(255, 255, 255, 0.1)"
                             />
-                            <XAxis 
-                              dataKey="date" 
+                            <XAxis
+                              dataKey="date"
                               stroke="rgba(255, 255, 255, 0.5)"
                               fontSize={12}
                               tickLine={false}
                               axisLine={false}
                               dy={10}
                             />
-                            <YAxis 
+                            <YAxis
                               stroke="rgba(255, 255, 255, 0.5)"
                               fontSize={12}
                               tickLine={false}
@@ -658,18 +789,18 @@ export default function Dashboard() {
                               dx={-10}
                             />
                             <Tooltip
-                              cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                              cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
                               contentStyle={{
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                border: "1px solid rgba(255, 255, 255, 0.1)",
                                 borderRadius: 8,
-                                backdropFilter: 'blur(24px)',
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                padding: '8px 12px'
+                                backdropFilter: "blur(24px)",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                                padding: "8px 12px",
                               }}
                             />
-                            <Bar 
-                              dataKey="count" 
+                            <Bar
+                              dataKey="count"
                               fill="url(#colorBar)"
                               radius={[4, 4, 0, 0]}
                               maxBarSize={50}
@@ -681,49 +812,65 @@ export default function Dashboard() {
 
                     {/* Workout Distribution */}
                     <Grid item xs={12} md={4}>
-                      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                        sx={{ mb: 2 }}
+                      >
                         <Typography variant="subtitle2" color="text.secondary">
                           Workout Distribution
                         </Typography>
-                        <Tooltip 
+                        <Tooltip
                           title="Distribution of your workouts by type (Cardio, Strength, Mobility)"
                           arrow
                           placement="right"
                         >
-                          <InfoIcon 
-                            sx={{ 
-                              fontSize: 16, 
-                              color: 'text.secondary',
-                              cursor: 'help',
-                              '&:hover': { color: 'primary.main' }
-                            }} 
+                          <InfoIcon
+                            sx={{
+                              fontSize: 16,
+                              color: "text.secondary",
+                              cursor: "help",
+                              "&:hover": { color: "primary.main" },
+                            }}
                           />
                         </Tooltip>
                       </Stack>
-                      <Box sx={{ 
-                        width: '100%', 
-                        height: 300,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        '.recharts-pie': {
-                          filter: 'drop-shadow(0px 2px 4px rgba(132, 204, 22, 0.2))',
-                        }
-                      }}>
+                      <Box
+                        sx={{
+                          width: "100%",
+                          height: 300,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          ".recharts-pie": {
+                            filter:
+                              "drop-shadow(0px 2px 4px rgba(132, 204, 22, 0.2))",
+                          },
+                        }}
+                      >
                         <ResponsiveContainer>
                           <PieChart>
                             <defs>
                               {COLORS.map((color, index) => (
-                                <linearGradient 
-                                  key={`gradient-${index}`} 
-                                  id={`pieGradient${index}`} 
-                                  x1="0" 
-                                  y1="0" 
-                                  x2="0" 
+                                <linearGradient
+                                  key={`gradient-${index}`}
+                                  id={`pieGradient${index}`}
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
                                   y2="1"
                                 >
-                                  <stop offset="0%" stopColor={color} stopOpacity={0.8}/>
-                                  <stop offset="100%" stopColor={color} stopOpacity={0.3}/>
+                                  <stop
+                                    offset="0%"
+                                    stopColor={color}
+                                    stopOpacity={0.8}
+                                  />
+                                  <stop
+                                    offset="100%"
+                                    stopColor={color}
+                                    stopOpacity={0.3}
+                                  />
                                 </linearGradient>
                               ))}
                             </defs>
@@ -738,8 +885,8 @@ export default function Dashboard() {
                               blendStroke
                             >
                               {distributionData.map((entry, index) => (
-                                <Cell 
-                                  key={`cell-${index}`} 
+                                <Cell
+                                  key={`cell-${index}`}
                                   fill={`url(#pieGradient${index})`}
                                   stroke="rgba(255, 255, 255, 0.1)"
                                 />
@@ -747,23 +894,25 @@ export default function Dashboard() {
                             </Pie>
                             <Tooltip
                               contentStyle={{
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                                border: "1px solid rgba(255, 255, 255, 0.1)",
                                 borderRadius: 8,
-                                backdropFilter: 'blur(24px)',
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                                padding: '8px 12px'
+                                backdropFilter: "blur(24px)",
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                                padding: "8px 12px",
                               }}
                             />
-                            <Legend 
-                              verticalAlign="bottom" 
+                            <Legend
+                              verticalAlign="bottom"
                               height={36}
                               formatter={(value) => (
-                                <span style={{ 
-                                  color: 'rgba(255, 255, 255, 0.7)', 
-                                  fontSize: '0.875rem',
-                                  fontFamily: '"Inter", sans-serif'
-                                }}>
+                                <span
+                                  style={{
+                                    color: "rgba(255, 255, 255, 0.7)",
+                                    fontSize: "0.875rem",
+                                    fontFamily: '"Inter", sans-serif',
+                                  }}
+                                >
                                   {value}
                                 </span>
                               )}
@@ -783,44 +932,58 @@ export default function Dashboard() {
                   {/* Recent Activities */}
                   <Grid item xs={12} md={7}>
                     <StyledCard>
-                      <Stack 
-                        direction="row" 
-                        justifyContent="space-between" 
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
                         alignItems="center"
                         sx={{ mb: 2 }}
                       >
                         <Typography variant="h6">Recent Activities</Typography>
-                        <Button 
-                          onClick={() => navigate('/activity-page')}
-                          sx={{ 
-                            textTransform: 'none',
-                            color: 'primary.main'
+                        <Button
+                          onClick={() => navigate("/activity-page")}
+                          sx={{
+                            textTransform: "none",
+                            color: "primary.main",
                           }}
                         >
                           View All
                         </Button>
                       </Stack>
-                      {loading ? <LoadingRecentActivities /> : (
+                      {loading ? (
+                        <LoadingRecentActivities />
+                      ) : (
                         <Stack spacing={2}>
                           {recentActivities.map((activity) => (
-                            <Box 
+                            <Box
                               key={activity.id}
                               sx={{
                                 p: 2,
                                 borderRadius: 1,
-                                bgcolor: 'background.paper',
-                                '&:hover': { bgcolor: alpha('#fff', 0.1) }
+                                bgcolor: "background.paper",
+                                "&:hover": { bgcolor: alpha("#fff", 0.1) },
                               }}
                             >
-                              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                              <Stack
+                                direction="row"
+                                justifyContent="space-between"
+                                alignItems="center"
+                              >
                                 <Box>
-                                  <Typography variant="subtitle2">{activity.activity}</Typography>
-                                  <Typography variant="caption" color="text.secondary">
+                                  <Typography variant="subtitle2">
+                                    {activity.activity}
+                                  </Typography>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                  >
                                     {formatActivityDetails(activity)}
                                   </Typography>
                                 </Box>
-                                <Typography variant="caption" color="text.secondary">
-                                  {format(activity.createdAt, 'MMM d, yyyy')}
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {format(activity.createdAt, "MMM d, yyyy")}
                                 </Typography>
                               </Stack>
                             </Box>
@@ -833,18 +996,18 @@ export default function Dashboard() {
                   {/* Goals Section */}
                   <Grid item xs={12} md={5}>
                     <StyledCard>
-                      <Stack 
-                        direction="row" 
-                        justifyContent="space-between" 
-                        alignItems="center" 
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        alignItems="center"
                         sx={{ mb: 2 }}
                       >
                         <Typography variant="h6">Goals</Typography>
-                        <Button 
+                        <Button
                           size="small"
-                          sx={{ 
-                            textTransform: 'none',
-                            color: 'primary.main'
+                          sx={{
+                            textTransform: "none",
+                            color: "primary.main",
                           }}
                         >
                           Add Goal
@@ -854,53 +1017,72 @@ export default function Dashboard() {
                         <LoadingOverview />
                       ) : (
                         <Stack spacing={2}>
-                          <Box sx={{ 
-                            p: 1.5, 
-                            bgcolor: alpha('#fff', 0.05), 
-                            borderRadius: 1,
-                            border: '1px solid',
-                            borderColor: alpha('#84CC16', 0.3),
-                          }}>
-                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Box
+                            sx={{
+                              p: 1.5,
+                              bgcolor: alpha("#fff", 0.05),
+                              borderRadius: 1,
+                              border: "1px solid",
+                              borderColor: alpha("#84CC16", 0.3),
+                            }}
+                          >
+                            <Stack
+                              direction="row"
+                              justifyContent="space-between"
+                              alignItems="center"
+                            >
                               <Box>
-                                <Typography variant="subtitle2">Run 5km</Typography>
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography variant="subtitle2">
+                                  Run 5km
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
                                   Progress: 3.2km
                                 </Typography>
                               </Box>
-                              <Typography 
-                                variant="caption" 
-                                sx={{ 
-                                  color: 'primary.main',
-                                  fontWeight: 500
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: "primary.main",
+                                  fontWeight: 500,
                                 }}
                               >
                                 64%
                               </Typography>
                             </Stack>
-                            <Box 
-                              sx={{ 
+                            <Box
+                              sx={{
                                 mt: 1,
-                                width: '100%',
+                                width: "100%",
                                 height: 4,
-                                bgcolor: alpha('#fff', 0.1),
+                                bgcolor: alpha("#fff", 0.1),
                                 borderRadius: 2,
-                                overflow: 'hidden'
+                                overflow: "hidden",
                               }}
                             >
-                              <Box 
-                                sx={{ 
-                                  width: '64%',
-                                  height: '100%',
-                                  bgcolor: 'primary.main',
-                                  borderRadius: 2
+                              <Box
+                                sx={{
+                                  width: "64%",
+                                  height: "100%",
+                                  bgcolor: "primary.main",
+                                  borderRadius: 2,
                                 }}
                               />
                             </Box>
                           </Box>
 
-                          <Box sx={{ p: 1.5, bgcolor: alpha('#fff', 0.05), borderRadius: 1 }}>
-                            <Typography variant="subtitle2">Weekly Workouts</Typography>
+                          <Box
+                            sx={{
+                              p: 1.5,
+                              bgcolor: alpha("#fff", 0.05),
+                              borderRadius: 1,
+                            }}
+                          >
+                            <Typography variant="subtitle2">
+                              Weekly Workouts
+                            </Typography>
                             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                               {[1, 2, 3, 4, 5].map((day) => (
                                 <Box
@@ -908,14 +1090,23 @@ export default function Dashboard() {
                                   sx={{
                                     width: 24,
                                     height: 24,
-                                    borderRadius: '50%',
-                                    bgcolor: day <= 3 ? 'primary.main' : alpha('#fff', 0.1),
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
+                                    borderRadius: "50%",
+                                    bgcolor:
+                                      day <= 3
+                                        ? "primary.main"
+                                        : alpha("#fff", 0.1),
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                   }}
                                 >
-                                  <Typography variant="caption" sx={{ color: day <= 3 ? 'white' : 'text.secondary' }}>
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color:
+                                        day <= 3 ? "white" : "text.secondary",
+                                    }}
+                                  >
                                     {day}
                                   </Typography>
                                 </Box>
