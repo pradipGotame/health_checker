@@ -13,8 +13,9 @@ import Drawer from "@mui/material/Drawer";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Logo from "./Logo";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom"; // React Router Link
+import { Link } from "@mui/material";
+import useLogout from "../../hooks/useLogout";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -33,12 +34,25 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }));
 
 export default function NavBar() {
-  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
+  const { logout } = useLogout();
+
+  const location = useLocation();
+  const [activeLink, setActiveLink] = React.useState(location.pathname);
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
+  const linkStyle = (path) => ({
+    color: activeLink === path ? "white" : "gray",
+    textDecoration: "none",
+    fontWeight: activeLink === path ? "bold" : "normal",
+    marginRight: 16,
+  });
+
+  React.useEffect(() => {
+    setActiveLink("/dashboard");
+  }, []);
 
   return (
     <AppBar
@@ -66,37 +80,57 @@ export default function NavBar() {
             }}
           >
             <Logo variant="h6" />
-            <Stack
-              direction="row"
-              sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}
-              spacing={2}
-            >
-              <Link to="/">Home</Link>
-
-              <Link
-                color="text.secondary"
-                variant="body2"
-                href="#features"
-                underline="hover"
+            {localStorage.getItem("userId") && (
+              <Stack
+                direction="row"
+                sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}
+                spacing={2}
               >
-                Features
-              </Link>
+                <Link
+                  component={RouterLink}
+                  to="/dashboard"
+                  style={linkStyle("/dashboard")}
+                  onClick={() => setActiveLink("/dashboard")}
+                >
+                  Home
+                </Link>
 
-              {/* <Link
-                component={"button"}
-                variant="body2"
-                color="secondary"
-                underline="hover"
-              >
-                Features
-              </Link> */}
-              {/* <Button variant="text" color="info" size="small">
-                Pricing
-              </Button> */}
+                <Link
+                  href="/featuress"
+                  underline="none"
+                  style={linkStyle("/featuress")}
+                  onClick={() => setActiveLink("/featuress")}
+                >
+                  Features
+                </Link>
 
-              <Link to="/activity-page">Workout</Link>
-              <Link to="/profile">Profile</Link>
-            </Stack>
+                <Link
+                  component={RouterLink}
+                  to="/activity-page"
+                  style={linkStyle("/activity-page")}
+                  onClick={() => setActiveLink("/activity-page")}
+                >
+                  Workout
+                </Link>
+
+                <Link
+                  component={RouterLink}
+                  to="/profile"
+                  style={linkStyle("/profile")}
+                  onClick={() => setActiveLink("/profile")}
+                >
+                  Profile
+                </Link>
+                <Link
+                  component={RouterLink}
+                  to="/notification"
+                  style={linkStyle("/notification")}
+                  onClick={() => setActiveLink("/notification")}
+                >
+                  Notification
+                </Link>
+              </Stack>
+            )}
           </Box>
           <Box
             sx={{
@@ -105,15 +139,32 @@ export default function NavBar() {
               alignItems: "center",
             }}
           >
-            <Button
-              variant="text"
-              color="secondary"
-              sx={{ textTransform: "none" }}
-              component={Link}
-              to="/login"
-            >
-              Sign in
-            </Button>
+            {localStorage.getItem("userId") ? (
+              <Button
+                variant="text"
+                color="secondary"
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                  color: "white",
+                }}
+                onClick={logout}
+              >
+                Sign out
+              </Button>
+            ) : (
+              <Link
+                component={RouterLink} // Ensures MUI Link behaves like React Router's Link
+                to="/login"
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                  color: "white",
+                }}
+              >
+                Sigin
+              </Link>
+            )}
           </Box>
           <Box sx={{ display: { xs: "flex", md: "none" }, gap: 1 }}>
             <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>

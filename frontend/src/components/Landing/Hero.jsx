@@ -72,13 +72,9 @@ export default function Hero() {
           <Button
             variant="contained"
             size="large"
-            sx={{
-              width: { xs: "100%", sm: "auto" },
-              minWidth: 200,
-              textTransform: "none",
-            }}
-            component={Link}
-            to="/register"
+            sx={{ width: { xs: "100%", sm: "auto" }, minWidth: 200 }}
+            className="Button"
+            onClick={() => navigate("/register")}
           >
             Join us now
           </Button>

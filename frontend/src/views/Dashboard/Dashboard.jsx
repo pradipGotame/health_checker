@@ -19,9 +19,15 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import SelfImprovementIcon from "@mui/icons-material/SelfImprovement";
 import InfoIcon from "@mui/icons-material/Info";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
-import { format, isToday, subDays, eachDayOfInterval } from "date-fns";
+import {
+  format,
+  isToday,
+  subDays,
+  startOfWeek,
+  eachDayOfInterval,
+} from "date-fns";
 import {
   BarChart,
   Bar,
@@ -131,6 +137,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const { darkMode } = useContext(ThemeContext);
   const theme = useTheme();
+
+  // const { app } = firebase;
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -358,6 +366,7 @@ export default function Dashboard() {
           pt: { xs: 6, sm: 8 },
           pb: { xs: 3, sm: 4 },
         }}
+        style={{ marginTop: 40 }}
       >
         <Grid container spacing={3}>
           {/* Welcome Section */}

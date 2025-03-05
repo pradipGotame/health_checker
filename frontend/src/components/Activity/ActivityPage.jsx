@@ -422,6 +422,7 @@ export default function ActivityPage() {
         minHeight: "100vh",
       }}
     >
+      {/* <NavBar /> */}
       <Container
         sx={{
           display: "flex",

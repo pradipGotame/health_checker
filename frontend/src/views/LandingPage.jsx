@@ -8,7 +8,6 @@ import Hero from "../components/Landing/Hero";
 export default function LandingPage() {
   return (
     <>
-      <NavigationBar />
       <Hero />
       <Divider />
       <Features />

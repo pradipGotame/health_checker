@@ -1,17 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
+import {
+  getFirestore,
+  collection,
   addDoc,
   updateDoc,
   query,
   where,
   orderBy,
   getDocs,
-  doc
+  doc,
+  setDoc,
 } from "firebase/firestore";
+import { getMessaging } from "firebase/messaging";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: import.meta.env.VITE_API_KEY,
   authDomain: import.meta.env.VITE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_PROJECT_ID,
@@ -22,18 +24,21 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
 const db = getFirestore(app);
 
-export { 
-  db, 
-  collection, 
-  addDoc, 
+export {
+  db,
+  collection,
+  addDoc,
   query,
   where,
   orderBy,
   getDocs,
   updateDoc,
   app,
-  doc
+  doc,
+  messaging,
+  setDoc,
 };

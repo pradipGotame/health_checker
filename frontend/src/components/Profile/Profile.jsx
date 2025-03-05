@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -10,66 +10,76 @@ import {
   CircularProgress,
   Modal,
   Fade,
-  Backdrop
-} from '@mui/material';
-import { collection, query, where, getDocs, doc, updateDoc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
-import { app, db } from '../../firebase/firebase';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
-import NavBar from '../Landing/NavBar';
-import GenderSelection from './GenderSelection';
-import FitnessGoal from './FitnessGoal';
-import AgeSelect from './Age';
-import HeightInput from './Height';
-import WeightInput from './Weight';
-import ActivityType from './ActivityType';
-import ExerciseLevel from './ExerciseLevel';
-import Location from './Location';
+  Backdrop,
+} from "@mui/material";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+} from "firebase/firestore";
+import { app, db } from "../../firebase/firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import NavBar from "../Landing/NavBar";
+import GenderSelection from "./GenderSelection";
+import FitnessGoal from "./FitnessGoal";
+import AgeSelect from "./Age";
+import HeightInput from "./Height";
+import WeightInput from "./Weight";
+import ActivityType from "./ActivityType";
+import ExerciseLevel from "./ExerciseLevel";
+import Location from "./Location";
 // Modal style configuration
 const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: 'background.paper',
+  bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
-  borderRadius: 2
+  borderRadius: 2,
 };
 
 // Add this constant at the top of your file, after imports
 const textFieldStyle = {
   backdropFilter: "blur(24px)",
-  backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  '& .MuiOutlinedInput-root': {
-    '&:hover fieldset': {
-      borderColor: 'primary.main',  // Use primary color instead of hsl
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  "& .MuiOutlinedInput-root": {
+    "&:hover fieldset": {
+      borderColor: "primary.main", // Use primary color instead of hsl
     },
-    '&.Mui-focused fieldset': {
-      borderColor: 'primary.main',
-    }
+    "&.Mui-focused fieldset": {
+      borderColor: "primary.main",
+    },
   },
-  '& .MuiInputLabel-root.Mui-focused': {
-    color: 'primary.main'
-  }
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "primary.main",
+  },
 };
 
 // Add this after modalStyle
 const commonHoverStyle = {
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
-    borderColor: 'primary.main',
-  }
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
+    borderColor: "primary.main",
+  },
 };
 
 // Add this constant after your other style constants
 const labelStyle = {
-  color: 'primary.main',  // Use the same color as the button
-  fontWeight: 600,  // Make it a bit bolder
-  fontSize: '1rem'
+  color: "primary.main", // Use the same color as the button
+  fontWeight: 600, // Make it a bit bolder
+  fontSize: "1rem",
 };
 
 export default function Profile() {
@@ -79,19 +89,19 @@ export default function Profile() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [documentId, setDocumentId] = useState(null);
   const [profileData, setProfileData] = useState({
-    height: '',
-    weight: '',
-    age: '',
-    gender: '',
+    height: "",
+    weight: "",
+    age: "",
+    gender: "",
     activityType: [],
-    exerciseLevel: '',
-    location: '',
-    fitnessGoal: '',
-    full_name: '',
-    sportsVenue: ''
+    exerciseLevel: "",
+    location: "",
+    fitnessGoal: "",
+    full_name: "",
+    sportsVenue: "",
   });
   const [errorModalOpen, setErrorModalOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -99,7 +109,7 @@ export default function Profile() {
 
   // Add this useEffect to monitor documentId changes
   useEffect(() => {
-    console.log('documentId updated:', documentId);
+    console.log("documentId updated:", documentId);
   }, [documentId]);
 
   // Load initial user data
@@ -108,22 +118,22 @@ export default function Profile() {
       try {
         setLoading(true);
         if (user) {
-          console.log('userId:', user.uid);
+          console.log("userId:", user.uid);
           const q = query(
-            collection(db, 'users'),
-            where('userId', '==', user.uid)
+            collection(db, "users"),
+            where("userId", "==", user.uid)
           );
-          console.log('query:', q);
+          console.log("query:", q);
           const querySnapshot = await getDocs(q);
           if (!querySnapshot.empty) {
             const doc = querySnapshot.docs[0];
             const fetchedData = doc.data();
-            console.log('Fetched data:', fetchedData);
-            setDocumentId(doc.id);  // This is async
+            console.log("Fetched data:", fetchedData);
+            setDocumentId(doc.id); // This is async
             loadUserData(fetchedData);
           } else {
-            console.log('No matching document');
-            setError('User data not found');
+            console.log("No matching document");
+            setError("User data not found");
           }
         }
       } catch (err) {
@@ -140,13 +150,13 @@ export default function Profile() {
     const errors = [];
 
     if (!profileData.fitnessGoal) {
-      errors.push('Fitness Goal is required');
+      errors.push("Fitness Goal is required");
     }
     if (!profileData.height) {
-      errors.push('Height is required');
+      errors.push("Height is required");
     }
     if (!profileData.weight) {
-      errors.push('Weight is required');
+      errors.push("Weight is required");
     }
 
     return errors;
@@ -158,43 +168,49 @@ export default function Profile() {
       setLoginModalOpen(true);
       return;
     } else {
-      console.log('Saving data to document:', documentId);
+      console.log("Saving data to document:", documentId);
       try {
         if (!documentId) {
-          throw new Error('No document ID found');
+          throw new Error("No document ID found");
         }
 
         // Validate required fields
         const validationErrors = validateForm();
         if (validationErrors.length > 0) {
-          setErrorMessage(`Please fill in all required fields:\n${validationErrors.join('\n')}`);
+          setErrorMessage(
+            `Please fill in all required fields:\n${validationErrors.join(
+              "\n"
+            )}`
+          );
           setErrorModalOpen(true);
           return;
         }
 
         // Get current document data first
-        const docRef = doc(db, 'users', documentId);
+        const docRef = doc(db, "users", documentId);
         const docSnap = await getDoc(docRef);
         const currentData = docSnap.data();
 
         // Prepare new data, filtering out undefined/empty values
         const newData = Object.fromEntries(
-          Object.entries(profileData).filter(([_, value]) => value !== undefined && value !== '')
+          Object.entries(profileData).filter(
+            ([_, value]) => value !== undefined && value !== ""
+          )
         );
 
         // Merge current data with new data
         const dataToSave = {
-          ...currentData,  // Keep existing fields
-          ...newData,      // Add/Update new fields
-          updatedAt: serverTimestamp()
+          ...currentData, // Keep existing fields
+          ...newData, // Add/Update new fields
+          updatedAt: serverTimestamp(),
         };
 
         // Update document with merged data
         await updateDoc(docRef, dataToSave);
-        console.log('Data saved successfully');
-        setSuccessModalOpen(true);  // Show success modal after save
+        console.log("Data saved successfully");
+        setSuccessModalOpen(true); // Show success modal after save
       } catch (error) {
-        console.error('Error saving data:', error);
+        console.error("Error saving data:", error);
         setErrorMessage(error.message);
         setErrorModalOpen(true);
       }
@@ -209,24 +225,24 @@ export default function Profile() {
   };
 
   const loadUserData = (data) => {
-    handleChange('height', data.height);
-    handleChange('weight', data.weight);
-    handleChange('age', data.age);
-    handleChange('gender', data.gender);
-    handleChange('activityType', data.activityType);
-    handleChange('exerciseLevel', data.exerciseLevel);
-    handleChange('sportsVenue', data.sportsVenue);
-    handleChange('fitnessGoal', data.fitnessGoal);
-    handleChange('full_name', data.full_name);
+    handleChange("height", data.height);
+    handleChange("weight", data.weight);
+    handleChange("age", data.age);
+    handleChange("gender", data.gender);
+    handleChange("activityType", data.activityType);
+    handleChange("exerciseLevel", data.exerciseLevel);
+    handleChange("sportsVenue", data.sportsVenue);
+    handleChange("fitnessGoal", data.fitnessGoal);
+    handleChange("full_name", data.full_name);
     console.log(data);
     console.log(profileData);
-  }
+  };
   // Close login modal
   const handleCloseModal = () => setLoginModalOpen(false);
 
   // Navigate to login page
   const handleNavigateToLogin = () => {
-    navigate('/login');
+    navigate("/login");
     handleCloseModal();
   };
 
@@ -239,24 +255,26 @@ export default function Profile() {
   // Loading state
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{
-      paddingTop: "8vh",
-      display: "flex",
-      flexDirection: "column",
-      gap: 3,
-      alignItems: "center",
-      backgroundImage:
-        "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
-      minHeight: "100vh",
-      padding: "8vh 15% 2rem"
-    }}>
+    <Box
+      sx={{
+        paddingTop: "8vh",
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+        alignItems: "center",
+        backgroundImage:
+          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+        minHeight: "100vh",
+        padding: "8vh 15% 2rem",
+      }}
+    >
       <NavBar />
 
       {/* Error Modal */}
@@ -269,14 +287,11 @@ export default function Profile() {
           <Typography variant="h6" gutterBottom>
             Error
           </Typography>
-          <Typography sx={{ mb: 3, whiteSpace: 'pre-line' }}>
+          <Typography sx={{ mb: 3, whiteSpace: "pre-line" }}>
             {errorMessage}
           </Typography>
           <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button
-              variant="contained"
-              onClick={handleCloseErrorModal}
-            >
+            <Button variant="contained" onClick={handleCloseErrorModal}>
               OK
             </Button>
           </Stack>
@@ -297,16 +312,10 @@ export default function Profile() {
             You need to login to save your changes.
           </Typography>
           <Stack direction="row" spacing={2}>
-            <Button
-              variant="contained"
-              onClick={handleNavigateToLogin}
-            >
+            <Button variant="contained" onClick={handleNavigateToLogin}>
               Go to Login
             </Button>
-            <Button
-              variant="outlined"
-              onClick={handleCloseModal}
-            >
+            <Button variant="outlined" onClick={handleCloseModal}>
               Cancel
             </Button>
           </Stack>
@@ -327,10 +336,7 @@ export default function Profile() {
             Your profile has been updated successfully.
           </Typography>
           <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button
-              variant="contained"
-              onClick={handleCloseSuccessModal}
-            >
+            <Button variant="contained" onClick={handleCloseSuccessModal}>
               OK
             </Button>
           </Stack>
@@ -338,73 +344,82 @@ export default function Profile() {
       </Modal>
 
       {/* Original Layout */}
-      <Card variant="outlined" sx={{
-        height: "auto",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        borderRadius: "16px",
-        backdropFilter: "blur(10px)",
-        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-        border: "1px solid rgba(255, 255, 255, 0.3)",
-        ...commonHoverStyle,
-        position: "relative"
-      }}>
-        <Box sx={{
+      <Card
+        variant="outlined"
+        sx={{
+          height: "auto",
+          width: "100%",
           display: "flex",
-          flexDirection: "row",
-          gap: 3,
-          flexWrap: "wrap",
-          padding: 2,
-          width: "100%"
-        }}>
-          {/* Left Section */}
-          <Box sx={{
+          flexDirection: "column",
+          alignItems: "flex-start",
+          borderRadius: "16px",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          ...commonHoverStyle,
+          position: "relative",
+        }}
+      >
+        <Box
+          sx={{
             display: "flex",
-            flexDirection: "column",
-            gap: 1,
-            padding: 8,
-            width: "fit-content"
-          }}>
+            flexDirection: "row",
+            gap: 3,
+            flexWrap: "wrap",
+            padding: 2,
+            width: "100%",
+          }}
+        >
+          {/* Left Section */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              padding: 8,
+              width: "fit-content",
+            }}
+          >
             <Avatar
               sx={{ width: 120, height: 120 }}
               src="https://github.com/shadcn.png"
             />
             <Typography sx={{ fontSize: "1.5rem" }}>
-              {userData?.displayName || 'Username'}
+              {userData?.displayName || "Username"}
             </Typography>
           </Box>
 
           {/* Center Section */}
-          <Box sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            flexGrow: 1
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              flexGrow: 1,
+            }}
+          >
             <Typography sx={labelStyle}>
-              Fitness Goal <span style={{ color: 'red' }}>*</span>
+              Fitness Goal <span style={{ color: "red" }}>*</span>
             </Typography>
             <FitnessGoal
               value={profileData.fitnessGoal}
-              onChange={(value) => handleChange('fitnessGoal', value)}
+              onChange={(value) => handleChange("fitnessGoal", value)}
               sx={textFieldStyle}
             />
             <Typography sx={labelStyle}>
-              Height (cm) <span style={{ color: 'red' }}>*</span>
+              Height (cm) <span style={{ color: "red" }}>*</span>
             </Typography>
             <HeightInput
               value={profileData.height}
-              onChange={(value) => handleChange('height', value)}
+              onChange={(value) => handleChange("height", value)}
               sx={textFieldStyle}
             />
             <Typography sx={labelStyle}>
-              Weight (kg) <span style={{ color: 'red' }}>*</span>
+              Weight (kg) <span style={{ color: "red" }}>*</span>
             </Typography>
             <WeightInput
               value={profileData.weight}
-              onChange={(value) => handleChange('weight', value)}
+              onChange={(value) => handleChange("weight", value)}
               sx={textFieldStyle}
             />
           </Box>
@@ -412,65 +427,73 @@ export default function Profile() {
       </Card>
 
       {/* Bottom Sections */}
-      <Box sx={{
-        display: "flex",
-        flexDirection: "row",
-        gap: 3,
-        width: "100%",
-        marginBottom: "80px"
-      }}>
-        <Card variant="outlined" sx={{
-          padding: 2,
-          width: "50%",
-          backdropFilter: "blur(10px)",
-          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
-          ...commonHoverStyle
-        }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: 3,
+          width: "100%",
+          marginBottom: "80px",
+        }}
+      >
+        <Card
+          variant="outlined"
+          sx={{
+            padding: 2,
+            width: "50%",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            ...commonHoverStyle,
+          }}
+        >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography sx={labelStyle}>Name</Typography>
             <TextField
-              value={profileData.full_name || ''}
-              onChange={(e) => handleChange('full_name', e.target.value)}
+              value={profileData.full_name || ""}
+              onChange={(e) => handleChange("full_name", e.target.value)}
               sx={textFieldStyle}
             />
             <Typography sx={labelStyle}>Age</Typography>
             <TextField
-              value={profileData.age || ''}
-              onChange={(e) => handleChange('age', e.target.value)}
+              value={profileData.age || ""}
+              onChange={(e) => handleChange("age", e.target.value)}
               sx={textFieldStyle}
             />
             <GenderSelection
               value={profileData.gender}
-              onChange={(value) => handleChange('gender', value)}
+              onChange={(value) => handleChange("gender", value)}
               sx={textFieldStyle}
             />
           </Box>
         </Card>
 
-        <Card variant="outlined" sx={{
-          padding: 2,
-          width: "50%",
-          backdropFilter: "blur(10px)",
-          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
-          ...commonHoverStyle
-        }}>
+        <Card
+          variant="outlined"
+          sx={{
+            padding: 2,
+            width: "50%",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            ...commonHoverStyle,
+          }}
+        >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography sx={labelStyle}>Preferred Activity Type</Typography>
             <ActivityType
               value={profileData.activityType}
-              onChange={(value) => handleChange('activityType', value)}
+              onChange={(value) => handleChange("activityType", value)}
               sx={textFieldStyle}
             />
             <ExerciseLevel
               value={profileData.exerciseLevel}
-              onChange={(value) => handleChange('exerciseLevel', value)}
+              onChange={(value) => handleChange("exerciseLevel", value)}
               sx={textFieldStyle}
             />
             <Location
               value={profileData.sportsVenue}
-              onChange={(value) => handleChange('sportsVenue', value)}
+              onChange={(value) => handleChange("sportsVenue", value)}
               sx={textFieldStyle}
             />
           </Box>
@@ -478,14 +501,16 @@ export default function Profile() {
       </Box>
 
       {/* Save Button */}
-      <Box sx={{
-        position: "fixed",
-        bottom: 40,
-        right: "15%",
-        zIndex: 1000,
-        display: "flex",
-        gap: 2
-      }}>
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 40,
+          right: "15%",
+          zIndex: 1000,
+          display: "flex",
+          gap: 2,
+        }}
+      >
         <Button
           variant="contained"
           onClick={handleSave}
@@ -494,11 +519,13 @@ export default function Profile() {
             fontSize: "1.1rem",
             borderRadius: "8px",
             backgroundColor: "primary.main",
-            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+            boxShadow:
+              "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
             "&:hover": {
               backgroundColor: "primary.dark",
-              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-            }
+              boxShadow:
+                "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+            },
           }}
         >
           Save Profile
