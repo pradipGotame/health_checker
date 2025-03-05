@@ -1,20 +1,23 @@
+import { useContext } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useNavigate } from "react-router-dom";
+import { ThemeContext } from "../../lib/ThemeContext";
+import { Link } from "react-router-dom";
 
 export default function Hero() {
-  const navigate = useNavigate();
+  const { darkMode } = useContext(ThemeContext);
   return (
     <Box
       id="hero"
       sx={() => ({
         width: "100%",
         backgroundRepeat: "no-repeat",
-        backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+        backgroundImage: !darkMode
+          ? "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(185, 100%, 14%), transparent)"
+          : "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
       })}
     >
       <Container
@@ -48,6 +51,7 @@ export default function Hero() {
             sx={{
               fontSize: "clamp(3rem, 10vw, 3.5rem)",
               fontWeight: "bold",
+              mt: -2,
             }}
             color="primary"
           >

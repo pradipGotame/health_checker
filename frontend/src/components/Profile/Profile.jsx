@@ -12,7 +12,17 @@ import {
   Fade,
   Backdrop,
 } from "@mui/material";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  setDoc,
+  serverTimestamp,
+  getDoc,
+} from "firebase/firestore";
 import { app, db } from "../../firebase/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +35,6 @@ import WeightInput from "./Weight";
 import ActivityType from "./ActivityType";
 import ExerciseLevel from "./ExerciseLevel";
 import Location from "./Location";
-
 // Modal style configuration
 const modalStyle = {
   position: "absolute",
@@ -39,12 +48,69 @@ const modalStyle = {
   borderRadius: 2,
 };
 
+// Add this constant at the top of your file, after imports
+const textFieldStyle = {
+  backdropFilter: "blur(24px)",
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  "& .MuiOutlinedInput-root": {
+    "&:hover fieldset": {
+      borderColor: "primary.main", // Use primary color instead of hsl
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "primary.main",
+    },
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: "primary.main",
+  },
+};
+
+// Add this after modalStyle
+const commonHoverStyle = {
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
+    borderColor: "primary.main",
+  },
+};
+
+// Add this constant after your other style constants
+const labelStyle = {
+  color: "primary.main", // Use the same color as the button
+  fontWeight: 600, // Make it a bit bolder
+  fontSize: "1rem",
+};
+
 export default function Profile() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [documentId, setDocumentId] = useState(null);
+  const [profileData, setProfileData] = useState({
+    height: "",
+    weight: "",
+    age: "",
+    gender: "",
+    activityType: [],
+    exerciseLevel: "",
+    location: "",
+    fitnessGoal: "",
+    full_name: "",
+    sportsVenue: "",
+  });
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+
   const navigate = useNavigate();
+  const auth = getAuth(app);
+
+  // Add this useEffect to monitor documentId changes
+  useEffect(() => {
+    console.log("documentId updated:", documentId);
+  }, [documentId]);
 
   // Load initial user data
   useEffect(() => {
@@ -52,8 +118,23 @@ export default function Profile() {
       try {
         setLoading(true);
         if (user) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          setUserData(userDoc.exists() ? userDoc.data() : {});
+          console.log("userId:", user.uid);
+          const q = query(
+            collection(db, "users"),
+            where("userId", "==", user.uid)
+          );
+          console.log("query:", q);
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            const fetchedData = doc.data();
+            console.log("Fetched data:", fetchedData);
+            setDocumentId(doc.id); // This is async
+            loadUserData(fetchedData);
+          } else {
+            console.log("No matching document");
+            setError("User data not found");
+          }
         }
       } catch (err) {
         setError(err.message);
@@ -62,18 +143,100 @@ export default function Profile() {
       }
     });
     return () => unsubscribe();
-  }, []);
-  const auth = getAuth(app);
-  // Handle save button click
-  const handleSave = () => {
+  }, [auth]);
+
+  // Add validation function
+  const validateForm = () => {
+    const errors = [];
+
+    if (!profileData.fitnessGoal) {
+      errors.push("Fitness Goal is required");
+    }
+    if (!profileData.height) {
+      errors.push("Height is required");
+    }
+    if (!profileData.weight) {
+      errors.push("Weight is required");
+    }
+
+    return errors;
+  };
+
+  // Modify handleSave to include validation
+  const handleSave = async () => {
     if (!auth.currentUser) {
       setLoginModalOpen(true);
       return;
+    } else {
+      console.log("Saving data to document:", documentId);
+      try {
+        if (!documentId) {
+          throw new Error("No document ID found");
+        }
+
+        // Validate required fields
+        const validationErrors = validateForm();
+        if (validationErrors.length > 0) {
+          setErrorMessage(
+            `Please fill in all required fields:\n${validationErrors.join(
+              "\n"
+            )}`
+          );
+          setErrorModalOpen(true);
+          return;
+        }
+
+        // Get current document data first
+        const docRef = doc(db, "users", documentId);
+        const docSnap = await getDoc(docRef);
+        const currentData = docSnap.data();
+
+        // Prepare new data, filtering out undefined/empty values
+        const newData = Object.fromEntries(
+          Object.entries(profileData).filter(
+            ([_, value]) => value !== undefined && value !== ""
+          )
+        );
+
+        // Merge current data with new data
+        const dataToSave = {
+          ...currentData, // Keep existing fields
+          ...newData, // Add/Update new fields
+          updatedAt: serverTimestamp(),
+        };
+
+        // Update document with merged data
+        await updateDoc(docRef, dataToSave);
+        console.log("Data saved successfully");
+        setSuccessModalOpen(true); // Show success modal after save
+      } catch (error) {
+        console.error("Error saving data:", error);
+        setErrorMessage(error.message);
+        setErrorModalOpen(true);
+      }
     }
-    // Add your save logic here
-    console.log("Saving data...");
   };
 
+  const handleChange = (field, value) => {
+    setProfileData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
+  const loadUserData = (data) => {
+    handleChange("height", data.height);
+    handleChange("weight", data.weight);
+    handleChange("age", data.age);
+    handleChange("gender", data.gender);
+    handleChange("activityType", data.activityType);
+    handleChange("exerciseLevel", data.exerciseLevel);
+    handleChange("sportsVenue", data.sportsVenue);
+    handleChange("fitnessGoal", data.fitnessGoal);
+    handleChange("full_name", data.full_name);
+    console.log(data);
+    console.log(profileData);
+  };
   // Close login modal
   const handleCloseModal = () => setLoginModalOpen(false);
 
@@ -82,6 +245,12 @@ export default function Profile() {
     navigate("/login");
     handleCloseModal();
   };
+
+  // Add handler for error modal
+  const handleCloseErrorModal = () => setErrorModalOpen(false);
+
+  // Add handler for success modal
+  const handleCloseSuccessModal = () => setSuccessModalOpen(false);
 
   // Loading state
   if (loading) {
@@ -100,9 +269,34 @@ export default function Profile() {
         flexDirection: "column",
         gap: 3,
         alignItems: "center",
+        backgroundImage:
+          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+        minHeight: "100vh",
+        padding: "8vh 15% 2rem",
       }}
     >
-      {/* <NavBar /> */}
+      <NavBar />
+
+      {/* Error Modal */}
+      <Modal
+        open={errorModalOpen}
+        onClose={handleCloseErrorModal}
+        BackdropComponent={Backdrop}
+      >
+        <Box sx={modalStyle}>
+          <Typography variant="h6" gutterBottom>
+            Error
+          </Typography>
+          <Typography sx={{ mb: 3, whiteSpace: "pre-line" }}>
+            {errorMessage}
+          </Typography>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button variant="contained" onClick={handleCloseErrorModal}>
+              OK
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
 
       {/* Login Required Modal */}
       <Modal
@@ -128,16 +322,42 @@ export default function Profile() {
         </Box>
       </Modal>
 
+      {/* Success Modal */}
+      <Modal
+        open={successModalOpen}
+        onClose={handleCloseSuccessModal}
+        BackdropComponent={Backdrop}
+      >
+        <Box sx={modalStyle}>
+          <Typography variant="h6" gutterBottom>
+            Success
+          </Typography>
+          <Typography sx={{ mb: 3 }}>
+            Your profile has been updated successfully.
+          </Typography>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button variant="contained" onClick={handleCloseSuccessModal}>
+              OK
+            </Button>
+          </Stack>
+        </Box>
+      </Modal>
+
       {/* Original Layout */}
       <Card
         variant="outlined"
         sx={{
           height: "auto",
-          width: "70%",
+          width: "100%",
           display: "flex",
+          flexDirection: "column",
           alignItems: "flex-start",
           borderRadius: "16px",
-          marginTop: 8,
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          ...commonHoverStyle,
+          position: "relative",
         }}
       >
         <Box
@@ -178,28 +398,31 @@ export default function Profile() {
               flexGrow: 1,
             }}
           >
-            <Typography>Fitness Goal</Typography>
-            <FitnessGoal />
-            <HeightInput />
-            <WeightInput />
+            <Typography sx={labelStyle}>
+              Fitness Goal <span style={{ color: "red" }}>*</span>
+            </Typography>
+            <FitnessGoal
+              value={profileData.fitnessGoal}
+              onChange={(value) => handleChange("fitnessGoal", value)}
+              sx={textFieldStyle}
+            />
+            <Typography sx={labelStyle}>
+              Height (cm) <span style={{ color: "red" }}>*</span>
+            </Typography>
+            <HeightInput
+              value={profileData.height}
+              onChange={(value) => handleChange("height", value)}
+              sx={textFieldStyle}
+            />
+            <Typography sx={labelStyle}>
+              Weight (kg) <span style={{ color: "red" }}>*</span>
+            </Typography>
+            <WeightInput
+              value={profileData.weight}
+              onChange={(value) => handleChange("weight", value)}
+              sx={textFieldStyle}
+            />
           </Box>
-        </Box>
-
-        {/* Save Button */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            position: "absolute",
-            bottom: 16,
-            right: 16,
-          }}
-        >
-          <Stack direction="column" spacing={2}>
-            <Button variant="contained" onClick={handleSave}>
-              Save
-            </Button>
-          </Stack>
         </Box>
       </Card>
 
@@ -209,7 +432,8 @@ export default function Profile() {
           display: "flex",
           flexDirection: "row",
           gap: 3,
-          width: "70%",
+          width: "100%",
+          marginBottom: "80px",
         }}
       >
         <Card
@@ -217,16 +441,30 @@ export default function Profile() {
           sx={{
             padding: 2,
             width: "50%",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            ...commonHoverStyle,
           }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography>Name</Typography>
+            <Typography sx={labelStyle}>Name</Typography>
             <TextField
-              value={userData?.name || ""}
-              InputProps={{ readOnly: true }}
+              value={profileData.full_name || ""}
+              onChange={(e) => handleChange("full_name", e.target.value)}
+              sx={textFieldStyle}
             />
-            <AgeSelect />
-            <GenderSelection />
+            <Typography sx={labelStyle}>Age</Typography>
+            <TextField
+              value={profileData.age || ""}
+              onChange={(e) => handleChange("age", e.target.value)}
+              sx={textFieldStyle}
+            />
+            <GenderSelection
+              value={profileData.gender}
+              onChange={(value) => handleChange("gender", value)}
+              sx={textFieldStyle}
+            />
           </Box>
         </Card>
 
@@ -235,15 +473,63 @@ export default function Profile() {
           sx={{
             padding: 2,
             width: "50%",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            ...commonHoverStyle,
           }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography>Preferred Activity Type</Typography>
-            <ActivityType />
-            <ExerciseLevel />
-            <Location />
+            <Typography sx={labelStyle}>Preferred Activity Type</Typography>
+            <ActivityType
+              value={profileData.activityType}
+              onChange={(value) => handleChange("activityType", value)}
+              sx={textFieldStyle}
+            />
+            <ExerciseLevel
+              value={profileData.exerciseLevel}
+              onChange={(value) => handleChange("exerciseLevel", value)}
+              sx={textFieldStyle}
+            />
+            <Location
+              value={profileData.sportsVenue}
+              onChange={(value) => handleChange("sportsVenue", value)}
+              sx={textFieldStyle}
+            />
           </Box>
         </Card>
+      </Box>
+
+      {/* Save Button */}
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 40,
+          right: "15%",
+          zIndex: 1000,
+          display: "flex",
+          gap: 2,
+        }}
+      >
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          sx={{
+            padding: "12px 36px",
+            fontSize: "1.1rem",
+            borderRadius: "8px",
+            backgroundColor: "primary.main",
+            boxShadow:
+              "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+            "&:hover": {
+              backgroundColor: "primary.dark",
+              boxShadow:
+                "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+            },
+          }}
+        >
+          Save Profile
+        </Button>
       </Box>
     </Box>
   );

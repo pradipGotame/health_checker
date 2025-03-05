@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
   Box,
   Button,
@@ -7,6 +7,7 @@ import {
   Container,
   Tooltip,
   Skeleton,
+  useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +40,8 @@ import {
   Legend,
   CartesianGrid,
 } from "recharts";
-import NavBar from "../../components/Landing/NavBar";
+import { ThemeContext } from "../../lib/ThemeContext";
+import ThemeToggle from "../../components/ui/ThemeToggle";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   borderRadius: 12,
@@ -81,29 +83,29 @@ const StreakCard = styled(Box)(({ theme }) => ({
 }));
 
 // Add custom tooltip component
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <Box
-        sx={{
-          bgcolor: "rgba(0, 0, 0, 0.8)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          borderRadius: 1,
-          p: 1.5,
-          backdropFilter: "blur(24px)",
-        }}
-      >
-        <Typography variant="caption" sx={{ color: "#fff" }}>
-          {label}
-        </Typography>
-        <Typography variant="body2" sx={{ color: "#84CC16", mt: 0.5 }}>
-          {`${payload[0].value} activities`}
-        </Typography>
-      </Box>
-    );
-  }
-  return null;
-};
+// const CustomTooltip = ({ active, payload, label }) => {
+//   if (active && payload && payload.length) {
+//     return (
+//       <Box
+//         sx={{
+//           bgcolor: "rgba(0, 0, 0, 0.8)",
+//           border: "1px solid rgba(255, 255, 255, 0.1)",
+//           borderRadius: 1,
+//           p: 1.5,
+//           backdropFilter: "blur(24px)",
+//         }}
+//       >
+//         <Typography variant="caption" sx={{ color: "#fff" }}>
+//           {label}
+//         </Typography>
+//         <Typography variant="body2" sx={{ color: "#84CC16", mt: 0.5 }}>
+//           {`${payload[0].value} activities`}
+//         </Typography>
+//       </Box>
+//     );
+//   }
+//   return null;
+// };
 
 // Add a keyframe animation for the wave effect
 const pulseKeyframe = keyframes`
@@ -133,6 +135,8 @@ export default function Dashboard() {
   const [weeklyData, setWeeklyData] = useState([]);
   const [distributionData, setDistributionData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { darkMode } = useContext(ThemeContext);
+  const theme = useTheme();
 
   // const { app } = firebase;
 
@@ -180,7 +184,7 @@ export default function Dashboard() {
 
         // Prepare weekly activity data
         const today = new Date();
-        const weekStart = startOfWeek(today);
+        // const weekStart = startOfWeek(today);
         const last7Days = eachDayOfInterval({
           start: subDays(today, 6),
           end: today,
@@ -213,7 +217,7 @@ export default function Dashboard() {
   }, [user]);
 
   // Add chart colors
-  const COLORS = ["#84CC16", "#65a30d", "#4d7c0f"];
+  const COLORS = ["#eab308", "#7c3aed", "#f43f5e"];
 
   const formatActivityDetails = (activity) => {
     if (activity.workoutType === "Cardio") {
@@ -354,8 +358,7 @@ export default function Dashboard() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+        backgroundImage: !darkMode ? "" : "",
       }}
     >
       <Container
@@ -392,15 +395,13 @@ export default function Dashboard() {
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={2}>
+                  <ThemeToggle />
                   <Button
                     variant="contained"
                     startIcon={<AddIcon />}
                     onClick={() => navigate("/create-activity")}
                     sx={{
                       textTransform: "none",
-                      borderRadius: 2,
-                      px: { xs: 2, sm: 3 },
-                      py: { xs: 0.75, sm: 1 },
                     }}
                   >
                     New Activity
@@ -410,7 +411,6 @@ export default function Dashboard() {
                     onClick={logout}
                     sx={{
                       textTransform: "none",
-                      borderRadius: 2,
                       borderColor: "divider",
                       color: "text.secondary",
                       "&:hover": {
@@ -435,7 +435,14 @@ export default function Dashboard() {
                   Quick Actions
                 </Typography>
                 <Stack spacing={2}>
-                  <QuickActionCard onClick={() => navigate("/create-activity")}>
+                  <QuickActionCard
+                    onClick={() => navigate("/create-activity?type=Cardio")}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "divider",
+                      },
+                    }}
+                  >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box
                         sx={{
@@ -443,6 +450,9 @@ export default function Dashboard() {
                           borderRadius: 1,
                           bgcolor: "primary.main",
                           color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         <DirectionsRunIcon />
@@ -458,7 +468,14 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate("/create-activity")}>
+                  <QuickActionCard
+                    onClick={() => navigate("/create-activity?type=Strength")}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "divider",
+                      },
+                    }}
+                  >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box
                         sx={{
@@ -466,6 +483,9 @@ export default function Dashboard() {
                           borderRadius: 1,
                           bgcolor: "primary.main",
                           color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         <FitnessCenterIcon />
@@ -481,7 +501,14 @@ export default function Dashboard() {
                     </Stack>
                   </QuickActionCard>
 
-                  <QuickActionCard onClick={() => navigate("/create-activity")}>
+                  <QuickActionCard
+                    onClick={() => navigate("/create-activity?type=Mobility")}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "divider",
+                      },
+                    }}
+                  >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Box
                         sx={{
@@ -489,6 +516,9 @@ export default function Dashboard() {
                           borderRadius: 1,
                           bgcolor: "primary.main",
                           color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         <SelfImprovementIcon />
@@ -527,7 +557,10 @@ export default function Dashboard() {
                     >
                       <Typography
                         variant="h4"
-                        sx={{ color: "white", fontWeight: "bold" }}
+                        sx={{
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
                       >
                         {loading ? <Skeleton width={30} /> : stats.streak || 0}
                       </Typography>
@@ -619,7 +652,7 @@ export default function Dashboard() {
                           {stats.todayCount}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Today's Activities
+                          Today&apos;s Activities
                         </Typography>
                       </Box>
                     </Grid>
@@ -729,7 +762,7 @@ export default function Dashboard() {
                           height: 300,
                           ".recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line":
                             {
-                              stroke: "rgba(255, 255, 255, 0.1)",
+                              stroke: `${theme.palette.divider}`,
                             },
                           ".recharts-bar-rectangle": {
                             filter:
@@ -757,31 +790,31 @@ export default function Dashboard() {
                               >
                                 <stop
                                   offset="0%"
-                                  stopColor="#84CC16"
+                                  stopColor={theme.palette.primary.main}
                                   stopOpacity={0.8}
                                 />
                                 <stop
                                   offset="100%"
-                                  stopColor="#84CC16"
+                                  stopColor={theme.palette.primary.main}
                                   stopOpacity={0.3}
                                 />
                               </linearGradient>
                             </defs>
                             <CartesianGrid
-                              strokeDasharray="3 3"
+                              strokeDasharray="5 5"
                               vertical={false}
-                              stroke="rgba(255, 255, 255, 0.1)"
+                              stroke={theme.palette.divider.light}
                             />
                             <XAxis
                               dataKey="date"
-                              stroke="rgba(255, 255, 255, 0.5)"
+                              stroke={theme.palette.text.secondary}
                               fontSize={12}
                               tickLine={false}
                               axisLine={false}
                               dy={10}
                             />
                             <YAxis
-                              stroke="rgba(255, 255, 255, 0.5)"
+                              stroke={theme.palette.text.secondary}
                               fontSize={12}
                               tickLine={false}
                               axisLine={false}
@@ -864,12 +897,12 @@ export default function Dashboard() {
                                   <stop
                                     offset="0%"
                                     stopColor={color}
-                                    stopOpacity={0.8}
+                                    stopOpacity={0.7}
                                   />
                                   <stop
                                     offset="100%"
                                     stopColor={color}
-                                    stopOpacity={0.3}
+                                    stopOpacity={1}
                                   />
                                 </linearGradient>
                               ))}
@@ -908,9 +941,10 @@ export default function Dashboard() {
                               formatter={(value) => (
                                 <span
                                   style={{
-                                    color: "rgba(255, 255, 255, 0.7)",
+                                    color: theme.palette.text.secondary,
                                     fontSize: "0.875rem",
                                     fontFamily: '"Inter", sans-serif',
+                                    margin: "0 4px",
                                   }}
                                 >
                                   {value}

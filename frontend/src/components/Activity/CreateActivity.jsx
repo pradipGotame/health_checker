@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
@@ -7,20 +7,30 @@ import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import { Typography, Tooltip, Snackbar, Alert } from "@mui/material";
 import Select from "@mui/material/Select";
-import InfoIcon from '@mui/icons-material/Info';
-import TryIcon from '@mui/icons-material/Try';
+import InfoIcon from "@mui/icons-material/Info";
+import TryIcon from "@mui/icons-material/Try";
 import * as Activities from "./Activities";
 import { styled, alpha } from "@mui/material/styles";
 import { useNavigate, useLocation } from "react-router-dom";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { addDoc, collection, db, updateDoc, doc } from "../../firebase/firebase";
-import { useAuth } from '../../hooks/useAuth';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import {
+  addDoc,
+  collection,
+  updateDoc,
+  doc,
+  app,
+} from "../../firebase/firebase";
+import { useAuth } from "../../hooks/useAuth";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getDocs, getFirestore, query, where } from "firebase/firestore";
+import { getStrengthSuggestionsWithAi } from "../../ai/suggestions";
 
 const StyledCard = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
   borderRadius: 12,
   backdropFilter: "blur(24px)",
   border: "1px solid",
@@ -30,27 +40,27 @@ const StyledCard = styled(Box)(({ theme }) => ({
     : alpha(theme.palette.background.default, 0.4),
   boxShadow: (theme.vars || theme).shadows[1],
   padding: theme.spacing(3),
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(2),
   },
 }));
 
 const StyledSelect = styled(Select)(({ theme }) => ({
-  '& .MuiSelect-select': {
+  "& .MuiSelect-select": {
     backdropFilter: "blur(24px)",
     backgroundColor: theme.vars
       ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
       : alpha(theme.palette.background.default, 0.4),
   },
-  '& .MuiOutlinedInput-notchedOutline': {
+  "& .MuiOutlinedInput-notchedOutline": {
     borderColor: (theme.vars || theme).palette.divider,
   },
-  '&:hover .MuiOutlinedInput-notchedOutline': {
+  "&:hover .MuiOutlinedInput-notchedOutline": {
     borderColor: theme.palette.primary.main,
   },
-  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
     borderColor: theme.palette.primary.main,
-  }
+  },
 }));
 
 export default function CreateActivity() {
@@ -58,44 +68,131 @@ export default function CreateActivity() {
   const editMode = location.state?.editMode;
   const editActivity = location.state?.activity;
   const preselectedType = location.state?.workoutType;
-  
-  const [workoutType, updateWorkoutType] = useState(editMode ? editActivity.workoutType : preselectedType || '');
-  const [activity, updateActivity] = useState(editMode ? editActivity.activity : '');
+
+  const [workoutType, updateWorkoutType] = useState(
+    editMode ? editActivity.workoutType : preselectedType || ""
+  );
+  const [activity, updateActivity] = useState(
+    editMode ? editActivity.activity : ""
+  );
   const [formErrors, setFormErrors] = useState({});
   const [formData, setFormData] = useState({
-    duration: editMode && editActivity.duration ? editActivity.duration : '',
-    distance: editMode && editActivity.distance ? editActivity.distance : '',
-    reps: editMode && editActivity.reps ? editActivity.reps : '',
-    sets: editMode && editActivity.sets ? editActivity.sets : '',
-    weight: editMode && editActivity.weight ? editActivity.weight : '',
-    durationUnit: editMode && editActivity.durationUnit ? editActivity.durationUnit : 'min',
-    distanceUnit: editMode && editActivity.distanceUnit ? editActivity.distanceUnit : 'km'
+    duration: editMode && editActivity.duration ? editActivity.duration : "",
+    distance: editMode && editActivity.distance ? editActivity.distance : "",
+    reps: editMode && editActivity.reps ? editActivity.reps : "",
+    sets: editMode && editActivity.sets ? editActivity.sets : "",
+    weight: editMode && editActivity.weight ? editActivity.weight : "",
+    durationUnit:
+      editMode && editActivity.durationUnit ? editActivity.durationUnit : "min",
+    distanceUnit:
+      editMode && editActivity.distanceUnit ? editActivity.distanceUnit : "km",
   });
   const { user } = useAuth();
   const navigate = useNavigate();
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState({ message: '', severity: 'success' });
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    message: "",
+    severity: "success",
+  });
   const [saving, setSaving] = useState(false);
+  const [userDoc, setUserDoc] = useState(null);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [suggestions, setSuggestions] = useState({});
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      try {
+        if (user) {
+          console.log("userId:", user.uid);
+          const q = query(
+            collection(db, "users"),
+            where("userId", "==", user.uid)
+          );
+          console.log("query:", q);
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            const fetchedData = doc.data();
+            setUserDoc(fetchedData);
+            console.log("Fetched data:", fetchedData);
+          } else {
+            console.log("No matching document");
+          }
+        }
+      } catch (err) {
+        console.error("Error getting user document:", err);
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, db]);
+
+  useEffect(() => {
+    if (isSuggesting) {
+      // Call AI suggestion API
+      const user = userDoc;
+      const workout = {
+        type: workoutType,
+        activity,
+        ...formData,
+      };
+      if (
+        !user ||
+        !workoutType ||
+        !activity ||
+        !formData.sets ||
+        !formData.reps ||
+        workoutType !== Activities.WorkoutType.STRENGTH // Only suggest for strength workouts for now
+      ) {
+        setIsSuggesting(false);
+        return;
+      }
+      async function getSuggestions(user, workout) {
+        try {
+          console.log("Getting AI suggestion...");
+          const suggestions = await getStrengthSuggestionsWithAi(user, {
+            type: workout.type,
+            activity: workout.activity,
+            sets: workout.sets,
+            reps: workout.reps,
+          });
+          console.log("AI suggestions:", suggestions);
+          setSuggestions(suggestions);
+        } catch (error) {
+          console.error("Error getting AI suggestion:", error);
+        } finally {
+          setIsSuggesting(false);
+        }
+      }
+      getSuggestions(user, workout);
+    }
+  }, [isSuggesting, userDoc, workoutType, activity, formData]);
 
   const handleInputChange = (field) => (event) => {
     let value = event.target.value;
-    
+
     // Prevent negative numbers and validate input
-    if (field === 'duration' || field === 'distance' || 
-        field === 'reps' || field === 'sets' || field === 'weight') {
+    if (
+      field === "duration" ||
+      field === "distance" ||
+      field === "reps" ||
+      field === "sets" ||
+      field === "weight"
+    ) {
       // Don't allow negative signs or non-numeric characters except decimal point
-      value = value.replace(/-/g, '');
-      
+      value = value.replace(/-/g, "");
+
       // Ensure it's a valid positive number
       const num = parseFloat(value);
       if (isNaN(num) || num < 0) {
-        value = '';
+        value = "";
       }
     }
 
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (formErrors[field]) {
-      setFormErrors(prev => ({ ...prev, [field]: '' }));
+      setFormErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -103,39 +200,41 @@ export default function CreateActivity() {
     const errors = {};
 
     if (!workoutType) {
-      errors.workoutType = 'Please select a workout type';
+      errors.workoutType = "Please select a workout type";
     }
     if (!activity) {
-      errors.activity = 'Please select an activity';
+      errors.activity = "Please select an activity";
     }
 
     if (workoutType === Activities.WorkoutType.CARDIO) {
       if (!formData.duration) {
-        errors.duration = 'Duration is required';
+        errors.duration = "Duration is required";
       } else if (formData.duration <= 0) {
-        errors.duration = 'Duration must be greater than 0';
+        errors.duration = "Duration must be greater than 0";
       }
       if (!formData.distance) {
-        errors.distance = 'Distance is required';
+        errors.distance = "Distance is required";
       } else if (formData.distance <= 0) {
-        errors.distance = 'Distance must be greater than 0';
+        errors.distance = "Distance must be greater than 0";
       }
     }
 
-    if (workoutType === Activities.WorkoutType.STRENGTH || 
-        workoutType === Activities.WorkoutType.MOBILITY) {
+    if (
+      workoutType === Activities.WorkoutType.STRENGTH ||
+      workoutType === Activities.WorkoutType.MOBILITY
+    ) {
       if (!formData.reps) {
-        errors.reps = 'Reps are required';
+        errors.reps = "Reps are required";
       } else if (formData.reps <= 0) {
-        errors.reps = 'Reps must be greater than 0';
+        errors.reps = "Reps must be greater than 0";
       }
       if (!formData.sets) {
-        errors.sets = 'Sets are required';
+        errors.sets = "Sets are required";
       } else if (formData.sets <= 0) {
-        errors.sets = 'Sets must be greater than 0';
+        errors.sets = "Sets must be greater than 0";
       }
       if (workoutType === Activities.WorkoutType.STRENGTH && !formData.weight) {
-        errors.weight = 'Weight is required';
+        errors.weight = "Weight is required";
       }
     }
 
@@ -151,50 +250,57 @@ export default function CreateActivity() {
           userId: user.uid,
           workoutType,
           activity,
-          createdAt: editMode ? editActivity.createdAt : new Date().toISOString(),
+          createdAt: editMode
+            ? editActivity.createdAt
+            : new Date().toISOString(),
           ...(workoutType === Activities.WorkoutType.CARDIO && {
             duration: Number(formData.duration),
             distance: Number(formData.distance),
             durationUnit: formData.durationUnit,
-            distanceUnit: formData.distanceUnit
+            distanceUnit: formData.distanceUnit,
           }),
           ...(workoutType === Activities.WorkoutType.STRENGTH && {
             reps: Number(formData.reps),
             sets: Number(formData.sets),
-            weight: Number(formData.weight)
+            weight: Number(formData.weight),
           }),
           ...(workoutType === Activities.WorkoutType.MOBILITY && {
             reps: Number(formData.reps),
-            sets: Number(formData.sets)
-          })
+            sets: Number(formData.sets),
+          }),
         };
 
         if (editMode) {
           // Update existing document
           await updateDoc(doc(db, "activities", editActivity.id), activityData);
           setSnackbarMessage({
-            message: 'Activity updated successfully!',
-            severity: 'success'
+            message: "Activity updated successfully!",
+            severity: "success",
           });
         } else {
           // Create new document
           await addDoc(collection(db, "activities"), activityData);
           setSnackbarMessage({
-            message: 'Activity saved successfully!',
-            severity: 'success'
+            message: "Activity saved successfully!",
+            severity: "success",
           });
         }
-        
+
         setOpenSnackbar(true);
         setTimeout(() => {
-          navigate('/activity-page');
+          navigate("/activity-page");
         }, 1500);
       } catch (error) {
-        console.error(editMode ? "Error updating activity:" : "Error saving activity:", error);
+        console.error(
+          editMode ? "Error updating activity:" : "Error saving activity:",
+          error
+        );
         setOpenSnackbar(true);
         setSnackbarMessage({
-          message: editMode ? 'Failed to update activity. Please try again.' : 'Failed to save activity. Please try again.',
-          severity: 'error'
+          message: editMode
+            ? "Failed to update activity. Please try again."
+            : "Failed to save activity. Please try again.",
+          severity: "error",
         });
       } finally {
         setSaving(false);
@@ -211,7 +317,7 @@ export default function CreateActivity() {
       return Activities.Cardio;
     } else if (workoutType == Activities.WorkoutType.STRENGTH) {
       return Activities.Strength;
-    }  else if (workoutType === Activities.WorkoutType.MOBILITY) {
+    } else if (workoutType === Activities.WorkoutType.MOBILITY) {
       return Activities.Mobility;
     } else {
       return Activities.Mobility;
@@ -221,9 +327,7 @@ export default function CreateActivity() {
   return (
     <Box
       sx={{
-        backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
-        minHeight: '100vh'
+        minHeight: "100vh",
       }}
     >
       <Container
@@ -232,41 +336,41 @@ export default function CreateActivity() {
           flexDirection: "column",
           pt: { xs: 6, sm: 8 },
           pb: { xs: 3, sm: 4 },
-          gap: 1.5
+          gap: 1.5,
         }}
       >
-        <Stack 
-          direction="row" 
-          spacing={1} 
-          sx={{ 
-            cursor: 'pointer',
-            width: 'fit-content',
-            '&:hover': { 
-              color: 'primary.main',
-            }
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            cursor: "pointer",
+            width: "fit-content",
+            "&:hover": {
+              color: "primary.main",
+            },
           }}
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate("/dashboard")}
         >
           <ArrowBackIcon sx={{ fontSize: 20 }} />
-          <Typography 
-            sx={{ 
-              color: 'inherit',
-              fontSize: '0.875rem',
-              fontWeight: 500
+          <Typography
+            sx={{
+              color: "inherit",
+              fontSize: "0.875rem",
+              fontWeight: 500,
             }}
           >
             Back to Dashboard
           </Typography>
         </Stack>
-        <Typography 
-          variant="h4" 
-          sx={{ 
-            fontWeight: 'bold',
-            color: 'primary.main',
-            fontSize: { xs: '1.75rem', sm: '2.125rem' }
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: "bold",
+            color: "primary.main",
+            fontSize: { xs: "1.75rem", sm: "2.125rem" },
           }}
         >
-          {editMode ? 'Edit Activity' : 'New Activity'}
+          {editMode ? "Edit Activity" : "New Activity"}
         </Typography>
         <Stack
           direction={{ xs: "column-reverse", sm: "row" }}
@@ -276,17 +380,17 @@ export default function CreateActivity() {
           <StyledCard
             sx={{
               flex: 7,
-              width: '100%'
+              width: "100%",
             }}
           >
             <Stack spacing={{ xs: 2, sm: 3 }}>
               <Box>
-                <Typography 
-                  variant="subtitle1" 
-                  color="text.secondary" 
-                  sx={{ 
+                <Typography
+                  variant="subtitle1"
+                  color="text.secondary"
+                  sx={{
                     mb: { xs: 0.5, sm: 1 },
-                    fontSize: { xs: '0.875rem', sm: '1rem' }
+                    fontSize: { xs: "0.875rem", sm: "1rem" },
                   }}
                 >
                   Workout Type
@@ -294,62 +398,64 @@ export default function CreateActivity() {
                 <StyledSelect
                   value={workoutType}
                   size="small"
-                  sx={{ 
+                  sx={{
                     width: "100%",
-                    '& .MuiSelect-select': {
+                    "& .MuiSelect-select": {
                       py: { xs: 0.75, sm: 1 },
-                      fontSize: { xs: '0.875rem', sm: '1rem' }
-                    }
+                      fontSize: { xs: "0.875rem", sm: "1rem" },
+                    },
                   }}
                   onChange={(event) => {
                     updateWorkoutType(event.target.value);
-                    updateActivity(''); // Reset activity when type changes
+                    updateActivity(""); // Reset activity when type changes
                   }}
                   MenuProps={{
                     PaperProps: {
                       sx: {
                         maxHeight: 300,
                         backdropFilter: "blur(24px)",
-                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        backgroundColor: "rgba(0, 0, 0, 0.4)",
                         border: "1px solid",
-                        borderColor: 'divider',
-                        '& .MuiMenuItem-root': {
-                          '&:hover': {
-                            backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                        borderColor: "divider",
+                        "& .MuiMenuItem-root": {
+                          "&:hover": {
+                            backgroundColor: "rgba(132, 204, 22, 0.1)",
                           },
-                          '&.Mui-selected': {
-                            backgroundColor: 'rgba(132, 204, 22, 0.2)',
-                            '&:hover': {
-                              backgroundColor: 'rgba(132, 204, 22, 0.3)',
-                            }
-                          }
-                        }
-                      }
+                          "&.Mui-selected": {
+                            backgroundColor: "rgba(132, 204, 22, 0.2)",
+                            "&:hover": {
+                              backgroundColor: "rgba(132, 204, 22, 0.3)",
+                            },
+                          },
+                        },
+                      },
                     },
                     anchorOrigin: {
-                      vertical: 'bottom',
-                      horizontal: 'left',
+                      vertical: "bottom",
+                      horizontal: "left",
                     },
                     transformOrigin: {
-                      vertical: 'top',
-                      horizontal: 'left',
-                    }
+                      vertical: "top",
+                      horizontal: "left",
+                    },
                   }}
                 >
                   {Object.values(Activities.WorkoutType).map((type) => (
-                    <MenuItem key={type} value={type}>{type}</MenuItem>
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
                   ))}
                 </StyledSelect>
               </Box>
 
               {workoutType && (
                 <Box>
-                  <Typography 
-                    variant="subtitle1" 
+                  <Typography
+                    variant="subtitle1"
                     color="text.secondary"
-                    sx={{ 
+                    sx={{
                       mb: { xs: 0.5, sm: 1 },
-                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                      fontSize: { xs: "0.875rem", sm: "1rem" },
                     }}
                   >
                     Activity
@@ -357,12 +463,12 @@ export default function CreateActivity() {
                   <StyledSelect
                     value={activity}
                     size="small"
-                    sx={{ 
+                    sx={{
                       width: "100%",
-                      '& .MuiSelect-select': {
+                      "& .MuiSelect-select": {
                         py: { xs: 0.75, sm: 1 },
-                        fontSize: { xs: '0.875rem', sm: '1rem' }
-                      }
+                        fontSize: { xs: "0.875rem", sm: "1rem" },
+                      },
                     }}
                     onChange={(event) => updateActivity(event.target.value)}
                     MenuProps={{
@@ -370,34 +476,36 @@ export default function CreateActivity() {
                         sx: {
                           maxHeight: 300,
                           backdropFilter: "blur(24px)",
-                          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                          backgroundColor: "rgba(0, 0, 0, 0.4)",
                           border: "1px solid",
-                          borderColor: 'divider',
-                          '& .MuiMenuItem-root': {
-                            '&:hover': {
-                              backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                          borderColor: "divider",
+                          "& .MuiMenuItem-root": {
+                            "&:hover": {
+                              backgroundColor: "rgba(132, 204, 22, 0.1)",
                             },
-                            '&.Mui-selected': {
-                              backgroundColor: 'rgba(132, 204, 22, 0.2)',
-                              '&:hover': {
-                                backgroundColor: 'rgba(132, 204, 22, 0.3)',
-                              }
-                            }
-                          }
-                        }
+                            "&.Mui-selected": {
+                              backgroundColor: "rgba(132, 204, 22, 0.2)",
+                              "&:hover": {
+                                backgroundColor: "rgba(132, 204, 22, 0.3)",
+                              },
+                            },
+                          },
+                        },
                       },
                       anchorOrigin: {
-                        vertical: 'bottom',
-                        horizontal: 'left',
+                        vertical: "bottom",
+                        horizontal: "left",
                       },
                       transformOrigin: {
-                        vertical: 'top',
-                        horizontal: 'left',
-                      }
+                        vertical: "top",
+                        horizontal: "left",
+                      },
                     }}
                   >
                     {Object.values(getActivities()).map((workout) => (
-                      <MenuItem key={workout} value={workout}>{workout}</MenuItem>
+                      <MenuItem key={workout} value={workout}>
+                        {workout}
+                      </MenuItem>
                     ))}
                   </StyledSelect>
                 </Box>
@@ -405,26 +513,26 @@ export default function CreateActivity() {
 
               {workoutType === Activities.WorkoutType.CARDIO && (
                 <Stack spacing={{ xs: 2, sm: 3 }}>
-                  <Stack 
-                    direction={{ xs: 'column', sm: 'row' }} 
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
                     spacing={{ xs: 2, sm: 3 }}
                   >
                     <Box flex={1}>
-                      <Typography 
-                        variant="subtitle1" 
+                      <Typography
+                        variant="subtitle1"
                         color="text.secondary"
-                        sx={{ 
+                        sx={{
                           mb: { xs: 0.5, sm: 1 },
-                          fontSize: { xs: '0.875rem', sm: '1rem' }
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
                         }}
                       >
                         Duration
                       </Typography>
-                      <Stack 
-                        direction="row" 
+                      <Stack
+                        direction="row"
                         spacing={1}
-                        sx={{ 
-                          flexWrap: { xs: 'wrap', sm: 'nowrap' }
+                        sx={{
+                          flexWrap: { xs: "wrap", sm: "nowrap" },
                         }}
                       >
                         <TextField
@@ -433,24 +541,24 @@ export default function CreateActivity() {
                           type="number"
                           inputProps={{
                             step: "1",
-                            min: "0"
+                            min: "0",
                           }}
-                          sx={{ 
+                          sx={{
                             flex: 1,
-                            minWidth: { xs: '100%', sm: 'auto' },
-                            mb: { xs: 1, sm: 0 }
+                            minWidth: { xs: "100%", sm: "auto" },
+                            mb: { xs: 1, sm: 0 },
                           }}
                           error={!!formErrors.duration}
                           helperText={formErrors.duration}
                           value={formData.duration}
-                          onChange={handleInputChange('duration')}
+                          onChange={handleInputChange("duration")}
                         />
                         <StyledSelect
                           size="small"
                           value={formData.durationUnit}
-                          onChange={handleInputChange('durationUnit')}
-                          sx={{ 
-                            width: { xs: '100%', sm: '120px' }
+                          onChange={handleInputChange("durationUnit")}
+                          sx={{
+                            width: { xs: "100%", sm: "120px" },
                           }}
                         >
                           <MenuItem value="min">Minutes</MenuItem>
@@ -471,30 +579,30 @@ export default function CreateActivity() {
                         type="number"
                         inputProps={{
                           step: "1",
-                          min: "0"
+                          min: "0",
                         }}
-                        sx={{ 
+                        sx={{
                           flex: 1,
-                          '& .MuiOutlinedInput-input': {
+                          "& .MuiOutlinedInput-input": {
                             py: 1,
-                            fontSize: '0.875rem'
-                          }
+                            fontSize: "0.875rem",
+                          },
                         }}
                         error={!!formErrors.distance}
                         helperText={formErrors.distance}
                         value={formData.distance}
-                        onChange={handleInputChange('distance')}
+                        onChange={handleInputChange("distance")}
                       />
                       <StyledSelect
                         size="small"
                         value={formData.distanceUnit}
-                        onChange={handleInputChange('distanceUnit')}
-                        sx={{ 
+                        onChange={handleInputChange("distanceUnit")}
+                        sx={{
                           width: "120px",
-                          '& .MuiSelect-select': {
+                          "& .MuiSelect-select": {
                             py: 1,
-                            fontSize: '0.875rem'
-                          }
+                            fontSize: "0.875rem",
+                          },
                         }}
                       >
                         <MenuItem value="km">Kilometers</MenuItem>
@@ -506,9 +614,10 @@ export default function CreateActivity() {
                 </Stack>
               )}
 
-              {(workoutType === Activities.WorkoutType.STRENGTH || workoutType === Activities.WorkoutType.MOBILITY) && (
-                <Stack 
-                  direction={{ xs: 'column', sm: 'row' }} 
+              {(workoutType === Activities.WorkoutType.STRENGTH ||
+                workoutType === Activities.WorkoutType.MOBILITY) && (
+                <Stack
+                  direction={{ xs: "column", sm: "row" }}
                   spacing={{ xs: 2, sm: 3 }}
                 >
                   <Stack spacing={1} sx={{ flex: 1 }}>
@@ -523,18 +632,18 @@ export default function CreateActivity() {
                       type="number"
                       inputProps={{
                         step: "1",
-                        min: "0"
+                        min: "0",
                       }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-input': {
+                      sx={{
+                        "& .MuiOutlinedInput-input": {
                           py: 1,
-                          fontSize: '0.875rem'
-                        }
+                          fontSize: "0.875rem",
+                        },
                       }}
                       error={!!formErrors.reps}
                       helperText={formErrors.reps}
                       value={formData.reps}
-                      onChange={handleInputChange('reps')}
+                      onChange={handleInputChange("reps")}
                     />
                   </Stack>
                   <Stack spacing={1} sx={{ flex: 1 }}>
@@ -549,18 +658,18 @@ export default function CreateActivity() {
                       type="number"
                       inputProps={{
                         step: "1",
-                        min: "0"
+                        min: "0",
                       }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-input': {
+                      sx={{
+                        "& .MuiOutlinedInput-input": {
                           py: 1,
-                          fontSize: '0.875rem'
-                        }
+                          fontSize: "0.875rem",
+                        },
                       }}
                       error={!!formErrors.sets}
                       helperText={formErrors.sets}
                       value={formData.sets}
-                      onChange={handleInputChange('sets')}
+                      onChange={handleInputChange("sets")}
                     />
                   </Stack>
                   {workoutType === Activities.WorkoutType.STRENGTH && (
@@ -576,61 +685,82 @@ export default function CreateActivity() {
                         type="number"
                         inputProps={{
                           step: "1",
-                          min: "0"
+                          min: "0",
                         }}
                         error={!!formErrors.weight}
                         helperText={formErrors.weight}
                         value={formData.weight}
-                        onChange={handleInputChange('weight')}
+                        onChange={handleInputChange("weight")}
                       />
                     </Stack>
                   )}
                 </Stack>
               )}
 
-              <Box sx={{ 
-                display: 'flex',
-                justifyContent: 'flex-end',
-                mt: { xs: 3, sm: 4 },
-                gap: 2
-              }}>
-                <Button 
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  mt: { xs: 3, sm: 4 },
+                  gap: 2,
+                }}
+              >
+                <Button
                   variant="outlined"
-                  onClick={() => navigate('/activity-page')}
-                  sx={{ 
-                    px: { xs: 2, sm: 3 },
-                    py: { xs: 0.75, sm: 1 },
-                    fontSize: { xs: '0.875rem', sm: '1rem' },
-                    textTransform: 'none',
-                    borderRadius: '8px',
-                    borderColor: 'divider',
-                    color: 'text.secondary',
-                    '&:hover': {
-                      borderColor: 'primary.main',
-                      backgroundColor: 'rgba(132, 204, 22, 0.04)',
-                    }
+                  startIcon={<AutoAwesomeIcon />}
+                  sx={{
+                    textTransform: "none",
+                    border: "none",
+                    color: "white",
+                    background:
+                      "linear-gradient(90deg, #1565C0, #6A1B9A, #E91E63)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      background:
+                        "linear-gradient(90deg, #1976D2, #8E24AA, #F50057)",
+                      boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+                    },
+                  }}
+                  onClick={() => setIsSuggesting(true)}
+                  disabled={isSuggesting || saving}
+                >
+                  Get AI Suggestion
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate("/activity-page")}
+                  sx={{
+                    textTransform: "none",
+                    borderColor: "divider",
+                    color: "text.secondary",
+                    "&:hover": {
+                      borderColor: "primary.main",
+                      backgroundColor: "rgba(132, 204, 22, 0.04)",
+                    },
                   }}
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   variant="contained"
                   disabled={saving}
                   onClick={handleSubmit}
-                  startIcon={saving ? null : editMode ? <EditIcon /> : <AddIcon />}
-                  sx={{ 
-                    px: { xs: 2, sm: 3 },
-                    py: { xs: 0.75, sm: 1 },
-                    fontSize: { xs: '0.875rem', sm: '1rem' },
-                    textTransform: 'none',
-                    borderRadius: '8px',
-                    backgroundColor: 'primary.main',
-                    '&:hover': {
-                      backgroundColor: 'primary.dark',
-                    }
+                  startIcon={
+                    saving ? null : editMode ? <EditIcon /> : <AddIcon />
+                  }
+                  sx={{
+                    textTransform: "none",
+                    backgroundColor: "primary.main",
+                    "&:hover": {
+                      backgroundColor: "primary.dark",
+                    },
                   }}
                 >
-                  {saving ? 'Saving...' : editMode ? 'Update Activity' : 'Save Activity'}
+                  {saving
+                    ? "Saving..."
+                    : editMode
+                    ? "Update Activity"
+                    : "Save Activity"}
                 </Button>
               </Box>
             </Stack>
@@ -638,7 +768,7 @@ export default function CreateActivity() {
           <StyledCard
             sx={{
               flex: 3,
-              width: { xs: '100%', sm: 'auto' }
+              width: { xs: "100%", sm: "auto" },
             }}
           >
             <Stack spacing={1.5} width="100%">
@@ -650,51 +780,54 @@ export default function CreateActivity() {
                   borderRadius: "12px",
                   background: "rgba(132, 204, 22, 0.03)",
                   minHeight: 160,
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&::before': {
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::before": {
                     content: '""',
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: '3px',
-                    background: 'linear-gradient(90deg, transparent, rgba(132, 204, 22, 0.3), transparent)'
-                  }
+                    height: "3px",
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(132, 204, 22, 0.3), transparent)",
+                  },
                 }}
               >
-                <Box sx={{ position: 'relative' }}>
-                  <Tooltip 
+                <Box sx={{ position: "relative" }}>
+                  <Tooltip
                     title="Activity details and information"
                     placement="top"
                     arrow
                   >
-                    <InfoIcon 
-                      sx={{ 
+                    <InfoIcon
+                      sx={{
                         fontSize: 24,
-                        color: 'primary.main',
-                        cursor: 'help',
-                        transition: 'transform 0.2s ease-in-out',
-                        '&:hover': {
-                          transform: 'scale(1.1)'
-                        }
-                      }} 
+                        color: "primary.main",
+                        cursor: "help",
+                        transition: "transform 0.2s ease-in-out",
+                        "&:hover": {
+                          transform: "scale(1.1)",
+                        },
+                      }}
                     />
                   </Tooltip>
                 </Box>
-                
-                <Box sx={{ 
-                  width: '100%',
-                  transition: 'opacity 0.3s ease',
-                  opacity: workoutType ? 1 : 0.7
-                }}>
+
+                <Box
+                  sx={{
+                    width: "100%",
+                    transition: "opacity 0.3s ease",
+                    opacity: workoutType ? 1 : 0.7,
+                  }}
+                >
                   {!workoutType ? (
-                    <Typography 
+                    <Typography
                       align="center"
                       color="text.secondary"
-                      sx={{ 
-                        fontSize: '0.875rem',
-                        fontStyle: 'italic'
+                      sx={{
+                        fontSize: "0.875rem",
+                        fontStyle: "italic",
                       }}
                     >
                       Select a workout type to see details
@@ -703,35 +836,35 @@ export default function CreateActivity() {
                     <Stack spacing={1.5} width="100%">
                       {activity ? (
                         <>
-                          <Typography 
+                          <Typography
                             variant="subtitle1"
                             align="center"
                             color="primary"
-                            sx={{ 
+                            sx={{
                               fontWeight: 600,
-                              position: 'relative',
-                              '&::after': {
+                              position: "relative",
+                              "&::after": {
                                 content: '""',
-                                position: 'absolute',
+                                position: "absolute",
                                 bottom: -4,
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                width: '40px',
-                                height: '2px',
-                                backgroundColor: 'primary.main',
-                                opacity: 0.5
-                              }
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                width: "40px",
+                                height: "2px",
+                                backgroundColor: "primary.main",
+                                opacity: 0.5,
+                              },
                             }}
                           >
                             {activity}
                           </Typography>
-                          <Typography 
+                          <Typography
                             align="center"
                             color="text.secondary"
-                            sx={{ 
-                              fontSize: '0.875rem',
+                            sx={{
+                              fontSize: "0.875rem",
                               lineHeight: 1.5,
-                              px: 1
+                              px: 1,
                             }}
                           >
                             {Activities.ActivityDescriptions[activity]}
@@ -739,35 +872,35 @@ export default function CreateActivity() {
                         </>
                       ) : (
                         <>
-                          <Typography 
+                          <Typography
                             variant="subtitle1"
                             align="center"
                             color="primary"
-                            sx={{ 
+                            sx={{
                               fontWeight: 600,
-                              position: 'relative',
-                              '&::after': {
+                              position: "relative",
+                              "&::after": {
                                 content: '""',
-                                position: 'absolute',
+                                position: "absolute",
                                 bottom: -4,
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                width: '40px',
-                                height: '2px',
-                                backgroundColor: 'primary.main',
-                                opacity: 0.5
-                              }
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                width: "40px",
+                                height: "2px",
+                                backgroundColor: "primary.main",
+                                opacity: 0.5,
+                              },
                             }}
                           >
                             {workoutType}
                           </Typography>
-                          <Typography 
+                          <Typography
                             align="center"
                             color="text.secondary"
-                            sx={{ 
-                              fontSize: '0.875rem',
+                            sx={{
+                              fontSize: "0.875rem",
                               lineHeight: 1.5,
-                              px: 1
+                              px: 1,
                             }}
                           >
                             {Activities.WorkoutDescriptions[workoutType]}
@@ -787,49 +920,52 @@ export default function CreateActivity() {
                   borderRadius: "12px",
                   background: "rgba(132, 204, 22, 0.03)",
                   minHeight: 120,
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&::before': {
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::before": {
                     content: '""',
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: '3px',
-                    background: 'linear-gradient(270deg, transparent, rgba(132, 204, 22, 0.3), transparent)'
-                  }
+                    height: "3px",
+                    background:
+                      "linear-gradient(270deg, transparent, rgba(132, 204, 22, 0.3), transparent)",
+                  },
                 }}
               >
-                <Box sx={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}>
-                  <Typography 
-                    variant="subtitle1" 
-                    sx={{ 
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
                       fontWeight: 600,
-                      color: 'primary.main',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1
+                      color: "primary.main",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
                     }}
                   >
                     AI Recommendation
-                    <Tooltip 
+                    <Tooltip
                       title="Get personalized workout suggestions"
                       placement="top"
                       arrow
                     >
-                      <TryIcon 
-                        sx={{ 
+                      <TryIcon
+                        sx={{
                           fontSize: 20,
-                          color: 'primary.main',
-                          cursor: 'help',
-                          transition: 'transform 0.2s ease-in-out',
-                          '&:hover': {
-                            transform: 'rotate(15deg)'
-                          }
+                          color: "primary.main",
+                          cursor: "help",
+                          transition: "transform 0.2s ease-in-out",
+                          "&:hover": {
+                            transform: "rotate(15deg)",
+                          },
                         }}
                       />
                     </Tooltip>
@@ -839,10 +975,10 @@ export default function CreateActivity() {
                 <Typography
                   align="center"
                   color="text.secondary"
-                  sx={{ 
-                    fontSize: '0.875rem',
-                    fontStyle: 'italic',
-                    opacity: 0.8
+                  sx={{
+                    fontSize: "0.875rem",
+                    fontStyle: "italic",
+                    opacity: 0.8,
                   }}
                 >
                   Complete your activity details to get AI suggestions
@@ -851,28 +987,91 @@ export default function CreateActivity() {
             </Stack>
           </StyledCard>
         </Stack>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            mt: 3,
+          }}
+        >
+          {Object.keys(suggestions).length > 0 && (
+            <StyledCard
+              sx={{
+                width: "100%",
+                p: 2,
+                borderRadius: 2,
+                backdropFilter: "blur(24px)",
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  color: "primary.main",
+                  mb: 1,
+                }}
+              >
+                AI Suggestions
+              </Typography>
+              <div>
+                <h2>Training Techniques</h2>
+                <ul>
+                  {Object.entries(suggestions.techniques).map(
+                    ([key, value]) => (
+                      <li key={key}>
+                        <strong>{key.replace(/_/g, " ")}:</strong> {value}
+                      </li>
+                    )
+                  )}
+                </ul>
+
+                <h2>Supplementary Exercises</h2>
+                <ul>
+                  {suggestions.supplementary.map((item, index) => (
+                    <li key={index}>
+                      <strong>{item.activity}</strong> - Sets: {item.sets},
+                      Reps: {item.reps}
+                    </li>
+                  ))}
+                </ul>
+
+                <h2>Recovery Strategies</h2>
+                <ul>
+                  {Object.entries(suggestions.recovary).map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key.replace(/_/g, " ")}:</strong> {value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </StyledCard>
+          )}
+        </Box>
       </Container>
-      
+
       <Snackbar
         open={openSnackbar}
         autoHideDuration={1500}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert 
+        <Alert
           severity={snackbarMessage.severity}
           variant="filled"
-          sx={{ 
-            width: '100%',
-            bgcolor: 'primary.main',
-            '& .MuiAlert-icon': {
-              color: 'white'
-            }
+          sx={{
+            width: "100%",
+            bgcolor: "primary.main",
+            "& .MuiAlert-icon": {
+              color: "white",
+            },
           }}
         >
           {snackbarMessage.message}
         </Alert>
       </Snackbar>
+      {/* Create suggestions section */}
     </Box>
   );
 }

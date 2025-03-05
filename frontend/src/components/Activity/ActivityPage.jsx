@@ -42,7 +42,6 @@ import {
   subDays,
 } from "date-fns";
 import DeleteIcon from "@mui/icons-material/Delete";
-import NavBar from "../Landing/NavBar";
 
 const StyledCard = styled(Stack)(({ theme }) => ({
   borderRadius: 12,
@@ -284,8 +283,6 @@ export default function ActivityPage() {
       <Box
         sx={{
           minHeight: "100vh",
-          backgroundImage:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
         }}
       >
         <Container
@@ -423,8 +420,6 @@ export default function ActivityPage() {
     <Box
       sx={{
         minHeight: "100vh",
-        backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
       }}
     >
       {/* <NavBar /> */}
@@ -439,9 +434,32 @@ export default function ActivityPage() {
       >
         <Stack
           direction="row"
+          spacing={1}
+          sx={{
+            cursor: "pointer",
+            width: "fit-content",
+            "&:hover": {
+              color: "primary.main",
+            },
+          }}
+          onClick={() => navigate("/dashboard")}
+        >
+          <ArrowBackIcon sx={{ fontSize: 20 }} />
+          <Typography
+            sx={{
+              color: "inherit",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+            }}
+          >
+            Back to Dashboard
+          </Typography>
+        </Stack>
+
+        <Stack
+          direction="row"
           justifyContent="space-between"
           alignItems="center"
-          style={{ marginTop: 50 }}
         >
           <Typography
             variant="h4"

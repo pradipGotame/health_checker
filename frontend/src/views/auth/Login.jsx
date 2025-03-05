@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   Box,
   Button,
@@ -14,10 +14,14 @@ import { useNavigate } from "react-router-dom";
 import Logo from "../../components/Landing/Logo";
 import useLogin from "../../hooks/useLogin";
 
+import { ThemeContext } from "../../lib/ThemeContext";
+import ThemeToggle from "../../components/ui/ThemeToggle";
+
 export default function Login() {
   const navigate = useNavigate();
   const { loginUser, loading } = useLogin();
   const [formError, setFormError] = useState(null);
+  const { darkMode } = useContext(ThemeContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -46,8 +50,9 @@ export default function Login() {
         sx={() => ({
           width: "100%",
           backgroundRepeat: "no-repeat",
-          backgroundImage:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+          backgroundImage: !darkMode
+            ? "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(185, 100%, 14%), transparent)"
+            : "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
           position: "absolute",
           height: "100%",
           left: 0,
@@ -55,7 +60,15 @@ export default function Login() {
           zIndex: -1,
         })}
       />
-      <Container component="main" maxWidth="xs" sx={{ paddingTop: 8 }}>
+      <Container
+        component="main"
+        maxWidth="xs"
+        sx={{
+          paddingTop: 8,
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
         <Button
           variant="outlined"
           onClick={() => navigate("/")}
@@ -63,6 +76,7 @@ export default function Login() {
         >
           <Logo />
         </Button>
+        <ThemeToggle />
       </Container>
 
       <Container component="main" maxWidth="xs" sx={{ paddingTop: 4 }}>
