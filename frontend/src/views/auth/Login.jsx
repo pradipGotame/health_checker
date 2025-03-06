@@ -9,7 +9,7 @@ import {
   CssBaseline,
   Paper,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import Logo from "../../components/Landing/Logo";
 import useLogin from "../../hooks/useLogin";
@@ -19,6 +19,7 @@ import ThemeToggle from "../../components/ui/ThemeToggle";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { loginUser, loading } = useLogin();
   const [formError, setFormError] = useState(null);
   const { darkMode } = useContext(ThemeContext);
@@ -40,7 +41,10 @@ export default function Login() {
       setFormError("Invalid credentials.");
       return;
     }
-    navigate("/dashboard");
+    
+    // Check if there's a redirect path in the location state
+    const from = location.state?.from || "/dashboard";
+    navigate(from);
   };
 
   return (

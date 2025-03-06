@@ -10,6 +10,7 @@ import { styled, alpha } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../hooks/useAuth";
 
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import ViewQuiltRoundedIcon from "@mui/icons-material/ViewQuiltRounded";
@@ -39,141 +40,155 @@ const items = [
     title: "Smart Dashboard",
     description:
       "Track your fitness journey with our intuitive dashboard. View your progress, analyze trends, and stay motivated with personalized insights.",
-    preview: ({ navigate }) => (
-      <Box
-        sx={{
-          height: "100%",
-          width: "100%",
-          overflow: "hidden",
-          borderRadius: 2,
-          position: "relative",
-          p: { xs: 2, sm: 2.5 },
-        }}
-      >
-        {/* Welcome Section */}
-        <StyledCard sx={{ mb: 2 }}>
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-            spacing={2}
-          >
-            <Box>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: "bold",
-                  color: "primary.main",
-                  mb: 0.5,
-                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                }}
-              >
-                Welcome back!
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Track your fitness journey
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={() => navigate('/create-activity')}
-              sx={{
-                textTransform: "none",
-                borderRadius: 2,
-                px: 2,
-              }}
-            >
-              New Activity
-            </Button>
-          </Stack>
-        </StyledCard>
+    preview: ({ navigate }) => {
+      const { user } = useAuth();
+      
+      const handleNewActivity = () => {
+        if (!user) {
+          // If user is not authenticated, redirect to signin with return URL
+          navigate('/login', { state: { from: '/create-activity' } });
+        } else {
+          // If user is authenticated, redirect to create activity
+          navigate('/create-activity');
+        }
+      };
 
-        {/* Stats Overview */}
-        <StyledCard sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500 }}>
-            Activity Overview
-          </Typography>
-          <Grid container spacing={2}>
-            {[
-              { label: "Today", value: "3" },
-              { label: "Week", value: "12" },
-              { label: "Month", value: "42" },
-            ].map((stat) => (
-              <Grid item xs={4} key={stat.label}>
-                <Box
+      return (
+        <Box
+          sx={{
+            height: "100%",
+            width: "100%",
+            overflow: "hidden",
+            borderRadius: 2,
+            position: "relative",
+            p: { xs: 2, sm: 2.5 },
+          }}
+        >
+          {/* Welcome Section */}
+          <StyledCard sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              spacing={2}
+            >
+              <Box>
+                <Typography
+                  variant="h5"
                   sx={{
-                    textAlign: "center",
-                    p: 1,
-                    bgcolor: "rgba(255,255,255,0.02)",
-                    borderRadius: 1,
+                    fontWeight: "bold",
+                    color: "primary.main",
+                    mb: 0.5,
+                    fontSize: { xs: "1.25rem", sm: "1.5rem" },
                   }}
                 >
-                  <Typography
-                    variant="h6"
-                    color="primary.main"
-                    sx={{
-                      mb: 0.5,
-                      fontSize: { xs: "1.125rem", sm: "1.25rem" },
-                    }}
-                  >
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {stat.label}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        </StyledCard>
-
-        {/* Quick Actions */}
-        <StyledCard>
-          <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 500 }}>
-            Quick Actions
-          </Typography>
-          <Stack spacing={1}>
-            {[
-              { icon: <DirectionsRunIcon />, label: "Cardio" },
-              { icon: <FitnessCenterIcon />, label: "Strength" },
-              { icon: <SelfImprovementIcon />, label: "Mobility" },
-            ].map(({ icon, label }) => (
-              <Box
-                key={label}
+                  Welcome back!
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Track your fitness journey
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={handleNewActivity}
                 sx={{
-                  p: 1.25,
-                  borderRadius: 1,
-                  bgcolor: "rgba(255,255,255,0.05)",
-                  cursor: "pointer",
-                  "&:hover": {
-                    bgcolor: "rgba(255,255,255,0.1)",
-                    transform: "translateY(-1px)",
-                  },
-                  transition: "all 0.2s",
+                  textTransform: "none",
+                  borderRadius: 2,
+                  px: 2,
                 }}
               >
-                <Stack direction="row" spacing={1.5} alignItems="center">
+                New Activity
+              </Button>
+            </Stack>
+          </StyledCard>
+
+          {/* Stats Overview */}
+          <StyledCard sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500 }}>
+              Activity Overview
+            </Typography>
+            <Grid container spacing={2}>
+              {[
+                { label: "Today", value: "3" },
+                { label: "Week", value: "12" },
+                { label: "Month", value: "42" },
+              ].map((stat) => (
+                <Grid item xs={4} key={stat.label}>
                   <Box
                     sx={{
-                      p: 0.75,
-                      borderRadius: 0.75,
-                      bgcolor: "primary.main",
-                      color: "white",
-                      display: "flex",
+                      textAlign: "center",
+                      p: 1,
+                      bgcolor: "rgba(255,255,255,0.02)",
+                      borderRadius: 1,
                     }}
                   >
-                    {React.cloneElement(icon, { sx: { fontSize: 18 } })}
+                    <Typography
+                      variant="h6"
+                      color="primary.main"
+                      sx={{
+                        mb: 0.5,
+                        fontSize: { xs: "1.125rem", sm: "1.25rem" },
+                      }}
+                    >
+                      {stat.value}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {stat.label}
+                    </Typography>
                   </Box>
-                  <Typography variant="body2">{label}</Typography>
-                </Stack>
-              </Box>
-            ))}
-          </Stack>
-        </StyledCard>
-      </Box>
-    ),
+                </Grid>
+              ))}
+            </Grid>
+          </StyledCard>
+
+          {/* Quick Actions */}
+          <StyledCard>
+            <Typography variant="subtitle1" sx={{ mb: 1.5, fontWeight: 500 }}>
+              Quick Actions
+            </Typography>
+            <Stack spacing={1}>
+              {[
+                { icon: <DirectionsRunIcon />, label: "Cardio" },
+                { icon: <FitnessCenterIcon />, label: "Strength" },
+                { icon: <SelfImprovementIcon />, label: "Mobility" },
+              ].map(({ icon, label }) => (
+                <Box
+                  key={label}
+                  sx={{
+                    p: 1.25,
+                    borderRadius: 1,
+                    bgcolor: "rgba(255,255,255,0.05)",
+                    cursor: "pointer",
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.1)",
+                      transform: "translateY(-1px)",
+                    },
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box
+                      sx={{
+                        p: 0.75,
+                        borderRadius: 0.75,
+                        bgcolor: "primary.main",
+                        color: "white",
+                        display: "flex",
+                      }}
+                    >
+                      {React.cloneElement(icon, { sx: { fontSize: 18 } })}
+                    </Box>
+                    <Typography variant="body2">{label}</Typography>
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
+          </StyledCard>
+        </Box>
+      );
+    },
   },
   {
     icon: <AutoAwesomeOutlinedIcon />,
