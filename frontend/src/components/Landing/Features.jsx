@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import { styled, alpha } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
+import { useNavigate } from 'react-router-dom';
 
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import ViewQuiltRoundedIcon from "@mui/icons-material/ViewQuiltRounded";
@@ -38,7 +39,7 @@ const items = [
     title: "Smart Dashboard",
     description:
       "Track your fitness journey with our intuitive dashboard. View your progress, analyze trends, and stay motivated with personalized insights.",
-    preview: (
+    preview: ({ navigate }) => (
       <Box
         sx={{
           height: "100%",
@@ -77,6 +78,7 @@ const items = [
               variant="contained"
               size="small"
               startIcon={<AddIcon />}
+              onClick={() => navigate('/create-activity')}
               sx={{
                 textTransform: "none",
                 borderRadius: 2,
@@ -280,6 +282,7 @@ export { MobileLayout };
 
 export default function Features() {
   const [selectedItemIndex, setSelectedItemIndex] = React.useState(0);
+  const navigate = useNavigate();
 
   const handleItemClick = (index) => {
     setSelectedItemIndex(index);
@@ -388,7 +391,9 @@ export default function Features() {
               bgcolor: "background.paper",
             }}
           >
-            {selectedFeature.preview}
+            {typeof selectedFeature.preview === 'function' 
+              ? selectedFeature.preview({ navigate })
+              : selectedFeature.preview}
           </Card>
         </Box>
       </Box>

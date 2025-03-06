@@ -474,7 +474,14 @@ export default function ActivityPage() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => navigate("/create-activity")}
+            onClick={() => {
+              try {
+                console.log('Navigating to create activity page...');
+                navigate('/create-activity');
+              } catch (error) {
+                console.error('Navigation error:', error);
+              }
+            }}
             sx={{
               textTransform: "none",
               borderRadius: 2,
