@@ -3,15 +3,26 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
 
-export default function FreeSolo({ value, onChange }) {
+
+const exerciseLevel = [
+  { title: 'Beginner' },
+  { title: 'Intermediate' },
+  { title: 'Advanced' },
+  { title: 'Expert' },
+  { title: 'Professional' },
+
+];
+
+
+export default function ExerciseLevel({ value, onChange }) {
   const handleChange = (event, newValue) => {
     onChange(newValue);
   };
   return (
-    <Stack spacing={2} sx={{ width: "80%", minWidth: 215 }}>
+    <Stack margin="normal">
       <Autocomplete
         freeSolo
-        id="exeerise-level"
+        id="exerciseLevel"
         disableClearable
         options={exerciseLevel.map((option) => option.title)}
         value={value || null}
@@ -19,6 +30,7 @@ export default function FreeSolo({ value, onChange }) {
         renderInput={(params) => (
           <TextField
             {...params}
+            margin="normal"
             label="Search/Select your Level"
             slotProps={{
               input: {
@@ -33,11 +45,4 @@ export default function FreeSolo({ value, onChange }) {
   );
 }
 
-const exerciseLevel = [
-  { title: 'Beginer' },
-  { title: 'Intermediate' },
-  { title: 'Advanced' },
-  { title: 'Expert' },
-  { title: 'Professional' },
 
-];

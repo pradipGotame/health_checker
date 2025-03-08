@@ -15,6 +15,10 @@ import useRegister from "../../hooks/userRegister";
 import Logo from "../../components/Landing/Logo";
 import ThemeToggle from "../../components/ui/ThemeToggle";
 import { ThemeContext } from "../../lib/ThemeContext";
+import FitnessGoal from "../../components/Profile/FitnessGoal";
+import ExerciseLevel from "../../components/Profile/ExerciseLevel";
+import GenderSelection from "../../components/Profile/GenderSelection";
+import Location from "../../components/Profile/Location";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -22,9 +26,29 @@ export default function Register() {
   const [formError, setFormError] = useState(null);
   const { darkMode } = useContext(ThemeContext);
 
+  // ✅ 添加 useState 来管理 formData
+  const [formData, setFormData] = useState({
+    fitnessGoal: "",
+    exerciseLevel: "",
+    Location: "",
+  });
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+
+    console.log("FormData values:");
+    console.log("Email:", data.get("email"));
+    console.log("FitnessGoal (FormData):", formData.fitnessGoal);
+    console.log("ExerciseLevel (FormData):", formData.exerciseLevel);
+    console.log("Gender (FormData):", data.get("gender"));
+
+    console.log("State values:");
+    console.log("FitnessGoal (State):", formData.fitnessGoal);
+    console.log("ExerciseLevel (State):", formData.exerciseLevel);
+    console.log("Gender (State):", formData.gender);
+    console.log("Location (State):", formData.location);
+
 
     const email = data.get("email");
     const password = data.get("password");
@@ -32,7 +56,11 @@ export default function Register() {
     const age = data.get("age");
     const weight = data.get("weight");
     const height = data.get("height");
-    const location = data.get("location");
+    const location = formData.location;
+
+    const fitnessGoal = formData.fitnessGoal;
+    const exerciseLevel = formData.exerciseLevel;
+    const gender = data.get("gender");
 
     if (
       !email ||
@@ -41,7 +69,10 @@ export default function Register() {
       !age ||
       !weight ||
       !height ||
-      !location
+      !location ||
+      !fitnessGoal ||
+      !gender ||
+      !exerciseLevel
     ) {
       setFormError("All fields are required.");
       return;
@@ -69,13 +100,16 @@ export default function Register() {
       weight,
       height,
       location,
+      fitnessGoal,
+      gender,
+      exerciseLevel,
     };
+
+    console.log("Submitting user data:", value);
+
 
     const user = await registerUser(value);
     if (!user) {
-      // to be fixed, error can not be set here from the hook
-      // should find another way to set the error
-      // this current message will causse a bad user experience
       setFormError("Invalid credentials.");
       return;
     }
@@ -176,6 +210,43 @@ export default function Register() {
               autoComplete="name"
               autoFocus
             />
+
+            <FitnessGoal
+              required
+              fullWidth
+              id="fitnessGoal"
+              name="fitnessGoal"
+              value={formData.fitnessGoal}
+              onChange={(newValue) =>
+                setFormData({ ...formData, fitnessGoal: newValue })
+              }
+            />
+
+            <Location
+              margin="normal"
+              required
+              fullWidth
+              id="location"
+              name="location"
+              
+              value={formData.location}
+              onChange={(newValue) =>
+                setFormData({ ...formData, location: newValue })
+              }
+            />
+
+            <ExerciseLevel
+              required
+              fullWidth
+              id="exerciseLevel"
+              label="Exercise Level"
+              name="exerciseLevel"
+              value={formData.exerciseLevel}
+              onChange={(newValue) =>
+                setFormData({ ...formData, exerciseLevel: newValue })
+              }
+            />
+
             <TextField
               margin="normal"
               required
@@ -184,6 +255,13 @@ export default function Register() {
               label="Age"
               name="age"
               type="number"
+              inputProps={{ min: 1 }} 
+              onChange={(event) => {
+                const value = parseInt(event.target.value, 10);
+                if (value < 1) {
+                  event.target.value = 1; // if<1, set to 1
+                }
+              }}
             />
             <TextField
               margin="normal"
@@ -203,15 +281,15 @@ export default function Register() {
               name="height"
               type="number"
             />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="location"
-              label="Location"
-              name="location"
-              autoComplete="address-level2"
+
+            <GenderSelection
+              value={formData.gender || ""}
+              onChange={(newValue) => {
+                console.log("Updating gender in state:", newValue);
+                setFormData((prev) => ({ ...prev, gender: newValue }));
+              }}
             />
+
             <Button
               type="submit"
               fullWidth

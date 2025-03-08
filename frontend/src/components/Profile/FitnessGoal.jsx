@@ -2,10 +2,10 @@ import React from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 
 const fitnessGoals = [
-  'lose weight',
-  'gain muscle',
-  'improve fitness',
-  'maintain health'
+  'Lose Weight',
+  'Gain Muscle',
+  'Improve Fitness',
+  'Maintain Health'
 ];
 
 export default function FitnessGoal({ value, onChange }) {
@@ -19,6 +19,7 @@ export default function FitnessGoal({ value, onChange }) {
       renderInput={(params) => (
         <TextField
           {...params}
+          margin="normal"
           label="Fitness Goal"
           variant="outlined"
         />
