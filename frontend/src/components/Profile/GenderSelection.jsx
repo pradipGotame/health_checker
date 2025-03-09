@@ -1,26 +1,30 @@
-import React from 'react';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
+import React from "react";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
 
-export default function RowRadioButtonsGroup({ value, onChange }) {
+export default function GenderSelection({ value, onChange }) {
   const handleChange = (event) => {
-    console.log("Selected Value:", event.target.value); // 添加日志检查
-    onChange(event.target.value); // 让父组件更新 value
+    if (!onChange) {
+      console.error("Error: onChange is not defined in GenderSelection");
+      return;
+    }
+    console.log("Selected Gender:", event.target.value); // ✅ 确保 gender 被正确选中
+    onChange(event.target.value); // ✅ 让父组件更新 state
   };
 
   return (
     <FormControl>
-      <FormLabel id="genderSelect" sx={{ display: "flex", color: "text.primary" }}>
+      <FormLabel id="gender-label" sx={{ display: "flex", color: "text.primary" }}>
         Gender
       </FormLabel>
       <RadioGroup
         row
-        aria-labelledby="genderSelect"
-        name="gender"
-        value={value}
+        aria-labelledby="gender-label"
+        name="gender" // ✅ 确保 FormData.get("gender") 能正确获取
+        value={value || ""} // ✅ 防止 value 为 undefined
         onChange={handleChange}
         sx={{ padding: 1 }}
       >

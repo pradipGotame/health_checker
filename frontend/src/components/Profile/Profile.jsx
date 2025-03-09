@@ -36,6 +36,7 @@ import WeightInput from "./Weight";
 import ActivityType from "./ActivityType";
 import ExerciseLevel from "./ExerciseLevel";
 import Location from "./Location";
+import { max } from "date-fns";
 // Modal style configuration
 const modalStyle = {
   position: "absolute",
@@ -232,7 +233,7 @@ export default function Profile() {
     handleChange("gender", data.gender);
     handleChange("activityType", data.activityType);
     handleChange("exerciseLevel", data.exerciseLevel);
-    handleChange("sportsVenue", data.sportsVenue);
+    handleChange("sportsVenue", data.location);
     handleChange("fitnessGoal", data.fitnessGoal);
     handleChange("full_name", data.full_name);
     console.log(data);
@@ -393,6 +394,7 @@ export default function Profile() {
                 flexGrow: 1,
               }}
             >
+              <Box sx={{ width: "50%", minWidth: "255px" }}>
               <Typography sx={labelStyle}>
                 Fitness Goal <span style={{ color: "red" }}>*</span>
               </Typography>
@@ -401,6 +403,7 @@ export default function Profile() {
                 onChange={(value) => handleChange("fitnessGoal", value)}
                 sx={textFieldStyle}
               />
+              </Box>
               <Typography sx={labelStyle}>
                 Height (cm) <span style={{ color: "red" }}>*</span>
               </Typography>
