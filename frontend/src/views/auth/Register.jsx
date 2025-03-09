@@ -37,19 +37,6 @@ export default function Register() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
-    console.log("FormData values:");
-    console.log("Email:", data.get("email"));
-    console.log("FitnessGoal (FormData):", formData.fitnessGoal);
-    console.log("ExerciseLevel (FormData):", formData.exerciseLevel);
-    console.log("Gender (FormData):", data.get("gender"));
-
-    console.log("State values:");
-    console.log("FitnessGoal (State):", formData.fitnessGoal);
-    console.log("ExerciseLevel (State):", formData.exerciseLevel);
-    console.log("Gender (State):", formData.gender);
-    console.log("Location (State):", formData.location);
-
-
     const email = data.get("email");
     const password = data.get("password");
     const full_name = data.get("full_name");
@@ -104,9 +91,6 @@ export default function Register() {
       gender,
       exerciseLevel,
     };
-
-    console.log("Submitting user data:", value);
-
 
     const user = await registerUser(value);
     if (!user) {
