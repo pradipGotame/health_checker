@@ -16,6 +16,13 @@ import AddIcon from "@mui/icons-material/Add";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SelfImprovementIcon from "@mui/icons-material/SelfImprovement";
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import { useNavigate } from 'react-router-dom';
+
 
 const StyledCard = styled(Box)(({ theme }) => ({
   borderRadius: 12,
@@ -38,7 +45,7 @@ const items = [
     title: "Smart Dashboard",
     description:
       "Track your fitness journey with our intuitive dashboard. View your progress, analyze trends, and stay motivated with personalized insights.",
-    preview: (
+    preview: ({ onActionClick }) => (
       <Box
         sx={{
           height: "100%",
@@ -74,6 +81,7 @@ const items = [
               </Typography>
             </Box>
             <Button
+              onClick={onActionClick}
               variant="contained"
               size="small"
               startIcon={<AddIcon />}
@@ -151,6 +159,7 @@ const items = [
                   },
                   transition: "all 0.2s",
                 }}
+                onClick={onActionClick}
               >
                 <Stack direction="row" spacing={1.5} alignItems="center">
                   <Box
@@ -178,8 +187,140 @@ const items = [
     title: "AI-powered",
     description:
       "Our AI-powered features and plans are designed to help you achieve your goals faster and more efficiently.",
-    //imageLight: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/mobile-light.png")`,
-    //imageDark: `url("${process.env.TEMPLATE_IMAGE_URL || 'https://mui.com'}/static/images/templates/templates-images/mobile-dark.png")`,
+    preview: ({ onActionClick }) => (
+      <Box
+        sx={{
+          height: "100%",
+          width: "100%",
+          overflow: "hidden",
+          borderRadius: 2,
+          position: "relative",
+          p: { xs: 2, sm: 2.5 },
+        }}
+      >
+        <StyledCard sx={{ mb: 2 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={2}
+          >
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: "bold",
+                  color: "primary.main",
+                  mb: 0.5,
+                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                }}
+              >
+                AI Assistant
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Your personalized fitness coach
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                bgcolor: 'primary.main',
+                color: 'white',
+                borderRadius: '50%',
+                p: 1,
+                display: 'flex',
+              }}
+            >
+              <SmartToyIcon />
+            </Box>
+          </Stack>
+        </StyledCard>
+
+        <StyledCard sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: "primary.main" }}>
+            New Activity
+          </Typography>
+          
+          <Stack spacing={2.5}>
+            {/* Workout Type Selector */}
+            <Box>
+              <Typography color="text.secondary" sx={{ mb: 1 }}>
+                Workout Type
+              </Typography>
+              <Box 
+                sx={{ 
+                  p: 1.5, 
+                  border: "1px solid",
+                  borderColor: "divider", 
+                  borderRadius: 1,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography>Cardio</Typography>
+                <Box sx={{ 
+                  color: "primary.main", 
+                  fontSize: 18, 
+                  display: "flex",
+                  transform: "rotate(90deg)",
+                }}>›</Box>
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography sx={{ mb: 1}}>
+                Activity
+              </Typography>
+              <Box 
+                sx={{ 
+                  p: 1.5, 
+                  border: "1px solid",
+                  borderColor: "divider", 
+                  borderRadius: 1,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography>Running</Typography>
+                <Box sx={{ 
+                  color: "primary.main", 
+                  fontSize: 18, 
+                  display: "flex",
+                  transform: "rotate(90deg)",
+                }}>›</Box>
+              </Box>
+            </Box>
+
+            
+            
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+              <Button
+                onClick={onActionClick}
+                variant="outlined"
+                startIcon={<AutoAwesomeIcon />}
+                sx={{
+                  textTransform: "none",
+                  border: "none",
+                  color: "white",
+                  background: "linear-gradient(90deg, #1565C0, #6A1B9A, #E91E63)",
+                  transition: "all 0.3s ease",
+                  borderRadius: 2,
+                  px: 2.5,
+                  py: 1,
+                  "&:hover": {
+                    background: "linear-gradient(90deg, #1976D2, #8E24AA, #F50057)",
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+                  },
+                }}
+              >
+                Get AI Suggestion
+              </Button>
+            </Box>    
+          </Stack>
+        </StyledCard>
+      </Box>
+    ),
   },
 ];
 
@@ -280,9 +421,14 @@ export { MobileLayout };
 
 export default function Features() {
   const [selectedItemIndex, setSelectedItemIndex] = React.useState(0);
+  const navigate = useNavigate();
 
   const handleItemClick = (index) => {
     setSelectedItemIndex(index);
+  };
+
+  const handleActionClick = () => {
+    navigate('/login');
   };
 
   const selectedFeature = items[selectedItemIndex];
@@ -388,7 +534,9 @@ export default function Features() {
               bgcolor: "background.paper",
             }}
           >
-            {selectedFeature.preview}
+            {typeof selectedFeature.preview === 'function' 
+              ? selectedFeature.preview({ onActionClick: handleActionClick })
+              : selectedFeature.preview}
           </Card>
         </Box>
       </Box>
