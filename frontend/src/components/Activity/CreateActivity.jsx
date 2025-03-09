@@ -246,18 +246,22 @@ export default function CreateActivity() {
     if (validateForm()) {
       setSaving(true);
       try {
+        const now = new Date();
         const activityData = {
           userId: user.uid,
           workoutType,
           activity,
           createdAt: editMode
             ? editActivity.createdAt
-            : new Date().toISOString(),
+            : now.toISOString(),
+          status: 'start',
           ...(workoutType === Activities.WorkoutType.CARDIO && {
             duration: Number(formData.duration),
             distance: Number(formData.distance),
             durationUnit: formData.durationUnit,
             distanceUnit: formData.distanceUnit,
+            startTime: now.toISOString(),
+            endTime: new Date(now.getTime() + (Number(formData.duration) * 60 * 1000)).toISOString(), // Convert duration to milliseconds
           }),
           ...(workoutType === Activities.WorkoutType.STRENGTH && {
             reps: Number(formData.reps),
