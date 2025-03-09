@@ -427,7 +427,7 @@ export default function ActivityPage() {
         sx={{
           display: "flex",
           flexDirection: "column",
-          pt: { xs: 6, sm: 8 },
+          pt: { xs: 6, sm: 16 },
           pb: { xs: 3, sm: 4 },
           gap: 3,
         }}
