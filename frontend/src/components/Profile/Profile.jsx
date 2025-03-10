@@ -11,6 +11,7 @@ import {
   Modal,
   Fade,
   Backdrop,
+  Container,
 } from "@mui/material";
 import {
   collection,
@@ -35,6 +36,7 @@ import WeightInput from "./Weight";
 import ActivityType from "./ActivityType";
 import ExerciseLevel from "./ExerciseLevel";
 import Location from "./Location";
+import { max } from "date-fns";
 // Modal style configuration
 const modalStyle = {
   position: "absolute",
@@ -231,7 +233,7 @@ export default function Profile() {
     handleChange("gender", data.gender);
     handleChange("activityType", data.activityType);
     handleChange("exerciseLevel", data.exerciseLevel);
-    handleChange("sportsVenue", data.sportsVenue);
+    handleChange("sportsVenue", data.location);
     handleChange("fitnessGoal", data.fitnessGoal);
     handleChange("full_name", data.full_name);
     console.log(data);
@@ -264,273 +266,270 @@ export default function Profile() {
   return (
     <Box
       sx={{
-        paddingTop: "8vh",
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-        alignItems: "center",
-        backgroundImage:
-          "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(84, 81%, 14%), transparent)",
+        padding: "12vh 15% 2rem",
         minHeight: "100vh",
-        padding: "8vh 15% 2rem",
       }}
     >
-      <NavBar />
+      <Container sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+        <NavBar />
 
-      {/* Error Modal */}
-      <Modal
-        open={errorModalOpen}
-        onClose={handleCloseErrorModal}
-        BackdropComponent={Backdrop}
-      >
-        <Box sx={modalStyle}>
-          <Typography variant="h6" gutterBottom>
-            Error
-          </Typography>
-          <Typography sx={{ mb: 3, whiteSpace: "pre-line" }}>
-            {errorMessage}
-          </Typography>
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="contained" onClick={handleCloseErrorModal}>
-              OK
-            </Button>
-          </Stack>
-        </Box>
-      </Modal>
+        {/* Error Modal */}
+        <Modal
+          open={errorModalOpen}
+          onClose={handleCloseErrorModal}
+          BackdropComponent={Backdrop}
+        >
+          <Box sx={modalStyle}>
+            <Typography variant="h6" gutterBottom>
+              Error
+            </Typography>
+            <Typography sx={{ mb: 3, whiteSpace: "pre-line" }}>
+              {errorMessage}
+            </Typography>
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button variant="contained" onClick={handleCloseErrorModal}>
+                OK
+              </Button>
+            </Stack>
+          </Box>
+        </Modal>
 
-      {/* Login Required Modal */}
-      <Modal
-        open={loginModalOpen}
-        onClose={handleCloseModal}
-        BackdropComponent={Backdrop}
-      >
-        <Box sx={modalStyle}>
-          <Typography variant="h6" gutterBottom>
-            Login Required
-          </Typography>
-          <Typography sx={{ mb: 3 }}>
-            You need to login to save your changes.
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <Button variant="contained" onClick={handleNavigateToLogin}>
-              Go to Login
-            </Button>
-            <Button variant="outlined" onClick={handleCloseModal}>
-              Cancel
-            </Button>
-          </Stack>
-        </Box>
-      </Modal>
+        {/* Login Required Modal */}
+        <Modal
+          open={loginModalOpen}
+          onClose={handleCloseModal}
+          BackdropComponent={Backdrop}
+        >
+          <Box sx={modalStyle}>
+            <Typography variant="h6" gutterBottom>
+              Login Required
+            </Typography>
+            <Typography sx={{ mb: 3 }}>
+              You need to login to save your changes.
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              <Button variant="contained" onClick={handleNavigateToLogin}>
+                Go to Login
+              </Button>
+              <Button variant="outlined" onClick={handleCloseModal}>
+                Cancel
+              </Button>
+            </Stack>
+          </Box>
+        </Modal>
 
-      {/* Success Modal */}
-      <Modal
-        open={successModalOpen}
-        onClose={handleCloseSuccessModal}
-        BackdropComponent={Backdrop}
-      >
-        <Box sx={modalStyle}>
-          <Typography variant="h6" gutterBottom>
-            Success
-          </Typography>
-          <Typography sx={{ mb: 3 }}>
-            Your profile has been updated successfully.
-          </Typography>
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="contained" onClick={handleCloseSuccessModal}>
-              OK
-            </Button>
-          </Stack>
-        </Box>
-      </Modal>
+        {/* Success Modal */}
+        <Modal
+          open={successModalOpen}
+          onClose={handleCloseSuccessModal}
+          BackdropComponent={Backdrop}
+        >
+          <Box sx={modalStyle}>
+            <Typography variant="h6" gutterBottom>
+              Success
+            </Typography>
+            <Typography sx={{ mb: 3 }}>
+              Your profile has been updated successfully.
+            </Typography>
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button variant="contained" onClick={handleCloseSuccessModal}>
+                OK
+              </Button>
+            </Stack>
+          </Box>
+        </Modal>
 
-      {/* Original Layout */}
-      <Card
-        variant="outlined"
-        sx={{
-          height: "auto",
-          width: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          borderRadius: "16px",
-          backdropFilter: "blur(10px)",
-          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
-          ...commonHoverStyle,
-          position: "relative",
-        }}
-      >
+        {/* Original Layout */}
+        <Card
+          variant="outlined"
+          sx={{
+            height: "auto",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            borderRadius: "16px",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            ...commonHoverStyle,
+            position: "relative",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 3,
+              flexWrap: "wrap",
+              padding: 2,
+              width: "100%",
+            }}
+          >
+            {/* Left Section */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+                padding: 8,
+                width: "fit-content",
+              }}
+            >
+              <Avatar
+                sx={{ width: 120, height: 120 }}
+                src="https://github.com/shadcn.png"
+              />
+              <Typography sx={{ fontSize: "1.5rem" }}>
+                {userData?.displayName || "Username"}
+              </Typography>
+            </Box>
+
+            {/* Center Section */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                flexGrow: 1,
+              }}
+            >
+              <Box sx={{ width: "50%", minWidth: "255px" }}>
+              <Typography sx={labelStyle}>
+                Fitness Goal <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <FitnessGoal
+                value={profileData.fitnessGoal}
+                onChange={(value) => handleChange("fitnessGoal", value)}
+                sx={textFieldStyle}
+              />
+              </Box>
+              <Typography sx={labelStyle}>
+                Height (cm) <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <HeightInput
+                value={profileData.height}
+                onChange={(value) => handleChange("height", value)}
+                sx={textFieldStyle}
+              />
+              <Typography sx={labelStyle}>
+                Weight (kg) <span style={{ color: "red" }}>*</span>
+              </Typography>
+              <WeightInput
+                value={profileData.weight}
+                onChange={(value) => handleChange("weight", value)}
+                sx={textFieldStyle}
+              />
+            </Box>
+          </Box>
+        </Card>
+
+        {/* Bottom Sections */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "row",
             gap: 3,
-            flexWrap: "wrap",
-            padding: 2,
             width: "100%",
+            marginBottom: "80px",
           }}
         >
-          {/* Left Section */}
-          <Box
+          <Card
+            variant="outlined"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              padding: 8,
-              width: "fit-content",
+              padding: 2,
+              width: "50%",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.3)",
+              ...commonHoverStyle,
             }}
           >
-            <Avatar
-              sx={{ width: 120, height: 120 }}
-              src="https://github.com/shadcn.png"
-            />
-            <Typography sx={{ fontSize: "1.5rem" }}>
-              {userData?.displayName || "Username"}
-            </Typography>
-          </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Typography sx={labelStyle}>Name</Typography>
+              <TextField
+                value={profileData.full_name || ""}
+                onChange={(e) => handleChange("full_name", e.target.value)}
+                sx={textFieldStyle}
+              />
+              <Typography sx={labelStyle}>Age</Typography>
+              <TextField
+                value={profileData.age || ""}
+                onChange={(e) => handleChange("age", e.target.value)}
+                sx={textFieldStyle}
+              />
+              <GenderSelection
+                value={profileData.gender}
+                onChange={(value) => handleChange("gender", value)}
+                sx={textFieldStyle}
+              />
+            </Box>
+          </Card>
 
-          {/* Center Section */}
-          <Box
+          <Card
+            variant="outlined"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              flexGrow: 1,
+              padding: 2,
+              width: "50%",
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.3)",
+              ...commonHoverStyle,
             }}
           >
-            <Typography sx={labelStyle}>
-              Fitness Goal <span style={{ color: "red" }}>*</span>
-            </Typography>
-            <FitnessGoal
-              value={profileData.fitnessGoal}
-              onChange={(value) => handleChange("fitnessGoal", value)}
-              sx={textFieldStyle}
-            />
-            <Typography sx={labelStyle}>
-              Height (cm) <span style={{ color: "red" }}>*</span>
-            </Typography>
-            <HeightInput
-              value={profileData.height}
-              onChange={(value) => handleChange("height", value)}
-              sx={textFieldStyle}
-            />
-            <Typography sx={labelStyle}>
-              Weight (kg) <span style={{ color: "red" }}>*</span>
-            </Typography>
-            <WeightInput
-              value={profileData.weight}
-              onChange={(value) => handleChange("weight", value)}
-              sx={textFieldStyle}
-            />
-          </Box>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Typography sx={labelStyle}>Preferred Activity Type</Typography>
+              <ActivityType
+                value={profileData.activityType}
+                onChange={(value) => handleChange("activityType", value)}
+                sx={textFieldStyle}
+              />
+              <ExerciseLevel
+                value={profileData.exerciseLevel}
+                onChange={(value) => handleChange("exerciseLevel", value)}
+                sx={textFieldStyle}
+              />
+              <Location
+                value={profileData.sportsVenue}
+                onChange={(value) => handleChange("sportsVenue", value)}
+                sx={textFieldStyle}
+              />
+            </Box>
+          </Card>
         </Box>
-      </Card>
 
-      {/* Bottom Sections */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 3,
-          width: "100%",
-          marginBottom: "80px",
-        }}
-      >
-        <Card
-          variant="outlined"
+        {/* Save Button */}
+        <Box
           sx={{
-            padding: 2,
-            width: "50%",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-            ...commonHoverStyle,
+            position: "fixed",
+            bottom: 40,
+            right: "15%",
+            zIndex: 1000,
+            display: "flex",
+            gap: 2,
           }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography sx={labelStyle}>Name</Typography>
-            <TextField
-              value={profileData.full_name || ""}
-              onChange={(e) => handleChange("full_name", e.target.value)}
-              sx={textFieldStyle}
-            />
-            <Typography sx={labelStyle}>Age</Typography>
-            <TextField
-              value={profileData.age || ""}
-              onChange={(e) => handleChange("age", e.target.value)}
-              sx={textFieldStyle}
-            />
-            <GenderSelection
-              value={profileData.gender}
-              onChange={(value) => handleChange("gender", value)}
-              sx={textFieldStyle}
-            />
-          </Box>
-        </Card>
-
-        <Card
-          variant="outlined"
-          sx={{
-            padding: 2,
-            width: "50%",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-            ...commonHoverStyle,
-          }}
-        >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography sx={labelStyle}>Preferred Activity Type</Typography>
-            <ActivityType
-              value={profileData.activityType}
-              onChange={(value) => handleChange("activityType", value)}
-              sx={textFieldStyle}
-            />
-            <ExerciseLevel
-              value={profileData.exerciseLevel}
-              onChange={(value) => handleChange("exerciseLevel", value)}
-              sx={textFieldStyle}
-            />
-            <Location
-              value={profileData.sportsVenue}
-              onChange={(value) => handleChange("sportsVenue", value)}
-              sx={textFieldStyle}
-            />
-          </Box>
-        </Card>
-      </Box>
-
-      {/* Save Button */}
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 40,
-          right: "15%",
-          zIndex: 1000,
-          display: "flex",
-          gap: 2,
-        }}
-      >
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          sx={{
-            padding: "12px 36px",
-            fontSize: "1.1rem",
-            borderRadius: "8px",
-            backgroundColor: "primary.main",
-            boxShadow:
-              "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-            "&:hover": {
-              backgroundColor: "primary.dark",
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            sx={{
+              padding: "12px 36px",
+              fontSize: "1.1rem",
+              borderRadius: "8px",
+              backgroundColor: "primary.main",
               boxShadow:
-                "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-            },
-          }}
-        >
-          Save Profile
-        </Button>
-      </Box>
+                "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+              "&:hover": {
+                backgroundColor: "primary.dark",
+                boxShadow:
+                  "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+              },
+            }}
+          >
+            Save Profile
+          </Button>
+        </Box>
+      </Container>
     </Box>
   );
 }

@@ -17,6 +17,7 @@ import { Link as RouterLink, useLocation } from "react-router-dom"; // React Rou
 import { Link } from "@mui/material";
 import useLogout from "../../hooks/useLogout";
 import NotificationBadge from '../Notification/NotificationBadge';
+import { useAuth } from "../../hooks/useAuth";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -37,6 +38,7 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 export default function NavBar() {
   const [open, setOpen] = React.useState(false);
   const { logout } = useLogout();
+  const { user } = useAuth();
 
   const location = useLocation();
   const [activeLink, setActiveLink] = React.useState(location.pathname);
@@ -54,6 +56,13 @@ export default function NavBar() {
   React.useEffect(() => {
     setActiveLink("/dashboard");
   }, []);
+
+  React.useEffect(() => {
+    if (!user) {
+      setActiveLink("/");
+    }
+    console.log("user", user);
+  }, [user]);
 
   return (
     <AppBar

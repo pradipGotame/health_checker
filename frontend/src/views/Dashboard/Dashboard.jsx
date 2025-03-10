@@ -42,6 +42,7 @@ import {
 } from "recharts";
 import { ThemeContext } from "../../lib/ThemeContext";
 import ThemeToggle from "../../components/ui/ThemeToggle";
+import { WorkoutType } from "../../components/Activity/Activities";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   borderRadius: 12,
@@ -412,21 +413,6 @@ export default function Dashboard() {
                   >
                     New Activity
                   </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={logout}
-                    sx={{
-                      textTransform: "none",
-                      borderColor: "divider",
-                      color: "text.secondary",
-                      "&:hover": {
-                        borderColor: "primary.main",
-                        backgroundColor: "rgba(132, 204, 22, 0.04)",
-                      },
-                    }}
-                  >
-                    Sign Out
-                  </Button>
                 </Stack>
               </Stack>
             </StyledCard>
@@ -442,7 +428,11 @@ export default function Dashboard() {
                 </Typography>
                 <Stack spacing={2}>
                   <QuickActionCard
-                    onClick={() => navigate("/create-activity?type=Cardio")}
+                    onClick={() =>
+                      navigate("/create-activity", {
+                        state: { workoutType: WorkoutType.CARDIO },
+                      })
+                    }
                     sx={{
                       "&:hover": {
                         bgcolor: "divider",
@@ -475,7 +465,11 @@ export default function Dashboard() {
                   </QuickActionCard>
 
                   <QuickActionCard
-                    onClick={() => navigate("/create-activity?type=Strength")}
+                    onClick={() =>
+                      navigate("/create-activity", {
+                        state: { workoutType: WorkoutType.STRENGTH },
+                      })
+                    }
                     sx={{
                       "&:hover": {
                         bgcolor: "divider",
@@ -508,7 +502,11 @@ export default function Dashboard() {
                   </QuickActionCard>
 
                   <QuickActionCard
-                    onClick={() => navigate("/create-activity?type=Mobility")}
+                    onClick={() =>
+                      navigate("/create-activity", {
+                        state: { workoutType: WorkoutType.MOBILITY },
+                      })
+                    }
                     sx={{
                       "&:hover": {
                         bgcolor: "divider",

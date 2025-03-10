@@ -28,7 +28,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDocs, getFirestore, query, where } from "firebase/firestore";
-import { getStrengthSuggestionsWithAi } from "../../ai/suggestions";
+import {
+  getCardioSuggestionsWithAi,
+  getMobilitySuggestionsWithAi,
+  getStrengthSuggestionsWithAi,
+} from "../../ai/suggestions";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -67,6 +71,7 @@ const StyledSelect = styled(Select)(({ theme }) => ({
 
 export default function CreateActivity() {
   const location = useLocation();
+  console.log("Location state:", location.state);
   const editMode = location.state?.editMode;
   const editActivity = location.state?.activity;
   const preselectedType = location.state?.workoutType;
@@ -87,7 +92,7 @@ export default function CreateActivity() {
     durationUnit:
       editMode && editActivity.durationUnit ? editActivity.durationUnit : "min",
     distanceUnit:
-      editMode && editActivity.distanceUnit ? editActivity.distanceUnit : "km",
+      editMode && editActivity.distanceUnit ? editActivity.distanceUnit : "m",
   });
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -104,21 +109,25 @@ export default function CreateActivity() {
   const db = getFirestore(app);
 
   useEffect(() => {
+    if (location.state?.activity?.suggestions) {
+      setSuggestions(location.state.activity.suggestions);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
-          console.log("userId:", user.uid);
           const q = query(
             collection(db, "users"),
             where("userId", "==", user.uid)
           );
-          console.log("query:", q);
           const querySnapshot = await getDocs(q);
           if (!querySnapshot.empty) {
             const doc = querySnapshot.docs[0];
             const fetchedData = doc.data();
+            console.log("User document data:", fetchedData);
             setUserDoc(fetchedData);
-            console.log("Fetched data:", fetchedData);
           } else {
             console.log("No matching document");
           }
@@ -139,28 +148,55 @@ export default function CreateActivity() {
         activity,
         ...formData,
       };
-      if (
-        !user ||
-        !workoutType ||
-        !activity ||
-        !formData.sets ||
-        !formData.reps ||
-        workoutType !== Activities.WorkoutType.STRENGTH // Only suggest for strength workouts for now
-      ) {
+      if (!user || !workoutType || !activity) {
         setIsSuggesting(false);
         return;
       }
       async function getSuggestions(user, workout) {
         try {
           console.log("Getting AI suggestion...");
-          const suggestions = await getStrengthSuggestionsWithAi(user, {
-            type: workout.type,
-            activity: workout.activity,
-            sets: workout.sets,
-            reps: workout.reps,
-          });
-          console.log("AI suggestions:", suggestions);
+          let suggestions = {};
+          if (workoutType === Activities.WorkoutType.CARDIO) {
+            suggestions = await getCardioSuggestionsWithAi(user, {
+              type: workout.type,
+              activity: workout.activity,
+            });
+            setFormData(() => ({
+              duration: suggestions.techniques.total_duration,
+              distance: suggestions.techniques.total_distance,
+              durationUnit: "min",
+              distanceUnit: "m",
+            }));
+          } else if (workoutType === Activities.WorkoutType.STRENGTH) {
+            suggestions = await getStrengthSuggestionsWithAi(user, {
+              type: workout.type,
+              activity: workout.activity,
+            });
+            if (!suggestions) {
+              console.error("No suggestions found");
+              return;
+            }
+            setFormData(() => ({
+              reps: suggestions.techniques.reps,
+              sets: suggestions.techniques.sets,
+              weight: suggestions.techniques.weight,
+            }));
+          } else {
+            suggestions = await getMobilitySuggestionsWithAi(user, {
+              type: workout.type,
+              activity: workout.activity,
+            });
+            if (!suggestions) {
+              console.error("No suggestions found");
+              return;
+            }
+            setFormData(() => ({
+              reps: suggestions.techniques.reps,
+              sets: suggestions.techniques.sets,
+            }));
+          }
           setSuggestions(suggestions);
+          console.log("AI suggestions:", suggestions);
         } catch (error) {
           console.error("Error getting AI suggestion:", error);
         } finally {
@@ -272,6 +308,7 @@ export default function CreateActivity() {
             reps: Number(formData.reps),
             sets: Number(formData.sets),
           }),
+          suggestions: suggestions,
         };
 
         console.log('Activity data to be saved:', activityData);
@@ -394,7 +431,7 @@ export default function CreateActivity() {
         sx={{
           display: "flex",
           flexDirection: "column",
-          pt: { xs: 6, sm: 8 },
+          pt: { xs: 6, sm: 16 },
           pb: { xs: 3, sm: 4 },
           gap: 1.5,
         }}
@@ -622,7 +659,6 @@ export default function CreateActivity() {
                           }}
                         >
                           <MenuItem value="min">Minutes</MenuItem>
-                          <MenuItem value="hr">Hours</MenuItem>
                         </StyledSelect>
                       </Stack>
                     </Box>
@@ -665,8 +701,6 @@ export default function CreateActivity() {
                           },
                         }}
                       >
-                        <MenuItem value="km">Kilometers</MenuItem>
-                        <MenuItem value="mi">Miles</MenuItem>
                         <MenuItem value="m">Meters</MenuItem>
                       </StyledSelect>
                     </Stack>
@@ -780,9 +814,22 @@ export default function CreateActivity() {
                         "linear-gradient(90deg, #1976D2, #8E24AA, #F50057)",
                       boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
                     },
+                    // disables style
+                    opacity:
+                      isSuggesting ||
+                      saving ||
+                      workoutType === "" ||
+                      activity === ""
+                        ? 0.5
+                        : 1,
                   }}
                   onClick={() => setIsSuggesting(true)}
-                  disabled={isSuggesting || saving}
+                  disabled={
+                    isSuggesting ||
+                    saving ||
+                    workoutType === "" ||
+                    activity === ""
+                  }
                 >
                   Get AI Suggestion
                 </Button>
@@ -1076,7 +1123,17 @@ export default function CreateActivity() {
                 AI Suggestions
               </Typography>
               <div>
-                <h2>Training Techniques</h2>
+                <h3>Session overview</h3>
+                <ul>
+                  {Object.entries(suggestions.sessionOverview).map(
+                    ([key, value]) => (
+                      <li key={key}>
+                        <strong>{key.replace(/_/g, " ")}:</strong> {value}
+                      </li>
+                    )
+                  )}
+                </ul>
+                <h3>Training Techniques</h3>
                 <ul>
                   {Object.entries(suggestions.techniques).map(
                     ([key, value]) => (
@@ -1087,17 +1144,21 @@ export default function CreateActivity() {
                   )}
                 </ul>
 
-                <h2>Supplementary Exercises</h2>
-                <ul>
-                  {suggestions.supplementary.map((item, index) => (
+                {suggestions.supplementary && <h3>Supplementary Exercises</h3>}
+                {suggestions.supplementary &&
+                  suggestions.supplementary.map((item, index) => (
                     <li key={index}>
-                      <strong>{item.activity}</strong> - Sets: {item.sets},
-                      Reps: {item.reps}
+                      <strong>{item.activity}</strong>:{" "}
+                      <strong>{item.description}</strong>
+                      <ul>
+                        <li>Sets: {item.sets}</li>
+                        <li>Reps: {item.reps}</li>
+                      </ul>
+                      <br />
                     </li>
                   ))}
-                </ul>
 
-                <h2>Recovery Strategies</h2>
+                <h3>Recovery Strategies</h3>
                 <ul>
                   {Object.entries(suggestions.recovary).map(([key, value]) => (
                     <li key={key}>

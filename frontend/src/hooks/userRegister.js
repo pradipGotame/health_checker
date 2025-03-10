@@ -10,7 +10,7 @@ const useRegister = () => {
     setLoading(true);
     setError(null);
 
-    const { email, password, full_name, age, weight, height, location } = data;
+    const { email, password, full_name, age, weight, height, location, fitnessGoal, exerciseLevel, gender } = data;
 
     try {
       const auth = getAuth();
@@ -30,6 +30,9 @@ const useRegister = () => {
         weight,
         height,
         location,
+        fitnessGoal, 
+        exerciseLevel, 
+        gender,
       });
 
       localStorage.setItem("userId", userId);

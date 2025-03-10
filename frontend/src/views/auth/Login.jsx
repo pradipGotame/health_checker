@@ -32,13 +32,15 @@ export default function Login() {
     const password = data.get("password");
 
     if (!email || !password) {
-      setFormError("All fields are required.");
+      setFormError("Please fill in all fields to continue.");
       return;
     }
 
     const user = await loginUser(email, password);
     if (!user) {
-      setFormError("Invalid credentials.");
+      setFormError(
+        "The email or password you entered is incorrect. Please try again or create a new account."
+      );
       return;
     }
     
@@ -95,7 +97,20 @@ export default function Login() {
             alignItems: "start",
           }}
         >
-          <Typography sx={{ color: "red" }}>{formError}</Typography>
+          {formError && (
+            <Typography
+              sx={{
+                color: '#0',
+                backgroundColor: 'error.light',
+                padding: 2,
+                borderRadius: 1,
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {formError}
+            </Typography>
+          )}
           <Box
             sx={{
               marginTop: 4,
