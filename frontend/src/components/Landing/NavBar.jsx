@@ -175,7 +175,7 @@ export default function NavBar() {
                   color: "white",
                 }}
               >
-                Sigin
+                Sign in
               </Link>
             )}
           </Box>

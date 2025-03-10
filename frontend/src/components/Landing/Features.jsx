@@ -23,7 +23,6 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import { useNavigate } from 'react-router-dom';
 
 
 const StyledCard = styled(Box)(({ theme }) => ({
