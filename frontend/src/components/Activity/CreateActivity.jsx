@@ -19,6 +19,8 @@ import {
   updateDoc,
   doc,
   app,
+  createNotification,
+  getDoc,
 } from "../../firebase/firebase";
 import { useAuth } from "../../hooks/useAuth";
 import AddIcon from "@mui/icons-material/Add";
@@ -251,17 +253,15 @@ export default function CreateActivity() {
           userId: user.uid,
           workoutType,
           activity,
-          createdAt: editMode
-            ? editActivity.createdAt
-            : now.toISOString(),
+          createdAt: now,
           status: 'start',
           ...(workoutType === Activities.WorkoutType.CARDIO && {
             duration: Number(formData.duration),
             distance: Number(formData.distance),
             durationUnit: formData.durationUnit,
             distanceUnit: formData.distanceUnit,
-            startTime: now.toISOString(),
-            endTime: new Date(now.getTime() + (Number(formData.duration) * 60 * 1000)).toISOString(), // Convert duration to milliseconds
+            startTime: now,
+            endTime: new Date(now.getTime() + (Number(formData.duration) * 60 * 1000)),
           }),
           ...(workoutType === Activities.WorkoutType.STRENGTH && {
             reps: Number(formData.reps),
@@ -274,20 +274,76 @@ export default function CreateActivity() {
           }),
         };
 
+        console.log('Activity data to be saved:', activityData);
+
+        let activityId;
         if (editMode) {
           // Update existing document
-          await updateDoc(doc(db, "activities", editActivity.id), activityData);
+          const activityRef = doc(db, "activities", editActivity.id);
+          await updateDoc(activityRef, activityData);
+          activityId = editActivity.id;
           setSnackbarMessage({
             message: "Activity updated successfully!",
             severity: "success",
           });
         } else {
           // Create new document
-          await addDoc(collection(db, "activities"), activityData);
+          const activitiesRef = collection(db, "activities");
+          const docRef = await addDoc(activitiesRef, activityData);
+          activityId = docRef.id;
+          console.log('New activity created with ID:', activityId);
+          
           setSnackbarMessage({
             message: "Activity saved successfully!",
             severity: "success",
           });
+
+          // Create notification for new activity
+          try {
+            const message = `You have created a ${workoutType.toLowerCase()} activity: ${activity}`;
+            await createNotification(user.uid, 'activity_created', message, activityId);
+            console.log('Notification created successfully');
+          } catch (notificationError) {
+            console.error('Error creating notification:', notificationError);
+          }
+
+          // Set up reminder notifications based on activity type
+          if (workoutType === Activities.WorkoutType.CARDIO) {
+            // For cardio activities, set up middle-point reminder
+            const durationInMs = Number(formData.duration) * 60 * 1000;
+            const middlePoint = durationInMs / 2;
+            
+            setTimeout(async () => {
+              try {
+                // Check if activity is still not completed
+                const activityRef = doc(db, "activities", activityId);
+                const activityDoc = await getDoc(activityRef);
+                if (activityDoc.exists() && activityDoc.data().status !== 'finish') {
+                  const reminderMessage = `You're halfway through your ${activity} workout! Keep going!`;
+                  await createNotification(user.uid, 'reminder', reminderMessage, activityId);
+                }
+              } catch (reminderError) {
+                console.error('Error creating middle-point reminder:', reminderError);
+              }
+            }, middlePoint);
+          } else if (workoutType === Activities.WorkoutType.STRENGTH || workoutType === Activities.WorkoutType.MOBILITY) {
+            // For strength and mobility activities, set up 15-minute reminder
+            const reminderInterval = 15 * 60 * 1000; // 15 minutes
+            
+            setTimeout(async () => {
+              try {
+                // Check if activity is still not completed
+                const activityRef = doc(db, "activities", activityId);
+                const activityDoc = await getDoc(activityRef);
+                if (activityDoc.exists() && activityDoc.data().status !== 'finish') {
+                  const reminderMessage = `Don't forget to complete your ${activity} workout!`;
+                  await createNotification(user.uid, 'reminder', reminderMessage, activityId);
+                }
+              } catch (reminderError) {
+                console.error('Error creating reminder notification:', reminderError);
+              }
+            }, reminderInterval);
+          }
         }
 
         setOpenSnackbar(true);

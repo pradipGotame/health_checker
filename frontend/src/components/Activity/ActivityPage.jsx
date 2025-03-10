@@ -32,7 +32,8 @@ import {
   deleteDoc,
   doc,
   updateDoc,
-} from "firebase/firestore";
+  createNotification,
+} from "../../firebase/firebase";
 import { db } from "../../firebase/firebase";
 import {
   format,
@@ -250,11 +251,17 @@ export default function ActivityPage() {
         );
 
         const querySnapshot = await getDocs(q);
-        const activitiesData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: new Date(doc.data().createdAt),
-        }));
+        const activitiesData = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
+            startTime: data.startTime?.toDate?.() || new Date(data.startTime),
+            endTime: data.endTime?.toDate?.() || new Date(data.endTime),
+            completedAt: data.completedAt?.toDate?.() || new Date(data.completedAt),
+          };
+        });
 
         setActivities(activitiesData);
 
@@ -263,12 +270,14 @@ export default function ActivityPage() {
         const weekStart = startOfWeek(now);
         const monthStart = startOfMonth(now);
 
-        const todayActivities = activitiesData.filter(activity => isToday(activity.createdAt));
+        const todayActivities = activitiesData.filter(activity => 
+          activity.createdAt && isToday(activity.createdAt)
+        );
         const weekActivities = activitiesData.filter(activity => 
-          activity.createdAt >= weekStart && activity.createdAt <= now
+          activity.createdAt && activity.createdAt >= weekStart && activity.createdAt <= now
         );
         const monthActivities = activitiesData.filter(activity => 
-          activity.createdAt >= monthStart && activity.createdAt <= now
+          activity.createdAt && activity.createdAt >= monthStart && activity.createdAt <= now
         );
 
         // Calculate streak
@@ -277,7 +286,7 @@ export default function ActivityPage() {
         
         while (true) {
           const activitiesOnDate = activitiesData.filter(activity => 
-            format(activity.createdAt, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+            activity.createdAt && format(activity.createdAt, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
           );
           
           if (activitiesOnDate.length === 0) {
@@ -376,10 +385,20 @@ export default function ActivityPage() {
   const handleFinishActivity = async (activityId) => {
     try {
       const activityRef = doc(db, "activities", activityId);
+      const activity = activities.find(a => a.id === activityId);
+      
       await updateDoc(activityRef, {
         status: 'finish',
-        completedAt: new Date().toISOString()
+        completedAt: new Date()
       });
+
+      // Create completion notification
+      try {
+        const message = `Congratulations! You've completed your ${activity.activity} ${activity.workoutType.toLowerCase()} workout!`;
+        await createNotification(user.uid, 'activity_completed', message, activityId);
+      } catch (notificationError) {
+        console.error('Error creating completion notification:', notificationError);
+      }
 
       // Update local state
       setActivities(activities.map(activity => 

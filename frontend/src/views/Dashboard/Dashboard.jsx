@@ -150,11 +150,17 @@ export default function Dashboard() {
 
         const querySnapshot = await getDocs(q);
         const activities = querySnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: new Date(doc.data().createdAt),
-          }))
+          .map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              ...data,
+              createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
+              startTime: data.startTime?.toDate?.() || new Date(data.startTime),
+              endTime: data.endTime?.toDate?.() || new Date(data.endTime),
+              completedAt: data.completedAt?.toDate?.() || new Date(data.completedAt),
+            };
+          })
           .sort((a, b) => b.createdAt - a.createdAt);
 
         // Set recent activities (limit to 5)
@@ -162,7 +168,7 @@ export default function Dashboard() {
 
         // Calculate stats
         const todayActivities = activities.filter((activity) =>
-          isToday(activity.createdAt)
+          activity.createdAt && isToday(activity.createdAt)
         );
         const cardioActivities = activities.filter(
           (activity) => activity.workoutType === "Cardio"
@@ -184,7 +190,6 @@ export default function Dashboard() {
 
         // Prepare weekly activity data
         const today = new Date();
-        // const weekStart = startOfWeek(today);
         const last7Days = eachDayOfInterval({
           start: subDays(today, 6),
           end: today,
@@ -194,6 +199,7 @@ export default function Dashboard() {
           date: format(date, "EEE"),
           count: activities.filter(
             (activity) =>
+              activity.createdAt &&
               format(activity.createdAt, "yyyy-MM-dd") ===
               format(date, "yyyy-MM-dd")
           ).length,
@@ -716,14 +722,16 @@ export default function Dashboard() {
                     arrow
                     placement="right"
                   >
-                    <InfoIcon
-                      sx={{
-                        fontSize: 18,
-                        color: "text.secondary",
-                        cursor: "help",
-                        "&:hover": { color: "primary.main" },
-                      }}
-                    />
+                    <Box>
+                      <InfoIcon
+                        sx={{
+                          fontSize: 18,
+                          color: "text.secondary",
+                          cursor: "help",
+                          "&:hover": { color: "primary.main" },
+                        }}
+                      />
+                    </Box>
                   </Tooltip>
                 </Stack>
                 {loading ? (
@@ -746,14 +754,16 @@ export default function Dashboard() {
                           arrow
                           placement="right"
                         >
-                          <InfoIcon
-                            sx={{
-                              fontSize: 16,
-                              color: "text.secondary",
-                              cursor: "help",
-                              "&:hover": { color: "primary.main" },
-                            }}
-                          />
+                          <Box>
+                            <InfoIcon
+                              sx={{
+                                fontSize: 16,
+                                color: "text.secondary",
+                                cursor: "help",
+                                "&:hover": { color: "primary.main" },
+                              }}
+                            />
+                          </Box>
                         </Tooltip>
                       </Stack>
                       <Box

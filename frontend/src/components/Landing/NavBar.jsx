@@ -16,6 +16,7 @@ import Logo from "./Logo";
 import { Link as RouterLink, useLocation } from "react-router-dom"; // React Router Link
 import { Link } from "@mui/material";
 import useLogout from "../../hooks/useLogout";
+import NotificationBadge from '../Notification/NotificationBadge';
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -80,57 +81,60 @@ export default function NavBar() {
             }}
           >
             <Logo variant="h6" />
-            {localStorage.getItem("userId") && (
-              <Stack
-                direction="row"
-                sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}
-                spacing={2}
-              >
-                <Link
-                  component={RouterLink}
-                  to="/dashboard"
-                  style={linkStyle("/dashboard")}
-                  onClick={() => setActiveLink("/dashboard")}
+            <Stack direction="row" spacing={2} alignItems="center">
+              <NotificationBadge />
+              {localStorage.getItem("userId") && (
+                <Stack
+                  direction="row"
+                  sx={{ display: { xs: "none", md: "flex" }, ml: 4 }}
+                  spacing={2}
                 >
-                  Home
-                </Link>
+                  <Link
+                    component={RouterLink}
+                    to="/dashboard"
+                    style={linkStyle("/dashboard")}
+                    onClick={() => setActiveLink("/dashboard")}
+                  >
+                    Home
+                  </Link>
 
-                <Link
-                  href="/featuress"
-                  underline="none"
-                  style={linkStyle("/featuress")}
-                  onClick={() => setActiveLink("/featuress")}
-                >
-                  Features
-                </Link>
+                  <Link
+                    href="/featuress"
+                    underline="none"
+                    style={linkStyle("/featuress")}
+                    onClick={() => setActiveLink("/featuress")}
+                  >
+                    Features
+                  </Link>
 
-                <Link
-                  component={RouterLink}
-                  to="/activity-page"
-                  style={linkStyle("/activity-page")}
-                  onClick={() => setActiveLink("/activity-page")}
-                >
-                  Workout
-                </Link>
+                  <Link
+                    component={RouterLink}
+                    to="/activity-page"
+                    style={linkStyle("/activity-page")}
+                    onClick={() => setActiveLink("/activity-page")}
+                  >
+                    Workout
+                  </Link>
 
-                <Link
-                  component={RouterLink}
-                  to="/profile"
-                  style={linkStyle("/profile")}
-                  onClick={() => setActiveLink("/profile")}
-                >
-                  Profile
-                </Link>
-                <Link
-                  component={RouterLink}
-                  to="/notification"
-                  style={linkStyle("/notification")}
-                  onClick={() => setActiveLink("/notification")}
-                >
-                  Notification
-                </Link>
-              </Stack>
-            )}
+                  <Link
+                    component={RouterLink}
+                    to="/profile"
+                    style={linkStyle("/profile")}
+                    onClick={() => setActiveLink("/profile")}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    component={RouterLink}
+                    to="/notification"
+                    style={linkStyle("/notification")}
+                    onClick={() => setActiveLink("/notification")}
+                  >
+                    Notification
+                  </Link>
+                </Stack>
+              )}
+            </Stack>
           </Box>
           <Box
             sx={{
