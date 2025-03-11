@@ -41,7 +41,6 @@ import {
   CartesianGrid,
 } from "recharts";
 import { ThemeContext } from "../../lib/ThemeContext";
-import ThemeToggle from "../../components/ui/ThemeToggle";
 import { WorkoutType } from "../../components/Activity/Activities";
 
 const StyledCard = styled(Box)(({ theme }) => ({
@@ -159,7 +158,8 @@ export default function Dashboard() {
               createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
               startTime: data.startTime?.toDate?.() || new Date(data.startTime),
               endTime: data.endTime?.toDate?.() || new Date(data.endTime),
-              completedAt: data.completedAt?.toDate?.() || new Date(data.completedAt),
+              completedAt:
+                data.completedAt?.toDate?.() || new Date(data.completedAt),
             };
           })
           .sort((a, b) => b.createdAt - a.createdAt);
@@ -168,8 +168,8 @@ export default function Dashboard() {
         setRecentActivities(activities.slice(0, 5));
 
         // Calculate stats
-        const todayActivities = activities.filter((activity) =>
-          activity.createdAt && isToday(activity.createdAt)
+        const todayActivities = activities.filter(
+          (activity) => activity.createdAt && isToday(activity.createdAt)
         );
         const cardioActivities = activities.filter(
           (activity) => activity.workoutType === "Cardio"
@@ -202,7 +202,7 @@ export default function Dashboard() {
             (activity) =>
               activity.createdAt &&
               format(activity.createdAt, "yyyy-MM-dd") ===
-              format(date, "yyyy-MM-dd")
+                format(date, "yyyy-MM-dd")
           ).length,
         }));
         setWeeklyData(weeklyData);
@@ -402,7 +402,6 @@ export default function Dashboard() {
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={2}>
-                  <ThemeToggle />
                   <Button
                     variant="contained"
                     startIcon={<AddIcon />}

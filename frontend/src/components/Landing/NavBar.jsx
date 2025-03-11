@@ -16,8 +16,9 @@ import Logo from "./Logo";
 import { Link as RouterLink, useLocation } from "react-router-dom"; // React Router Link
 import { Link } from "@mui/material";
 import useLogout from "../../hooks/useLogout";
-import NotificationBadge from '../Notification/NotificationBadge';
+import NotificationBadge from "../Notification/NotificationBadge";
 import { useAuth } from "../../hooks/useAuth";
+import ThemeToggle from "../ui/ThemeToggle";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: "flex",
@@ -90,8 +91,12 @@ export default function NavBar() {
             }}
           >
             <Logo variant="h6" />
-            <Stack direction="row" spacing={2} alignItems="center">
-              <NotificationBadge />
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{ ml: 4 }}
+            >
               {localStorage.getItem("userId") && (
                 <Stack
                   direction="row"
@@ -107,14 +112,14 @@ export default function NavBar() {
                     Home
                   </Link>
 
-                  <Link
+                  {/* <Link
                     href="/featuress"
                     underline="none"
                     style={linkStyle("/featuress")}
                     onClick={() => setActiveLink("/featuress")}
                   >
                     Features
-                  </Link>
+                  </Link> */}
 
                   <Link
                     component={RouterLink}
@@ -133,14 +138,14 @@ export default function NavBar() {
                   >
                     Profile
                   </Link>
-                  <Link
+                  {/* <Link
                     component={RouterLink}
                     to="/notification"
                     style={linkStyle("/notification")}
                     onClick={() => setActiveLink("/notification")}
                   >
                     Notification
-                  </Link>
+                  </Link> */}
                 </Stack>
               )}
             </Stack>
@@ -152,19 +157,22 @@ export default function NavBar() {
               alignItems: "center",
             }}
           >
+            <ThemeToggle />
             {localStorage.getItem("userId") ? (
-              <Button
-                variant="text"
-                color="secondary"
-                style={{
-                  textDecoration: "none",
-                  fontWeight: "bold",
-                  color: "white",
-                }}
-                onClick={logout}
-              >
-                Sign out
-              </Button>
+              <>
+                <NotificationBadge />
+                <Button
+                  variant="text"
+                  color="secondary"
+                  style={{
+                    textDecoration: "none",
+                    fontWeight: "bold",
+                  }}
+                  onClick={logout}
+                >
+                  Sign out
+                </Button>
+              </>
             ) : (
               <Link
                 component={RouterLink} // Ensures MUI Link behaves like React Router's Link
@@ -172,7 +180,6 @@ export default function NavBar() {
                 style={{
                   textDecoration: "none",
                   fontWeight: "bold",
-                  color: "white",
                 }}
               >
                 Sign in
