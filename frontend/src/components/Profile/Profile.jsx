@@ -233,7 +233,7 @@ export default function Profile() {
     handleChange("gender", data.gender);
     handleChange("activityType", data.activityType);
     handleChange("exerciseLevel", data.exerciseLevel);
-    handleChange("sportsVenue", data.location);
+    handleChange("location", data.location);
     handleChange("fitnessGoal", data.fitnessGoal);
     handleChange("full_name", data.full_name);
     console.log(data);
@@ -490,8 +490,8 @@ export default function Profile() {
                 sx={textFieldStyle}
               />
               <Location
-                value={profileData.sportsVenue}
-                onChange={(value) => handleChange("sportsVenue", value)}
+                value={profileData.location}
+                onChange={(value) => handleChange("location", value)}
                 sx={textFieldStyle}
               />
             </Box>
