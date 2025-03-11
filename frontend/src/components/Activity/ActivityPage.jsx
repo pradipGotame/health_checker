@@ -31,7 +31,9 @@ import {
   getDocs,
   deleteDoc,
   doc,
-} from "firebase/firestore";
+  updateDoc,
+  createNotification,
+} from "../../firebase/firebase";
 import { db } from "../../firebase/firebase";
 import {
   format,
@@ -42,6 +44,7 @@ import {
   subDays,
 } from "date-fns";
 import DeleteIcon from "@mui/icons-material/Delete";
+import LinearProgress from '@mui/material/LinearProgress';
 
 const StyledCard = styled(Stack)(({ theme }) => ({
   borderRadius: 12,
@@ -80,11 +83,147 @@ const ActivityItem = styled(Box)(({ theme }) => ({
   },
 }));
 
+const ActivityProgress = ({ activity, onFinish, isActive }) => {
+  const [progress, setProgress] = useState(0);
+  const [intervalId, setIntervalId] = useState(null);
+
+  useEffect(() => {
+    if (
+      isActive &&
+      activity.workoutType === 'Cardio' && 
+      activity.startTime && 
+      activity.endTime && 
+      activity.status !== 'finish'
+    ) {
+      const startTime = new Date(activity.startTime).getTime();
+      const endTime = new Date(activity.endTime).getTime();
+      
+      // Calculate and update progress every second
+      const id = setInterval(() => {
+        const currentTime = new Date().getTime();
+        const elapsed = currentTime - startTime;
+        const total = endTime - startTime;
+        const currentProgress = Math.min((elapsed / total) * 100, 100);
+
+        setProgress(currentProgress);
+
+        // If we've reached the end time, mark as finished
+        if (currentProgress >= 100 && activity.status !== 'finish') {
+          clearInterval(id);
+          onFinish(activity.id);
+        }
+      }, 1000);
+
+      setIntervalId(id);
+
+      return () => {
+        if (id) clearInterval(id);
+      };
+    }
+  }, [activity, onFinish, isActive]);
+
+  // Show completed status for finished activities
+  if (activity.status === 'finish') {
+    return (
+      <Box sx={{ width: '100%', mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            color: 'success.main',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5 
+          }}
+        >
+          ✓ Completed
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Show Mark as Complete button for non-cardio activities
+  if (activity.workoutType !== 'Cardio') {
+    return (
+      <Box sx={{ width: '100%', mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => onFinish(activity.id)}
+          sx={{
+            textTransform: 'none',
+            borderRadius: 2,
+            bgcolor: 'success.main',
+            '&:hover': {
+              bgcolor: 'success.dark',
+            }
+          }}
+        >
+          Mark as Complete
+        </Button>
+      </Box>
+    );
+  }
+
+  // For cardio activities that aren't active
+  if (!isActive) {
+    return (
+      <Box sx={{ width: '100%', mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+        {new Date(activity.startTime) > new Date() ? (
+          <Typography variant="caption" color="text.secondary">
+            Starts at {format(new Date(activity.startTime), 'h:mm a')}
+          </Typography>
+        ) : (
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => onFinish(activity.id)}
+            sx={{
+              textTransform: 'none',
+              borderRadius: 2,
+              bgcolor: 'success.main',
+              '&:hover': {
+                bgcolor: 'success.dark',
+              }
+            }}
+          >
+            Mark as Complete
+          </Button>
+        )}
+      </Box>
+    );
+  }
+
+  // Show progress bar only for current active cardio activity
+  return (
+    <Box sx={{ width: '100%', mt: 1 }}>
+      <LinearProgress 
+        variant="determinate" 
+        value={progress}
+        sx={{
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          '& .MuiLinearProgress-bar': {
+            borderRadius: 4,
+            backgroundColor: 'primary.main'
+          }
+        }}
+      />
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+        {progress === 100 
+          ? 'Time completed - Finalizing...'
+          : `${Math.round(progress)}% Complete`}
+      </Typography>
+    </Box>
+  );
+};
+
 export default function ActivityPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeActivityId, setActiveActivityId] = useState(null);
   const [stats, setStats] = useState({
     streak: 0,
     todayCount: 0,
@@ -105,30 +244,64 @@ export default function ActivityPage() {
 
       try {
         const activitiesRef = collection(db, "activities");
-        // Simplified query that doesn't require an index
-        const q = query(activitiesRef, where("userId", "==", user.uid));
+        const q = query(
+          activitiesRef, 
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc")
+        );
 
         const querySnapshot = await getDocs(q);
-        const activitiesData = querySnapshot.docs
-          .map((doc) => ({
+        const activitiesData = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
             id: doc.id,
-            ...doc.data(),
-            createdAt: new Date(doc.data().createdAt),
-          }))
-          // Sort the data in memory instead
-          .sort((a, b) => b.createdAt - a.createdAt);
+            ...data,
+            createdAt: data.createdAt?.toDate?.() || new Date(data.createdAt),
+            startTime: data.startTime?.toDate?.() || new Date(data.startTime),
+            endTime: data.endTime?.toDate?.() || new Date(data.endTime),
+            completedAt: data.completedAt?.toDate?.() || new Date(data.completedAt),
+          };
+        });
 
         setActivities(activitiesData);
 
-        const todayActivities = activitiesData.filter((activity) =>
-          isToday(activity.createdAt)
+        // Calculate statistics
+        const now = new Date();
+        const weekStart = startOfWeek(now);
+        const monthStart = startOfMonth(now);
+
+        const todayActivities = activitiesData.filter(activity => 
+          activity.createdAt && isToday(activity.createdAt)
+        );
+        const weekActivities = activitiesData.filter(activity => 
+          activity.createdAt && activity.createdAt >= weekStart && activity.createdAt <= now
+        );
+        const monthActivities = activitiesData.filter(activity => 
+          activity.createdAt && activity.createdAt >= monthStart && activity.createdAt <= now
         );
 
+        // Calculate streak
+        let currentStreak = 0;
+        let date = new Date();
+        
+        while (true) {
+          const activitiesOnDate = activitiesData.filter(activity => 
+            activity.createdAt && format(activity.createdAt, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+          );
+          
+          if (activitiesOnDate.length === 0) {
+            break;
+          }
+          
+          currentStreak++;
+          date = subDays(date, 1);
+        }
+
         setStats({
-          streak: 0,
+          streak: currentStreak,
           todayCount: todayActivities.length,
-          weekCount: activitiesData.length,
-          monthCount: activitiesData.length,
+          weekCount: weekActivities.length,
+          monthCount: monthActivities.length,
         });
       } catch (error) {
         console.error("Error fetching activities:", error);
@@ -148,6 +321,27 @@ export default function ActivityPage() {
       fetchActivities();
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    const checkActiveActivities = () => {
+      const now = new Date();
+      const activeActivity = activities.find(activity => 
+        activity.workoutType === 'Cardio' &&
+        activity.startTime &&
+        activity.endTime &&
+        activity.status !== 'finish' &&
+        new Date(activity.startTime) <= now &&
+        new Date(activity.endTime) >= now
+      );
+      
+      setActiveActivityId(activeActivity?.id || null);
+    };
+
+    checkActiveActivities();
+    const interval = setInterval(checkActiveActivities, 1000);
+    
+    return () => clearInterval(interval);
+  }, [activities]);
 
   const formatActivityDetails = (activity) => {
     if (activity.workoutType === "Cardio") {
@@ -188,6 +382,35 @@ export default function ActivityPage() {
     setDeleteDialog({ open: false, activityId: null });
   };
 
+  const handleFinishActivity = async (activityId) => {
+    try {
+      const activityRef = doc(db, "activities", activityId);
+      const activity = activities.find(a => a.id === activityId);
+      
+      await updateDoc(activityRef, {
+        status: 'finish',
+        completedAt: new Date()
+      });
+
+      // Create completion notification
+      try {
+        const message = `Congratulations! You've completed your ${activity.activity} ${activity.workoutType.toLowerCase()} workout!`;
+        await createNotification(user.uid, 'activity_completed', message, activityId);
+      } catch (notificationError) {
+        console.error('Error creating completion notification:', notificationError);
+      }
+
+      // Update local state
+      setActivities(activities.map(activity => 
+        activity.id === activityId 
+          ? { ...activity, status: 'finish', completedAt: new Date() }
+          : activity
+      ));
+    } catch (error) {
+      console.error("Error finishing activity:", error);
+    }
+  };
+
   const ActivityItemWithDelete = ({ activity }) => (
     <ActivityItem key={activity.id}>
       <Box
@@ -214,6 +437,11 @@ export default function ActivityPage() {
           <Typography variant="caption" color="text.secondary">
             {format(activity.createdAt, "MMM d, yyyy h:mm a")}
           </Typography>
+          <ActivityProgress 
+            activity={activity} 
+            onFinish={handleFinishActivity}
+            isActive={activity.id === activeActivityId}
+          />
         </Box>
         <Stack direction="row" spacing={1}>
           <IconButton
@@ -247,32 +475,35 @@ export default function ActivityPage() {
           >
             <EditIcon />
           </IconButton>
-          <IconButton
-            size="small"
-            onClick={() =>
-              setDeleteDialog({ open: true, activityId: activity.id })
-            }
-            sx={{
-              opacity: 0.2,
-              color: "text.secondary",
-              padding: "4px",
-              transition: "all 0.2s ease-in-out",
-              "& svg": {
-                fontSize: "1.1rem",
-              },
-              "&:hover": {
-                opacity: 1,
-                color: "error.main",
-                backgroundColor: "error.light",
-                transform: "scale(1.1)",
-              },
-              [`${ActivityItem}:hover &`]: {
-                opacity: 0.7,
-              },
-            }}
-          >
-            <DeleteIcon />
-          </IconButton>
+          {/* Only show delete button if activity is not finished */}
+          {(!activity.status || activity.status !== 'finish') && (
+            <IconButton
+              size="small"
+              onClick={() =>
+                setDeleteDialog({ open: true, activityId: activity.id })
+              }
+              sx={{
+                opacity: 0.2,
+                color: "text.secondary",
+                padding: "4px",
+                transition: "all 0.2s ease-in-out",
+                "& svg": {
+                  fontSize: "1.1rem",
+                },
+                "&:hover": {
+                  opacity: 1,
+                  color: "error.main",
+                  backgroundColor: "error.light",
+                  transform: "scale(1.1)",
+                },
+                [`${ActivityItem}:hover &`]: {
+                  opacity: 0.7,
+                },
+              }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
         </Stack>
       </Box>
     </ActivityItem>
@@ -474,7 +705,14 @@ export default function ActivityPage() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => navigate("/create-activity")}
+            onClick={() => {
+              try {
+                console.log('Navigating to create activity page...');
+                navigate('/create-activity');
+              } catch (error) {
+                console.error('Navigation error:', error);
+              }
+            }}
             sx={{
               textTransform: "none",
               borderRadius: 2,
@@ -500,10 +738,15 @@ export default function ActivityPage() {
                   <CalendarTodayIcon sx={{ color: "primary.main" }} />
                   Today&apos;s Activities
                 </Typography>
-                {activities.filter((activity) => isToday(activity.createdAt))
-                  .length > 0 ? (
+                {activities.filter((activity) => 
+                  isToday(activity.createdAt) && 
+                  (!activity.status || activity.status !== 'finish')
+                ).length > 0 ? (
                   activities
-                    .filter((activity) => isToday(activity.createdAt))
+                    .filter((activity) => 
+                      isToday(activity.createdAt) && 
+                      (!activity.status || activity.status !== 'finish')
+                    )
                     .map((activity) => (
                       <ActivityItemWithDelete
                         key={activity.id}
@@ -516,12 +759,12 @@ export default function ActivityPage() {
                     color="text.secondary"
                     sx={{ fontStyle: "italic" }}
                   >
-                    No activities recorded today
+                    No active activities today
                   </Typography>
                 )}
               </StyledCard>
 
-              {/* Activity History */}
+              {/* Previous Activities */}
               <StyledCard>
                 <Typography
                   variant="h6"
@@ -530,12 +773,14 @@ export default function ActivityPage() {
                   <FitnessCenterIcon sx={{ color: "primary.main" }} />
                   Previous Activities
                 </Typography>
-                {activities.map((activity) => (
-                  <ActivityItemWithDelete
-                    key={activity.id}
-                    activity={activity}
-                  />
-                ))}
+                {activities
+                  .filter(activity => activity.status === 'finish')
+                  .map((activity) => (
+                    <ActivityItemWithDelete
+                      key={activity.id}
+                      activity={activity}
+                    />
+                  ))}
               </StyledCard>
             </Stack>
           </Grid>
