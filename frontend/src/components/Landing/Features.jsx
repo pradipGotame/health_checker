@@ -10,7 +10,6 @@ import { styled, alpha } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../../hooks/useAuth";
 
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import ViewQuiltRoundedIcon from "@mui/icons-material/ViewQuiltRounded";
@@ -20,9 +19,7 @@ import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import SelfImprovementIcon from "@mui/icons-material/SelfImprovement";
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+
 
 
 const StyledCard = styled(Box)(({ theme }) => ({
@@ -47,7 +44,7 @@ const items = [
     description:
       "Track your fitness journey with our intuitive dashboard. View your progress, analyze trends, and stay motivated with personalized insights.",
     preview: ({ navigate }) => {
-      const { user } = useAuth();
+      const user = null;
       
       const handleNewActivity = () => {
         if (!user) {

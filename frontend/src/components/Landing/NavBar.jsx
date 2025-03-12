@@ -62,7 +62,6 @@ export default function NavBar() {
     if (!user) {
       setActiveLink("/");
     }
-    console.log("user", user);
   }, [user]);
 
   return (
