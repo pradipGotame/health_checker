@@ -255,6 +255,13 @@ export default function Register() {
               label="Weight (kg)"
               name="weight"
               type="number"
+              inputProps={{ min: 1 }} 
+              onChange={(event) => {
+                const value = parseInt(event.target.value, 10);
+                if (value < 1) {
+                  event.target.value = 1; // if<1, set to 1
+                }
+              }}
             />
             <TextField
               margin="normal"
@@ -264,6 +271,13 @@ export default function Register() {
               label="Height (cm)"
               name="height"
               type="number"
+              inputProps={{ min: 1 }} 
+              onChange={(event) => {
+                const value = parseInt(event.target.value, 10);
+                if (value < 1) {
+                  event.target.value = 1; // if<1, set to 1
+                }
+              }}
             />
 
             <GenderSelection
